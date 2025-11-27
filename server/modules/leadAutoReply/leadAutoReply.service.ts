@@ -8,8 +8,10 @@ export interface Lead {
   formId: string;
   formName?: string;
   fullName?: string;
+  name?: string;
   email?: string;
   phoneNumber?: string;
+  phone?: string;
   fieldData: Record<string, string>;
   createdTime: string;
   adName?: string;
@@ -17,6 +19,14 @@ export interface Lead {
   autoReplySent?: boolean;
   autoReplyMessage?: string;
   autoReplySentAt?: string;
+}
+
+function getLeadPhone(lead: Lead): string | undefined {
+  return lead.phoneNumber || lead.phone;
+}
+
+function getLeadName(lead: Lead): string | undefined {
+  return lead.fullName || lead.name;
 }
 
 function getWhatsAppCredentials(): { token: string; phoneNumberId: string } | null {
@@ -73,7 +83,8 @@ export async function processNewLead(lead: Lead): Promise<{ success: boolean; me
   try {
     console.log(`[AutoReply] Processing lead: ${lead.id} from form: ${lead.formId}`);
 
-    if (!lead.phoneNumber) {
+    const phoneNumber = getLeadPhone(lead);
+    if (!phoneNumber) {
       console.log(`[AutoReply] No phone number for lead ${lead.id}, skipping`);
       return { success: false, error: 'No phone number available' };
     }
@@ -105,7 +116,7 @@ export async function processNewLead(lead: Lead): Promise<{ success: boolean; me
       return { success: false, error: 'Failed to generate AI response' };
     }
 
-    const formattedPhone = formatPhoneNumber(lead.phoneNumber);
+    const formattedPhone = formatPhoneNumber(phoneNumber);
     console.log(`[AutoReply] Sending WhatsApp to: ${formattedPhone}`);
     
     const sendResult = await sendWhatsAppMessage(formattedPhone, aiResponse);
@@ -131,7 +142,7 @@ export async function processNewLead(lead: Lead): Promise<{ success: boolean; me
 
 export async function processAllPendingLeads(): Promise<{ processed: number; successful: number; failed: number }> {
   const leads = jsonAdapter.readCollection<Lead>('leads');
-  const pendingLeads = leads.filter((l: Lead) => !l.autoReplySent && l.phoneNumber);
+  const pendingLeads = leads.filter((l: Lead) => !l.autoReplySent && getLeadPhone(l));
 
   let successful = 0;
   let failed = 0;
@@ -157,11 +168,12 @@ export async function sendManualReply(leadId: string, message: string): Promise<
     return { success: false, error: 'Lead not found' };
   }
 
-  if (!lead.phoneNumber) {
+  const phoneNumber = getLeadPhone(lead);
+  if (!phoneNumber) {
     return { success: false, error: 'No phone number for this lead' };
   }
 
-  const formattedPhone = formatPhoneNumber(lead.phoneNumber);
+  const formattedPhone = formatPhoneNumber(phoneNumber);
   const result = await sendWhatsAppMessage(formattedPhone, message);
 
   if (result.success) {
@@ -177,7 +189,8 @@ export async function sendManualReply(leadId: string, message: string): Promise<
 function buildLeadContext(lead: Lead): string {
   const lines: string[] = [];
   
-  if (lead.fullName) lines.push(`Name: ${lead.fullName}`);
+  const name = getLeadName(lead);
+  if (name) lines.push(`Name: ${name}`);
   if (lead.email) lines.push(`Email: ${lead.email}`);
   if (lead.formName) lines.push(`Form: ${lead.formName}`);
   if (lead.adName) lines.push(`Ad: ${lead.adName}`);
