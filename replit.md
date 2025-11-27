@@ -74,18 +74,19 @@ The application uses in-memory storage with JSON file storage for new features. 
 10. **WhatsApp API** - API credentials configuration
 11. **Reports** - Delivery, campaign, and agent performance
 12. **AI Agents** - Create and manage AI-powered chat agents with OpenAI
-13. **Facebook Lead Forms** - Sync and manage Facebook lead forms
-14. **Lead Management** - View and filter leads from Facebook forms
-15. **Agent-Form Mapping** - Connect AI agents to lead forms for auto-reply
-16. **WhatsApp Webhook** - Receive and respond to WhatsApp messages with AI
-17. **Broadcast Messaging** - Enhanced bulk messaging with Template/Custom/AI Agent options
-18. **Excel/CSV Import** - Import contacts from Excel or CSV files
-19. **Broadcast Lists** - Save and manage contact lists for repeated broadcasts
-20. **Schedule Messages** - Schedule broadcasts for future delivery
-21. **Meta Template Sync** - Sync templates from Meta Business Suite
-22. **Template Approval** - Submit templates to Meta for approval with guidelines
-23. **Campaign Reports** - Section-wise messages, replies, costs, template performance
-24. **User Engagement Report** - Top users by engagement % (maximum to minimum)
+13. **24-Hour Window Inbox** - Show customers within 24-hour window for free-form messaging
+14. **Facebook Lead Forms** - Sync and manage Facebook lead forms
+15. **Lead Management** - View and filter leads from Facebook forms
+16. **Agent-Form Mapping** - Connect AI agents to lead forms for auto-reply
+17. **WhatsApp Webhook** - Receive and respond to WhatsApp messages with AI
+18. **Broadcast Messaging** - Enhanced bulk messaging with Template/Custom/AI Agent options
+19. **Excel/CSV Import** - Import contacts from Excel or CSV files
+20. **Broadcast Lists** - Save and manage contact lists for repeated broadcasts
+21. **Schedule Messages** - Schedule broadcasts for future delivery
+22. **Meta Template Sync** - Sync templates from Meta Business Suite
+23. **Template Approval** - Submit templates to Meta for approval with guidelines
+24. **Campaign Reports** - Section-wise messages, replies, costs, template performance
+25. **User Engagement Report** - Top users by engagement % (maximum to minimum)
 
 ## API Endpoints
 
@@ -144,6 +145,9 @@ Required secrets for full functionality:
 The application runs on port 5000 with `npm run dev`.
 
 ## Recent Changes
+- **Nov 27, 2025**: Added 24-Hour Window Inbox page for customers within messaging window with Select All, Download, and bulk messaging options
+- **Nov 27, 2025**: Updated navigation sidebar with 24-Hour Window option before Inbox
+- **Nov 27, 2025**: Enhanced regular Inbox with Export List feature for leads outside 24-hour window
 - **Nov 27, 2025**: Enhanced Manage Templates with Sync META Templates button and template rules/guidelines
 - **Nov 27, 2025**: Added Submit for Approval functionality for templates to Meta Business Suite
 - **Nov 27, 2025**: Enhanced Campaign Reports with section-wise stats, replies, costs, template performance tabs
