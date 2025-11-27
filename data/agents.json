@@ -1,1 +1,13 @@
-[]
+[
+  {
+    "id": "agent-1764271559077-a1d5rq6nm",
+    "name": "Test Bot",
+    "description": "",
+    "systemPrompt": "You are a helpful assistant",
+    "model": "gpt-4o",
+    "temperature": 0.7,
+    "isActive": true,
+    "createdAt": "2025-11-27T19:25:59.077Z",
+    "updatedAt": "2025-11-27T19:25:59.077Z"
+  }
+]
