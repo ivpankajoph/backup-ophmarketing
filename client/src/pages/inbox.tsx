@@ -33,6 +33,7 @@ interface Chat {
   contact: Contact;
   lastMessage?: string;
   lastMessageTime?: string;
+  lastInboundMessageTime?: string;
   unreadCount: number;
   status: string;
   fromWindowInbox?: boolean;
@@ -143,10 +144,10 @@ export default function Inbox() {
   });
 
   const windowLeads = chats.filter(chat => {
-    if (chat.lastMessageTime) {
-      const lastMsg = new Date(chat.lastMessageTime);
+    if (chat.lastInboundMessageTime) {
+      const lastInbound = new Date(chat.lastInboundMessageTime);
       const now = new Date();
-      const hoursDiff = (now.getTime() - lastMsg.getTime()) / (1000 * 60 * 60);
+      const hoursDiff = (now.getTime() - lastInbound.getTime()) / (1000 * 60 * 60);
       return hoursDiff > 24;
     }
     return true;

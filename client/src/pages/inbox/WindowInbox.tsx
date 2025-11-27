@@ -54,6 +54,7 @@ interface Chat {
   contact: Contact;
   lastMessage?: string;
   lastMessageTime?: string;
+  lastInboundMessageTime?: string;
   unreadCount: number;
   status: string;
   windowExpiresAt?: string;
@@ -95,15 +96,17 @@ export default function WindowInbox() {
       const allChats = await res.json();
       const now = new Date();
       return allChats.filter((chat: Chat) => {
-        if (chat.lastMessageTime) {
-          const lastMsg = new Date(chat.lastMessageTime);
-          const hoursDiff = (now.getTime() - lastMsg.getTime()) / (1000 * 60 * 60);
+        if (chat.lastInboundMessageTime) {
+          const lastInbound = new Date(chat.lastInboundMessageTime);
+          const hoursDiff = (now.getTime() - lastInbound.getTime()) / (1000 * 60 * 60);
           return hoursDiff <= 24;
         }
         return false;
       }).map((chat: Chat) => ({
         ...chat,
-        windowExpiresAt: new Date(new Date(chat.lastMessageTime!).getTime() + 24 * 60 * 60 * 1000).toISOString()
+        windowExpiresAt: chat.lastInboundMessageTime 
+          ? new Date(new Date(chat.lastInboundMessageTime).getTime() + 24 * 60 * 60 * 1000).toISOString()
+          : undefined
       }));
     },
   });

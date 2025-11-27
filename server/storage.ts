@@ -181,12 +181,15 @@ export class MemStorage implements IStorage {
     this.data.chats = this.data.contacts.map((contact) => {
       const contactMessages = this.data.messages.filter((m) => m.contactId === contact.id);
       const lastMessage = contactMessages[contactMessages.length - 1];
+      const inboundMessages = contactMessages.filter((m) => m.direction === "inbound");
+      const lastInboundMessage = inboundMessages[inboundMessages.length - 1];
       return {
         id: `chat-${contact.id}`,
         contactId: contact.id,
         contact,
         lastMessage: lastMessage?.content,
         lastMessageTime: lastMessage?.timestamp,
+        lastInboundMessageTime: lastInboundMessage?.timestamp,
         unreadCount: contactMessages.filter((m) => m.direction === "inbound" && m.status !== "read").length,
         status: "open" as const,
         notes: [],
