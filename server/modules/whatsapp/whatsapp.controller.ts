@@ -1,6 +1,6 @@
 import { Request, Response } from 'express';
 import { getMappingByFormId } from '../mapping/mapping.service';
-import { getAgentById } from '../aiAgents/agent.service';
+import { getAgentById, getAllAgents } from '../aiAgents/agent.service';
 import { generateAgentResponse } from '../openai/openai.service';
 import { getLeadById, getAllLeads } from '../facebook/fb.service';
 import { storage } from '../../storage';
@@ -74,7 +74,7 @@ export async function handleWebhook(req: Request, res: Response) {
     }
 
     if (!agentToUse) {
-      const agents = require('../aiAgents/agent.service').getAllAgents();
+      const agents = getAllAgents();
       agentToUse = agents.find((a: any) => a.isActive);
     }
 

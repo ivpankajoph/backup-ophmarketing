@@ -190,6 +190,42 @@
       "status": "sent",
       "id": "78f06ed7-cc44-4998-8763-38ef5c3fe5fb",
       "timestamp": "2025-11-27T22:43:30.003Z"
+    },
+    {
+      "contactId": "8a9e2cfc-5b0b-4473-a1e1-ed26edeaa049",
+      "content": "This is a test reply",
+      "type": "text",
+      "direction": "inbound",
+      "status": "sent",
+      "id": "ba525f59-4761-4001-914c-dca79bb19eaa",
+      "timestamp": "2025-11-27T22:50:39.574Z"
+    },
+    {
+      "contactId": "8a9e2cfc-5b0b-4473-a1e1-ed26edeaa049",
+      "content": "Hi, I am interested in the awards!",
+      "type": "text",
+      "direction": "inbound",
+      "status": "sent",
+      "id": "425e6b42-751b-498a-8241-a4a50ab3fee2",
+      "timestamp": "2025-11-27T22:51:27.144Z"
+    },
+    {
+      "contactId": "8a9e2cfc-5b0b-4473-a1e1-ed26edeaa049",
+      "content": "Cvbbbb",
+      "type": "text",
+      "direction": "inbound",
+      "status": "sent",
+      "id": "8d272679-2ec9-4eec-8303-473b6e22c09a",
+      "timestamp": "2025-11-27T22:51:36.607Z"
+    },
+    {
+      "contactId": "8a9e2cfc-5b0b-4473-a1e1-ed26edeaa049",
+      "content": "Rty",
+      "type": "text",
+      "direction": "inbound",
+      "status": "sent",
+      "id": "a62e0c75-3831-4e5c-a550-199dd6aa1714",
+      "timestamp": "2025-11-27T22:51:47.850Z"
     }
   ],
   "campaigns": [
@@ -513,9 +549,11 @@
         "createdAt": "2025-11-27T22:31:14.359Z",
         "updatedAt": "2025-11-27T22:31:14.359Z"
       },
-      "lastMessage": "[Template: awards_marketing]",
-      "lastMessageTime": "2025-11-27T22:43:30.003Z",
-      "unreadCount": 0,
+      "lastMessage": "Rty",
+      "lastMessageTime": "2025-11-27T22:51:47.850Z",
+      "lastInboundMessageTime": "2025-11-27T22:51:47.851Z",
+      "lastInboundMessage": "Rty",
+      "unreadCount": 4,
       "status": "open",
       "notes": []
     },
