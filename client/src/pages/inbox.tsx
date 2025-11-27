@@ -5,7 +5,7 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { Search, Paperclip, Send, Smile, MoreVertical, Phone, Video, Loader2 } from "lucide-react";
+import { Search, Paperclip, Send, Smile, MoreVertical, Phone, Video, Loader2, Download, Clock } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { toast } from "sonner";
 
@@ -35,6 +35,7 @@ interface Chat {
   lastMessageTime?: string;
   unreadCount: number;
   status: string;
+  fromWindowInbox?: boolean;
 }
 
 export default function Inbox() {
@@ -141,9 +142,60 @@ export default function Inbox() {
     return matchesSearch && matchesFilter;
   });
 
+  const windowLeads = chats.filter(chat => {
+    if (chat.lastMessageTime) {
+      const lastMsg = new Date(chat.lastMessageTime);
+      const now = new Date();
+      const hoursDiff = (now.getTime() - lastMsg.getTime()) / (1000 * 60 * 60);
+      return hoursDiff > 24;
+    }
+    return true;
+  });
+
+  const handleExportList = () => {
+    const data = windowLeads.map(chat => ({
+      name: chat.contact.name,
+      phone: chat.contact.phone,
+      email: chat.contact.email || "",
+      lastMessage: chat.lastMessage || "",
+      lastMessageTime: chat.lastMessageTime || "",
+    }));
+
+    const headers = ["Name", "Phone", "Email", "Last Message", "Last Message Time"];
+    const csv = [
+      headers.join(","),
+      ...data.map(row => 
+        [row.name, row.phone, row.email, `"${row.lastMessage}"`, row.lastMessageTime].join(",")
+      )
+    ].join("\n");
+
+    const blob = new Blob([csv], { type: "text/csv" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = "inbox_leads_outside_window.csv";
+    a.click();
+    URL.revokeObjectURL(url);
+    toast.success("List exported successfully");
+  };
+
   return (
     <DashboardLayout>
-      <div className="h-[calc(100vh-8rem)] flex bg-card border border-border rounded-lg overflow-hidden shadow-sm animate-in fade-in duration-500">
+      <div className="space-y-4 animate-in fade-in duration-500">
+        <div className="flex items-center justify-between">
+          <div>
+            <h2 className="text-2xl font-bold tracking-tight">Inbox</h2>
+            <p className="text-sm text-muted-foreground">
+              All conversations. Contacts outside 24-hour window require templates.
+            </p>
+          </div>
+          <Button variant="outline" onClick={handleExportList}>
+            <Download className="mr-2 h-4 w-4" />
+            Export List ({windowLeads.length})
+          </Button>
+        </div>
+
+      <div className="h-[calc(100vh-12rem)] flex bg-card border border-border rounded-lg overflow-hidden shadow-sm">
         <div className="w-80 border-r border-border flex flex-col bg-background">
           <div className="p-4 border-b border-border">
             <div className="relative">
@@ -318,6 +370,7 @@ export default function Inbox() {
             </div>
           )}
         </div>
+      </div>
       </div>
     </DashboardLayout>
   );

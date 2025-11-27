@@ -6,6 +6,7 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import NotFound from "@/pages/not-found";
 import Dashboard from "@/pages/dashboard";
 import Inbox from "@/pages/inbox";
+import WindowInbox from "@/pages/inbox/WindowInbox";
 import Campaigns from "@/pages/campaigns";
 import Automation from "@/pages/automation";
 import Contacts from "@/pages/contacts";
@@ -58,6 +59,7 @@ function Router() {
   return (
     <Switch>
       <Route path="/" component={Dashboard} />
+      <Route path="/inbox/window" component={WindowInbox} />
       <Route path="/inbox" component={Inbox} />
       
       {/* Campaigns */}

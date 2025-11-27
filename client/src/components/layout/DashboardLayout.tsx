@@ -17,7 +17,8 @@ import {
   BarChart3,
   ChevronDown,
   ChevronRight,
-  Facebook
+  Facebook,
+  Clock
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -43,6 +44,11 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
       icon: LayoutDashboard,
       label: "Dashboard",
       href: "/",
+    },
+    {
+      icon: Clock,
+      label: "24-Hour Window",
+      href: "/inbox/window",
     },
     {
       icon: MessageSquare,
