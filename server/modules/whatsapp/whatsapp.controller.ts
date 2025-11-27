@@ -347,7 +347,27 @@ export async function sendTemplateMessageEndpoint(req: Request, res: Response) {
       return res.status(400).json({ error: 'Recipient (to) and templateName are required' });
     }
 
-    const result = await sendTemplateMessage(to, templateName, languageCode || 'en', components || [], namedParams);
+    // Try multiple language codes if not specified
+    const languageCodesToTry = languageCode ? [languageCode] : ['en', 'en_US', 'en_GB'];
+    let result = null;
+    let lastError = null;
+
+    for (const langCode of languageCodesToTry) {
+      try {
+        console.log(`[WhatsApp] Trying template "${templateName}" with language code: ${langCode}`);
+        result = await sendTemplateMessage(to, templateName, langCode, components || [], namedParams);
+        console.log(`[WhatsApp] Success with language code: ${langCode}`);
+        break; // Success, exit loop
+      } catch (err: any) {
+        lastError = err;
+        console.log(`[WhatsApp] Failed with language code ${langCode}: ${err.message}`);
+        // Continue to try next language code
+      }
+    }
+
+    if (!result) {
+      throw lastError || new Error('Failed to send template with all language codes');
+    }
     
     // Save outbound message to storage
     try {

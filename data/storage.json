@@ -271,6 +271,114 @@
       "status": "sent",
       "id": "94f46219-61d5-43d2-9c1d-002e90cfb10d",
       "timestamp": "2025-11-27T22:54:50.211Z"
+    },
+    {
+      "contactId": "8a9e2cfc-5b0b-4473-a1e1-ed26edeaa049",
+      "content": "How u send without templates message",
+      "type": "text",
+      "direction": "inbound",
+      "status": "sent",
+      "id": "f620590d-22a9-4d69-a0d6-22cb92ca70fb",
+      "timestamp": "2025-11-27T22:55:14.090Z"
+    },
+    {
+      "contactId": "8a9e2cfc-5b0b-4473-a1e1-ed26edeaa049",
+      "content": "When responding to inquiries, I generate messages based on a combination of rules, patterns, and data I've been trained on, rather than using pre-defined templates. This allows me to create responses that are tailored to the specific question or topic at hand. While I don't have access to real-time data or the ability to send messages outside of this platform, I can provide information and assistance directly here. If you have specific questions or need further details, feel free to ask!",
+      "type": "text",
+      "direction": "outbound",
+      "status": "sent",
+      "id": "3ff83e7a-2543-4bf8-9e3d-0d5fa081bd7f",
+      "timestamp": "2025-11-27T22:55:18.230Z"
+    },
+    {
+      "contactId": "8a9e2cfc-5b0b-4473-a1e1-ed26edeaa049",
+      "content": "Gkkgjgkh",
+      "type": "text",
+      "direction": "inbound",
+      "status": "sent",
+      "id": "270c493c-a4f6-4423-b5f2-732a079628a9",
+      "timestamp": "2025-11-27T22:56:39.836Z"
+    },
+    {
+      "contactId": "8a9e2cfc-5b0b-4473-a1e1-ed26edeaa049",
+      "content": "It looks like there might have been a typing error in your message. If you have a question or need information on a specific topic, please let me know, and I'll be happy to help!",
+      "type": "text",
+      "direction": "outbound",
+      "status": "sent",
+      "id": "2b70505d-d75d-483e-9774-91ade443a12a",
+      "timestamp": "2025-11-27T22:56:42.221Z"
+    },
+    {
+      "contactId": "ebcdda60-5598-47b9-bc91-80c90c122996",
+      "content": "Afsfsg",
+      "type": "text",
+      "direction": "inbound",
+      "status": "sent",
+      "id": "8205b54f-8781-49ec-a86e-14b26f0dc802",
+      "timestamp": "2025-11-27T22:57:25.577Z"
+    },
+    {
+      "contactId": "ebcdda60-5598-47b9-bc91-80c90c122996",
+      "content": "It looks like your message might have been a typo or accidental. Could you please provide more details or clarify your request? I’m here to help!",
+      "type": "text",
+      "direction": "outbound",
+      "status": "sent",
+      "id": "499fd089-ef7c-427b-935c-3d9042d9a927",
+      "timestamp": "2025-11-27T22:57:27.175Z"
+    },
+    {
+      "contactId": "ebcdda60-5598-47b9-bc91-80c90c122996",
+      "content": "[Template: hello_world]",
+      "type": "text",
+      "direction": "outbound",
+      "status": "sent",
+      "id": "fc9c82ff-a25d-4cf7-91ce-a9dead9489c4",
+      "timestamp": "2025-11-27T22:58:45.133Z"
+    },
+    {
+      "contactId": "ebcdda60-5598-47b9-bc91-80c90c122996",
+      "content": "Tt",
+      "type": "text",
+      "direction": "inbound",
+      "status": "sent",
+      "id": "7705b70a-5c07-44f8-9194-cc2cbe8f4691",
+      "timestamp": "2025-11-27T22:58:49.467Z"
+    },
+    {
+      "contactId": "ebcdda60-5598-47b9-bc91-80c90c122996",
+      "content": "It seems like there might have been another mistake in your message. Could you provide more information or clarify what you need help with? I'm here to assist you!",
+      "type": "text",
+      "direction": "outbound",
+      "status": "sent",
+      "id": "e2bb9b68-04b9-491c-9362-f783ea58e10f",
+      "timestamp": "2025-11-27T22:58:51.198Z"
+    },
+    {
+      "contactId": "ebcdda60-5598-47b9-bc91-80c90c122996",
+      "content": "Jj",
+      "type": "text",
+      "direction": "inbound",
+      "status": "sent",
+      "id": "7a93df02-62aa-492c-9c14-960c4c88db16",
+      "timestamp": "2025-11-27T22:59:03.027Z"
+    },
+    {
+      "contactId": "ebcdda60-5598-47b9-bc91-80c90c122996",
+      "content": "It looks like there might have been another accidental input. If you have a question or need assistance with something specific, please let me know how I can help!",
+      "type": "text",
+      "direction": "outbound",
+      "status": "sent",
+      "id": "a260ea26-1696-44a4-a0e3-530e70b90508",
+      "timestamp": "2025-11-27T22:59:06.496Z"
+    },
+    {
+      "contactId": "ebcdda60-5598-47b9-bc91-80c90c122996",
+      "content": "[Template: hello_world]",
+      "type": "text",
+      "direction": "outbound",
+      "status": "sent",
+      "id": "f2287c16-7661-4bd8-8043-cbdc31ffff28",
+      "timestamp": "2025-11-27T22:59:32.452Z"
     }
   ],
   "campaigns": [
@@ -594,11 +702,11 @@
         "createdAt": "2025-11-27T22:31:14.359Z",
         "updatedAt": "2025-11-27T22:31:14.359Z"
       },
-      "lastMessage": "Certainly! Awards events are formal ceremonies where individuals or organizations are recognized for their achievements and contributions in various fields. These events can range from large international ceremonies to smaller, more localized gatherings. Here are some key aspects of awards events:\n\n1. **Purpose**: The primary purpose of an awards event is to celebrate excellence and acknowledge outstanding achievements. They can cover various fields, such as the arts, sciences, sports, business, and humanitarian efforts.\n\n2. **Types of Awards**: Awards can be specific to industries (like the Oscars for film, Grammys for music, or Nobel Prizes for various fields of research and peace), or more general, recognizing contributions across multiple domains.\n\n3. **Nomination and Selection Process**: Typically, there is a nomination process where individuals or organizations are proposed for awards. A panel of judges or a voting body usually reviews these nominations and selects the winners based on predefined criteria.\n\n4. **Ceremony Format**: Awards ceremonies often feature speeches, performances, and presentations. They might include a dinner or gala, and recipients usually give acceptance speeches upon receiving their awards.\n\n5. **Broadcast and Media Coverage**: Many major awards events are broadcast on television or streamed online, attracting large audiences. They can also generate significant media coverage before and after the event.\n\n6. **Impact**: Winning an award can significantly impact the recipient’s career or organization, providing recognition and increased visibility. It can also inspire others and set industry standards.\n\n7. **Criticism and Controversy**: Awards events can sometimes face criticism regarding the selection process, perceived biases, or lack of diversity among nominees and winners.\n\nIf you have a specific awards event in mind or want to know about a particular aspect, feel free to ask!",
-      "lastMessageTime": "2025-11-27T22:54:50.211Z",
-      "lastInboundMessageTime": "2025-11-27T22:54:40.396Z",
-      "lastInboundMessage": "Tell me more about the awards event",
-      "unreadCount": 8,
+      "lastMessage": "It looks like there might have been a typing error in your message. If you have a question or need information on a specific topic, please let me know, and I'll be happy to help!",
+      "lastMessageTime": "2025-11-27T22:56:42.221Z",
+      "lastInboundMessageTime": "2025-11-27T22:56:39.836Z",
+      "lastInboundMessage": "Gkkgjgkh",
+      "unreadCount": 10,
       "status": "open",
       "notes": []
     },
@@ -618,8 +726,10 @@
         "updatedAt": "2025-11-27T22:31:22.636Z"
       },
       "lastMessage": "[Template: hello_world]",
-      "lastMessageTime": "2025-11-27T22:31:22.637Z",
-      "unreadCount": 0,
+      "lastMessageTime": "2025-11-27T22:59:32.452Z",
+      "lastInboundMessageTime": "2025-11-27T22:59:03.027Z",
+      "lastInboundMessage": "Jj",
+      "unreadCount": 3,
       "status": "open",
       "notes": []
     }
