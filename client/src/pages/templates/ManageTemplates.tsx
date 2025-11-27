@@ -52,15 +52,27 @@ export default function ManageTemplates() {
       const res = await fetch("/api/templates/sync-meta", {
         method: "POST",
       });
-      if (!res.ok) throw new Error("Failed to sync templates");
-      return res.json();
+      const data = await res.json();
+      if (!res.ok) {
+        throw new Error(data.error || data.message || "Failed to sync templates");
+      }
+      return data;
     },
     onSuccess: (data) => {
       queryClient.invalidateQueries({ queryKey: ["/api/templates"] });
-      toast.success(`Synced ${data.synced || 0} templates from Meta`);
+      const approvedList = data.approvedTemplates?.length > 0 
+        ? `Approved: ${data.approvedTemplates.join(", ")}`
+        : "No approved templates found";
+      toast.success(data.message || `Synced ${data.synced || 0} templates from Meta`, {
+        description: approvedList,
+        duration: 5000,
+      });
     },
-    onError: () => {
-      toast.error("Failed to sync META templates. Check your API credentials.");
+    onError: (error: Error) => {
+      toast.error("Failed to sync META templates", {
+        description: error.message,
+        duration: 5000,
+      });
     },
   });
 
@@ -74,11 +86,14 @@ export default function ManageTemplates() {
       if (!res.ok) throw new Error("Failed to create template");
       return res.json();
     },
-    onSuccess: () => {
+    onSuccess: (template) => {
       queryClient.invalidateQueries({ queryKey: ["/api/templates"] });
       setIsAddDialogOpen(false);
       resetForm();
-      toast.success("Template created! It will be submitted to Meta for approval.");
+      toast.success("Template created successfully!", {
+        description: "Click 'Submit' button to send it to Meta for approval.",
+        duration: 4000,
+      });
     },
     onError: () => {
       toast.error("Failed to create template");
@@ -90,15 +105,24 @@ export default function ManageTemplates() {
       const res = await fetch(`/api/templates/${templateId}/submit-approval`, {
         method: "POST",
       });
-      if (!res.ok) throw new Error("Failed to submit for approval");
-      return res.json();
+      const data = await res.json();
+      if (!res.ok) {
+        throw new Error(data.error || data.message || "Failed to submit for approval");
+      }
+      return data;
     },
-    onSuccess: () => {
+    onSuccess: (data) => {
       queryClient.invalidateQueries({ queryKey: ["/api/templates"] });
-      toast.success("Template submitted to Meta for approval!");
+      toast.success(data.message || "Template submitted to Meta for approval!", {
+        description: data.metaTemplateName ? `Template name in Meta: ${data.metaTemplateName}` : undefined,
+        duration: 5000,
+      });
     },
-    onError: () => {
-      toast.error("Failed to submit template for approval");
+    onError: (error: Error) => {
+      toast.error("Failed to submit template", {
+        description: error.message,
+        duration: 5000,
+      });
     },
   });
 

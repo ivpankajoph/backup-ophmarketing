@@ -55,6 +55,7 @@ interface Chat {
   lastMessage?: string;
   lastMessageTime?: string;
   lastInboundMessageTime?: string;
+  lastInboundMessage?: string;
   unreadCount: number;
   status: string;
   windowExpiresAt?: string;
@@ -414,12 +415,15 @@ export default function WindowInbox() {
                           <div className="flex items-center justify-between mb-1">
                             <span className="font-medium truncate">{chat.contact.name}</span>
                             <span className="text-xs text-muted-foreground whitespace-nowrap">
-                              {chat.lastMessageTime ? formatTime(chat.lastMessageTime) : ""}
+                              {chat.lastInboundMessageTime ? formatTime(chat.lastInboundMessageTime) : ""}
                             </span>
                           </div>
-                          <p className="text-sm text-muted-foreground truncate mb-1">
-                            {chat.lastMessage || "No messages yet"}
-                          </p>
+                          <div className="bg-blue-50 dark:bg-blue-950/30 rounded p-2 mb-2 border-l-2 border-blue-400">
+                            <p className="text-xs text-blue-600 dark:text-blue-400 font-medium mb-0.5">Customer Message:</p>
+                            <p className="text-sm text-foreground truncate">
+                              {chat.lastInboundMessage || "No customer message"}
+                            </p>
+                          </div>
                           <Badge variant="outline" className="text-xs bg-green-50 text-green-700 border-green-200">
                             <Clock className="h-3 w-3 mr-1" />
                             {getTimeRemaining(chat.windowExpiresAt)} left

@@ -191,6 +191,7 @@ export class MemStorage implements IStorage {
         lastMessage: lastMessage?.content,
         lastMessageTime: lastMessage?.timestamp,
         lastInboundMessageTime: lastInboundMessage?.timestamp,
+        lastInboundMessage: lastInboundMessage?.content,
         unreadCount: contactMessages.filter((m) => m.direction === "inbound" && m.status !== "read").length,
         status: "open" as const,
         notes: [],
