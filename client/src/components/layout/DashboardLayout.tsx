@@ -103,6 +103,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
         { label: "All Agents", href: "/ai/agents" },
         { label: "New Agent", href: "/ai/new" },
         { label: "Agent Mapping", href: "/ai/map" },
+        { label: "AI Reports", href: "/ai/reports" },
       ]
     },
     {

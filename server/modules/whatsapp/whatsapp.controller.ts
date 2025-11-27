@@ -4,6 +4,7 @@ import { getAgentById, getAllAgents } from '../aiAgents/agent.service';
 import { generateAgentResponse } from '../openai/openai.service';
 import { getLeadById, getAllLeads } from '../facebook/fb.service';
 import { storage } from '../../storage';
+import * as aiAnalytics from '../aiAnalytics/aiAnalytics.service';
 
 const WHATSAPP_TOKEN = process.env.WHATSAPP_TOKEN_NEW || process.env.WHATSAPP_TOKEN;
 const PHONE_NUMBER_ID = process.env.PHONE_NUMBER_ID;
@@ -152,6 +153,41 @@ async function saveInboundMessage(from: string, content: string, type: string) {
     // Update or create chat with lastInboundMessageTime
     await storage.updateChatInboundTime(contact.id);
     console.log('Updated chat inbound time for contact:', contact.id);
+
+    // Track AI qualification for this contact
+    try {
+      const lead = findLeadByPhone(from);
+      let agentToUse = null;
+      let source: 'ai_chat' | 'campaign' | 'ad' | 'lead_form' | 'manual' = 'ai_chat';
+      
+      if (lead) {
+        source = 'lead_form';
+        const mapping = getMappingByFormId(lead.formId);
+        if (mapping && mapping.isActive) {
+          agentToUse = getAgentById(mapping.agentId);
+        }
+      }
+      
+      if (!agentToUse) {
+        const agents = getAllAgents();
+        agentToUse = agents.find((a: any) => a.isActive);
+      }
+      
+      aiAnalytics.createOrUpdateQualification(
+        from,
+        contact.name || `WhatsApp ${from}`,
+        content,
+        source,
+        {
+          contactId: contact.id,
+          agentId: agentToUse?.id,
+          agentName: agentToUse?.name,
+        }
+      );
+      console.log('Tracked AI qualification for:', from);
+    } catch (analyticsError) {
+      console.error('Error tracking AI qualification:', analyticsError);
+    }
 
   } catch (error) {
     console.error('Error saving inbound message:', error);

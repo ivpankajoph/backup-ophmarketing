@@ -16,6 +16,7 @@ import mappingRoutes from "./modules/mapping/mapping.routes";
 import whatsappRoutes from "./modules/whatsapp/whatsapp.routes";
 import leadAutoReplyRoutes from "./modules/leadAutoReply/leadAutoReply.routes";
 import broadcastRoutes from "./modules/broadcast/broadcast.routes";
+import aiAnalyticsRoutes from "./modules/aiAnalytics/aiAnalytics.routes";
 
 export async function registerRoutes(
   httpServer: Server,
@@ -753,6 +754,7 @@ export async function registerRoutes(
   app.use("/api/webhook/whatsapp", whatsappRoutes);
   app.use("/api/leads/auto-reply", leadAutoReplyRoutes);
   app.use("/api/broadcast", broadcastRoutes);
+  app.use("/api/ai-analytics", aiAnalyticsRoutes);
 
   return httpServer;
 }

@@ -43,6 +43,7 @@ import NewAgent from "@/pages/ai/NewAgent";
 import ManageAgents from "@/pages/ai/ManageAgents";
 import AgentsPage from "@/pages/ai/AgentsPage";
 import MapAgent from "@/pages/ai/MapAgent";
+import AgentReports from "@/pages/ai/AgentReports";
 
 import LeadForms from "@/pages/facebook/LeadForms";
 import Leads from "@/pages/facebook/Leads";
@@ -93,6 +94,7 @@ function Router() {
       <Route path="/ai/manage" component={AgentsPage} />
       <Route path="/ai/agents" component={AgentsPage} />
       <Route path="/ai/map" component={MapAgent} />
+      <Route path="/ai/reports" component={AgentReports} />
 
       {/* Facebook */}
       <Route path="/facebook/forms" component={LeadForms} />

@@ -469,6 +469,60 @@
       "status": "sent",
       "id": "8d950dbb-78ad-45a1-ac74-8fb01c3ccd4e",
       "timestamp": "2025-11-27T23:01:00.023Z"
+    },
+    {
+      "contactId": "ebcdda60-5598-47b9-bc91-80c90c122996",
+      "content": "Hhh",
+      "type": "text",
+      "direction": "inbound",
+      "status": "sent",
+      "id": "0a05758f-a2f3-46e6-800a-943b02063774",
+      "timestamp": "2025-11-27T23:08:29.501Z"
+    },
+    {
+      "contactId": "ebcdda60-5598-47b9-bc91-80c90c122996",
+      "content": "Hello! How can I assist you today?",
+      "type": "text",
+      "direction": "outbound",
+      "status": "sent",
+      "id": "2da60d4b-eb8d-4ccd-9c24-32674b3b27ea",
+      "timestamp": "2025-11-27T23:08:30.678Z"
+    },
+    {
+      "contactId": "ebcdda60-5598-47b9-bc91-80c90c122996",
+      "content": "Ffr",
+      "type": "text",
+      "direction": "inbound",
+      "status": "sent",
+      "id": "e60d3459-8567-49bd-94fd-dd6859a802a6",
+      "timestamp": "2025-11-27T23:09:58.660Z"
+    },
+    {
+      "contactId": "ebcdda60-5598-47b9-bc91-80c90c122996",
+      "content": "It seems like your message might be incomplete or accidental. Could you please provide more details or clarify your question? I'm here to help!",
+      "type": "text",
+      "direction": "outbound",
+      "status": "sent",
+      "id": "01cc5398-fc6f-4005-b1e4-1250e6cc10c2",
+      "timestamp": "2025-11-27T23:10:00.278Z"
+    },
+    {
+      "contactId": "8a9e2cfc-5b0b-4473-a1e1-ed26edeaa049",
+      "content": "Uue",
+      "type": "text",
+      "direction": "inbound",
+      "status": "sent",
+      "id": "8027ee20-8df0-48ff-a601-eb235eb375cc",
+      "timestamp": "2025-11-27T23:10:17.766Z"
+    },
+    {
+      "contactId": "8a9e2cfc-5b0b-4473-a1e1-ed26edeaa049",
+      "content": "It seems like your message is incomplete. Could you please provide more context or clarify what you need help with?",
+      "type": "text",
+      "direction": "outbound",
+      "status": "sent",
+      "id": "c1cbdb55-ea54-4344-8249-a1636a4b5fdf",
+      "timestamp": "2025-11-27T23:10:19.586Z"
     }
   ],
   "campaigns": [
@@ -792,11 +846,11 @@
         "createdAt": "2025-11-27T22:31:14.359Z",
         "updatedAt": "2025-11-27T22:31:14.359Z"
       },
-      "lastMessage": "The sequence \"Ghh\" doesn't have a widely recognized meaning on its own, but it could potentially stand for something specific depending on the context in which you encountered it. Here are a few possibilities:\n\n1. **Initials or Abbreviation**: It might be an abbreviation or initials for a person, organization, or concept.\n\n2. **Typo or Slang**: It could be a typo or part of informal internet slang that is specific to a certain group or community.\n\n3. **Code or Identifier**: It might be part of a code, product ID, or other identifier used in a specific context.\n\nIf you can provide more information or context about where you saw \"Ghh,\" I'd be happy to help figure out what it might mean!",
-      "lastMessageTime": "2025-11-27T23:00:24.321Z",
-      "lastInboundMessageTime": "2025-11-27T23:00:20.756Z",
-      "lastInboundMessage": "Ghh",
-      "unreadCount": 13,
+      "lastMessage": "It seems like your message is incomplete. Could you please provide more context or clarify what you need help with?",
+      "lastMessageTime": "2025-11-27T23:10:19.586Z",
+      "lastInboundMessageTime": "2025-11-27T23:10:17.766Z",
+      "lastInboundMessage": "Uue",
+      "unreadCount": 14,
       "status": "open",
       "notes": []
     },
@@ -815,11 +869,11 @@
         "createdAt": "2025-11-27T22:31:22.636Z",
         "updatedAt": "2025-11-27T22:31:22.636Z"
       },
-      "lastMessage": "It seems like your message might be incomplete. Could you please provide more details or clarify your request? I'm here to help!",
-      "lastMessageTime": "2025-11-27T23:01:00.023Z",
-      "lastInboundMessageTime": "2025-11-27T23:00:57.326Z",
-      "lastInboundMessage": "Yyr",
-      "unreadCount": 5,
+      "lastMessage": "It seems like your message might be incomplete or accidental. Could you please provide more details or clarify your question? I'm here to help!",
+      "lastMessageTime": "2025-11-27T23:10:00.278Z",
+      "lastInboundMessageTime": "2025-11-27T23:09:58.660Z",
+      "lastInboundMessage": "Ffr",
+      "unreadCount": 7,
       "status": "open",
       "notes": []
     }
