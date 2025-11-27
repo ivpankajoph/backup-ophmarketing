@@ -181,6 +181,15 @@
       "status": "sent",
       "id": "e40e0793-5479-491a-8e76-bf9985de0601",
       "timestamp": "2025-11-27T22:31:22.637Z"
+    },
+    {
+      "contactId": "8a9e2cfc-5b0b-4473-a1e1-ed26edeaa049",
+      "content": "[Template: awards_marketing]",
+      "type": "text",
+      "direction": "outbound",
+      "status": "sent",
+      "id": "78f06ed7-cc44-4998-8763-38ef5c3fe5fb",
+      "timestamp": "2025-11-27T22:43:30.003Z"
     }
   ],
   "campaigns": [
@@ -504,8 +513,8 @@
         "createdAt": "2025-11-27T22:31:14.359Z",
         "updatedAt": "2025-11-27T22:31:14.359Z"
       },
-      "lastMessage": "[Template: hello_world]",
-      "lastMessageTime": "2025-11-27T22:31:14.360Z",
+      "lastMessage": "[Template: awards_marketing]",
+      "lastMessageTime": "2025-11-27T22:43:30.003Z",
       "unreadCount": 0,
       "status": "open",
       "notes": []

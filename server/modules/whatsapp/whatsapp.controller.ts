@@ -234,8 +234,14 @@ export async function getConversation(req: Request, res: Response) {
   }
 }
 
-// Send template message
-export async function sendTemplateMessage(to: string, templateName: string, languageCode: string = 'en', components: any[] = []) {
+// Send template message with support for named parameters
+export async function sendTemplateMessage(
+  to: string, 
+  templateName: string, 
+  languageCode: string = 'en', 
+  components: any[] = [],
+  namedParams?: { [key: string]: string }
+) {
   if (!WHATSAPP_TOKEN || !PHONE_NUMBER_ID) {
     throw new Error('WhatsApp credentials not configured');
   }
@@ -255,8 +261,20 @@ export async function sendTemplateMessage(to: string, templateName: string, lang
     }
   };
 
-  // Add components if provided (for templates with variables)
-  if (components && components.length > 0) {
+  // If named parameters are provided, format them correctly for Meta API
+  if (namedParams && Object.keys(namedParams).length > 0) {
+    payload.template.components = [
+      {
+        type: 'body',
+        parameters: Object.entries(namedParams).map(([paramName, value]) => ({
+          type: 'text',
+          parameter_name: paramName,
+          text: value
+        }))
+      }
+    ];
+  } else if (components && components.length > 0) {
+    // Use provided components array
     payload.template.components = components;
   }
 
@@ -289,13 +307,13 @@ export async function sendTemplateMessage(to: string, templateName: string, lang
 
 export async function sendTemplateMessageEndpoint(req: Request, res: Response) {
   try {
-    const { to, templateName, languageCode, components } = req.body;
+    const { to, templateName, languageCode, components, namedParams } = req.body;
     
     if (!to || !templateName) {
       return res.status(400).json({ error: 'Recipient (to) and templateName are required' });
     }
 
-    const result = await sendTemplateMessage(to, templateName, languageCode || 'en', components || []);
+    const result = await sendTemplateMessage(to, templateName, languageCode || 'en', components || [], namedParams);
     
     // Save outbound message to storage
     try {
