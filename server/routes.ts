@@ -309,16 +309,16 @@ export async function registerRoutes(
         return res.status(400).json({ message: "WhatsApp Business Account ID (WABA_ID) not configured. Please add WABA_ID environment variable." });
       }
 
-      console.log(`Fetching templates from WABA ID: ${wabaId}`);
+      console.log(`[TemplateSync] Fetching templates from WABA ID: ${wabaId}`);
 
-      // Fetch templates from Meta Graph API
+      // Fetch templates from Meta Graph API with more fields
       const response = await fetch(
-        `https://graph.facebook.com/v18.0/${wabaId}/message_templates?access_token=${token}`
+        `https://graph.facebook.com/v18.0/${wabaId}/message_templates?fields=name,status,category,language,components&access_token=${token}`
       );
       
       if (!response.ok) {
         const errorData = await response.json();
-        console.error("Meta API Error:", errorData);
+        console.error("[TemplateSync] Meta API Error:", errorData);
         return res.status(response.status).json({ 
           message: "Failed to fetch templates from Meta",
           error: errorData.error?.message || "Unknown error",
@@ -329,8 +329,19 @@ export async function registerRoutes(
       const data = await response.json();
       const metaTemplates = data.data || [];
       let synced = 0;
+      let updated = 0;
+      const approvedTemplates: string[] = [];
+
+      console.log(`[TemplateSync] Found ${metaTemplates.length} templates from Meta`);
 
       for (const metaTemplate of metaTemplates) {
+        // Log template info
+        console.log(`[TemplateSync] Template: ${metaTemplate.name}, Status: ${metaTemplate.status}, Language: ${metaTemplate.language}`);
+        
+        if (metaTemplate.status === "APPROVED") {
+          approvedTemplates.push(`${metaTemplate.name} (${metaTemplate.language})`);
+        }
+
         // Check if template already exists
         const existingTemplates = await storage.getTemplates();
         const exists = existingTemplates.find(t => t.name === metaTemplate.name);
@@ -365,21 +376,25 @@ export async function registerRoutes(
           synced++;
         } else {
           // Update status if changed
-          await storage.updateTemplate(exists.id, {
-            status: metaTemplate.status === "APPROVED" ? "approved" : 
-                    metaTemplate.status === "REJECTED" ? "rejected" : "pending",
-          });
+          const status = metaTemplate.status === "APPROVED" ? "approved" : 
+                        metaTemplate.status === "REJECTED" ? "rejected" : "pending";
+          await storage.updateTemplate(exists.id, { status });
+          updated++;
         }
       }
+
+      console.log(`[TemplateSync] Approved templates: ${approvedTemplates.join(', ')}`);
 
       res.json({ 
         success: true, 
         synced, 
+        updated,
         total: metaTemplates.length,
-        message: `Synced ${synced} new templates from Meta`
+        approvedTemplates,
+        message: `Synced ${synced} new templates, updated ${updated} existing templates from Meta. ${approvedTemplates.length} are approved.`
       });
     } catch (error) {
-      console.error("Template sync error:", error);
+      console.error("[TemplateSync] Error:", error);
       res.status(500).json({ message: "Failed to sync templates from Meta" });
     }
   });

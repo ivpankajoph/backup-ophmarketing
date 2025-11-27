@@ -172,8 +172,12 @@ export async function sendCustomMessage(phone: string, message: string): Promise
   const credentials = getWhatsAppCredentials();
   
   if (!credentials) {
+    console.error('[CustomMessage] WhatsApp credentials not configured');
     return { success: false, error: 'WhatsApp credentials not configured' };
   }
+
+  const formattedPhone = formatPhoneNumber(phone);
+  console.log(`[CustomMessage] Sending to ${formattedPhone}: "${message.substring(0, 50)}..."`);
 
   try {
     const response = await fetch(
@@ -187,7 +191,7 @@ export async function sendCustomMessage(phone: string, message: string): Promise
         body: JSON.stringify({
           messaging_product: 'whatsapp',
           recipient_type: 'individual',
-          to: formatPhoneNumber(phone),
+          to: formattedPhone,
           type: 'text',
           text: { body: message }
         }),
@@ -197,11 +201,25 @@ export async function sendCustomMessage(phone: string, message: string): Promise
     const data = await response.json();
     
     if (response.ok && data.messages?.[0]?.id) {
+      console.log(`[CustomMessage] Successfully sent to ${formattedPhone}`);
       return { success: true, messageId: data.messages[0].id };
     } else {
-      return { success: false, error: data.error?.message || 'Failed to send message' };
+      const errorMsg = data.error?.message || 'Failed to send message';
+      const errorCode = data.error?.code;
+      console.error(`[CustomMessage] Failed (code: ${errorCode}): ${errorMsg}`);
+      
+      // Check for 24-hour window error
+      if (errorCode === 131047 || errorMsg.includes('24 hour') || errorMsg.includes('Re-engagement')) {
+        return { 
+          success: false, 
+          error: 'Cannot send custom message - outside 24-hour window. Customer must message you first, or use a template message.' 
+        };
+      }
+      
+      return { success: false, error: errorMsg };
     }
   } catch (error) {
+    console.error('[CustomMessage] Error:', error);
     return { success: false, error: error instanceof Error ? error.message : 'Unknown error' };
   }
 }
@@ -209,22 +227,28 @@ export async function sendCustomMessage(phone: string, message: string): Promise
 export async function sendAIAgentMessage(phone: string, agentId: string, context?: string): Promise<SendMessageResult> {
   const agent = agentService.getAgentById(agentId);
   if (!agent) {
+    console.error(`[AIAgent] Agent not found: ${agentId}`);
     return { success: false, error: 'Agent not found' };
   }
 
+  console.log(`[AIAgent] Generating message with agent "${agent.name}" for ${phone}`);
+  
   const prompt = context || 'Generate a friendly welcome message for a new contact. Keep it under 160 characters.';
   const aiMessage = await openaiService.generateAgentResponse(prompt, agent);
   
   if (!aiMessage) {
-    return { success: false, error: 'Failed to generate AI message' };
+    console.error('[AIAgent] Failed to generate AI message');
+    return { success: false, error: 'Failed to generate AI message. Check if OPENAI_API_KEY is configured.' };
   }
+
+  console.log(`[AIAgent] AI generated: "${aiMessage.substring(0, 100)}..."`);
 
   // Try sending as custom message first (works within 24-hour window)
   const customResult = await sendCustomMessage(phone, aiMessage);
   
-  // If custom message fails (outside 24-hour window), fall back to hello_world template
-  if (!customResult.success && customResult.error?.includes('24')) {
-    console.log('[AIAgent] Custom message failed, falling back to hello_world template');
+  // If custom message fails due to 24-hour window, fall back to hello_world template
+  if (!customResult.success && (customResult.error?.includes('24') || customResult.error?.includes('window'))) {
+    console.log('[AIAgent] Custom message failed (outside 24-hour window), falling back to hello_world template');
     return await templateService.sendHelloWorldTemplate(formatPhoneNumber(phone));
   }
   

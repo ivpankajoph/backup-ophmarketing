@@ -45,52 +45,71 @@ export async function sendTemplateMessage(
 
   // Convert template name to Meta format: lowercase with underscores
   const metaTemplateName = template.name.toLowerCase().replace(/\s+/g, '_');
-  console.log(`[TemplateMessage] Converting template name: "${template.name}" -> "${metaTemplateName}"`);
+  console.log(`[TemplateMessage] Sending template: "${metaTemplateName}" with language: "${template.languageCode}" to ${to}`);
 
-  const messagePayload: Record<string, unknown> = {
-    messaging_product: 'whatsapp',
-    recipient_type: 'individual',
-    to: to,
-    type: 'template',
-    template: {
-      name: metaTemplateName,
-      language: {
-        code: template.languageCode
+  // Try different language codes - Meta uses various formats
+  const languageCodesToTry = [template.languageCode, 'en', 'en_US', 'en_GB'];
+  const uniqueLanguages = Array.from(new Set(languageCodesToTry));
+
+  for (const langCode of uniqueLanguages) {
+    const messagePayload: Record<string, unknown> = {
+      messaging_product: 'whatsapp',
+      recipient_type: 'individual',
+      to: to,
+      type: 'template',
+      template: {
+        name: metaTemplateName,
+        language: {
+          code: langCode
+        }
       }
-    }
-  };
+    };
 
-  if (template.components && template.components.length > 0) {
-    (messagePayload.template as Record<string, unknown>).components = template.components;
+    if (template.components && template.components.length > 0) {
+      (messagePayload.template as Record<string, unknown>).components = template.components;
+    }
+
+    try {
+      const response = await fetch(
+        `https://graph.facebook.com/v18.0/${credentials.phoneNumberId}/messages`,
+        {
+          method: 'POST',
+          headers: {
+            'Authorization': `Bearer ${credentials.token}`,
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(messagePayload),
+        }
+      );
+
+      const data = await response.json();
+      
+      if (response.ok && data.messages?.[0]?.id) {
+        console.log(`[TemplateMessage] Successfully sent template "${metaTemplateName}" (lang: ${langCode}) to ${to}`);
+        return { success: true, messageId: data.messages[0].id };
+      } else {
+        const errorMsg = data.error?.message || 'Failed to send template message';
+        const errorCode = data.error?.code;
+        
+        // If template doesn't exist in this language, try next language
+        if (errorCode === 132001 || errorMsg.includes('does not exist')) {
+          console.log(`[TemplateMessage] Template "${metaTemplateName}" not found with lang "${langCode}", trying next...`);
+          continue;
+        }
+        
+        // For other errors, return immediately
+        console.error(`[TemplateMessage] Failed: ${errorMsg}`);
+        return { success: false, error: errorMsg };
+      }
+    } catch (error) {
+      console.error('[TemplateMessage] Error:', error);
+      return { success: false, error: error instanceof Error ? error.message : 'Unknown error' };
+    }
   }
 
-  try {
-    const response = await fetch(
-      `https://graph.facebook.com/v18.0/${credentials.phoneNumberId}/messages`,
-      {
-        method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${credentials.token}`,
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(messagePayload),
-      }
-    );
-
-    const data = await response.json();
-    
-    if (response.ok && data.messages?.[0]?.id) {
-      console.log(`[TemplateMessage] Successfully sent template "${template.name}" to ${to}`);
-      return { success: true, messageId: data.messages[0].id };
-    } else {
-      const errorMsg = data.error?.message || 'Failed to send template message';
-      console.error(`[TemplateMessage] Failed: ${errorMsg}`);
-      return { success: false, error: errorMsg };
-    }
-  } catch (error) {
-    console.error('[TemplateMessage] Error:', error);
-    return { success: false, error: error instanceof Error ? error.message : 'Unknown error' };
-  }
+  // If all language attempts failed
+  console.error(`[TemplateMessage] Template "${metaTemplateName}" not found in any language. Please sync templates from Meta to see which are actually approved.`);
+  return { success: false, error: `Template "${metaTemplateName}" not found in Meta. Please go to Templates page and click "Sync Meta Templates" to see your approved templates.` };
 }
 
 export async function sendHelloWorldTemplate(to: string): Promise<{ success: boolean; error?: string; messageId?: string }> {
