@@ -10,6 +10,11 @@ import {
   insertTeamMemberSchema,
 } from "@shared/schema";
 
+import agentRoutes from "./modules/aiAgents/agent.routes";
+import fbRoutes from "./modules/facebook/fb.routes";
+import mappingRoutes from "./modules/mapping/mapping.routes";
+import whatsappRoutes from "./modules/whatsapp/whatsapp.routes";
+
 export async function registerRoutes(
   httpServer: Server,
   app: Express
@@ -522,6 +527,11 @@ export async function registerRoutes(
       res.status(500).json({ message: "Failed to get agent performance" });
     }
   });
+
+  app.use("/api/agents", agentRoutes);
+  app.use("/api/facebook", fbRoutes);
+  app.use("/api/map-agent", mappingRoutes);
+  app.use("/api/webhook/whatsapp", whatsappRoutes);
 
   return httpServer;
 }
