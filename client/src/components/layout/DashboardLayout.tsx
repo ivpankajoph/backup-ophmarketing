@@ -16,7 +16,9 @@ import {
   Bot,
   BarChart3,
   ChevronDown,
-  ChevronRight
+  ChevronRight,
+  Facebook,
+  Link2
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -36,7 +38,6 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
   const [location] = useLocation();
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
-  // Define navigation structure
   const navStructure = [
     {
       icon: LayoutDashboard,
@@ -45,13 +46,32 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
     },
     {
       icon: MessageSquare,
-      label: "Inbox",
-      href: "/inbox",
+      label: "WhatsApp Inbox",
+      href: "/whatsapp",
+    },
+    {
+      icon: Facebook,
+      label: "Facebook Leads",
+      href: "/fb",
+      subItems: [
+        { label: "Lead Forms", href: "/fb/forms" },
+        { label: "Leads", href: "/fb/leads" },
+      ]
+    },
+    {
+      icon: Bot,
+      label: "AI Agents",
+      href: "/agents",
+    },
+    {
+      icon: Link2,
+      label: "Agent Mapping",
+      href: "/map-agent",
     },
     {
       icon: Megaphone,
       label: "Campaigns",
-      href: "/campaigns", // Kept for active state checking
+      href: "/campaigns",
       subItems: [
         { label: "Broadcasts", href: "/campaigns/broadcast" },
         { label: "Selected Contacts", href: "/campaigns/selected-contacts" },
@@ -86,15 +106,6 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
         { label: "Add Template", href: "/templates/add" },
         { label: "Template Status", href: "/templates/status" },
         { label: "Manage Templates", href: "/templates/manage" },
-      ]
-    },
-    {
-      icon: Bot,
-      label: "AI Agent",
-      href: "/ai",
-      subItems: [
-        { label: "New Agent", href: "/ai/new" },
-        { label: "Manage Agents", href: "/ai/manage" },
       ]
     },
     {
@@ -200,8 +211,8 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
           <MessageSquare className="h-6 w-6 text-primary-foreground" />
         </div>
         <div>
-          <h1 className="font-heading font-bold text-lg leading-none tracking-tight">WhatsApp</h1>
-          <span className="text-xs text-sidebar-foreground/60">Business API</span>
+          <h1 className="font-heading font-bold text-lg leading-none tracking-tight">WA + FB + AI</h1>
+          <span className="text-xs text-sidebar-foreground/60">Lead Management</span>
         </div>
       </div>
 
@@ -223,14 +234,11 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
 
   return (
     <div className="min-h-screen bg-gray-50/50 flex">
-      {/* Desktop Sidebar */}
       <div className="hidden md:block w-64 bg-sidebar border-r border-sidebar-border text-sidebar-foreground shrink-0">
         <NavContent />
       </div>
 
-      {/* Main Content */}
       <div className="flex-1 flex flex-col min-w-0 h-screen overflow-hidden">
-        {/* Header */}
         <header className="h-16 border-b border-border bg-background px-6 flex items-center justify-between shrink-0 sticky top-0 z-10">
           <div className="flex items-center gap-4">
             <Sheet open={isSidebarOpen} onOpenChange={setIsSidebarOpen}>
@@ -296,7 +304,6 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
           </div>
         </header>
 
-        {/* Page Content */}
         <main className="flex-1 overflow-auto p-6">
           {children}
         </main>
