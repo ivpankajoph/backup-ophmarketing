@@ -1,0 +1,170 @@
+IMPORTANT — READ CAREFULLY BEFORE GENERATING CODE
+
+DO NOT modify, rewrite, replace, delete, refactor or touch ANY existing code in my backend or frontend.
+
+DO NOT generate a new backend.
+DO NOT generate a new frontend.
+DO NOT create a new dashboard.
+DO NOT restructure my project.
+DO NOT override any existing folders or files.
+
+You are ONLY allowed to ADD new modules, pages, routes, controllers, and UI integration code for the features specified below.
+
+===========================================================
+ADD THESE FEATURES INTO MY EXISTING SYSTEM ONLY
+===========================================================
+
+I ONLY want to add features related to:
+
+1. AI Agent (enhanced functionality without changing UI layout)
+2. Facebook Lead Forms and Leads
+3. Agent–Form Mapping
+4. WhatsApp Auto-Reply Integration
+5. OpenAI Integration
+
+No other module should be touched.
+Existing UI, sidebar, pages, and functions must remain exactly as they are.
+AI Agent page may be updated only to integrate new backend APIs or features as per requirement, without changing layout, styling, or sidebar items.
+
+===========================================================
+# 1 — BACKEND (Node.js) — ADD ONLY THESE NEW FILES
+===========================================================
+
+Create ONLY these new folders and new files under my EXISTING backend:
+
+backend/src/
+  aiAgents/
+    agent.controller.js
+    agent.service.js
+    agent.routes.js
+
+  facebook/
+    fb.controller.js
+    fb.service.js
+    fb.routes.js
+
+  mapping/
+    mapping.controller.js
+    mapping.service.js
+    mapping.routes.js
+
+  whatsapp/
+    whatsapp.controller.js
+    whatsapp.routes.js
+
+  openai/
+    openai.service.js
+
+  storage/
+    json.adapter.js     ← temporary storage only
+    index.js            ← allows future DB swap
+
+Create ONLY THESE ROUTES (do NOT touch existing routes):
+
+/agents
+/map-agent
+/facebook/forms
+/facebook/leads
+/webhook/whatsapp
+
+Temporary JSON storage in:
+backend/data/
+  agents.json
+  forms.json
+  leads.json
+  mapping.json
+
+NO existing files should be modified.
+
+===========================================================
+# 2 — FRONTEND (React) — ADD OR ENHANCE ONLY THESE PAGES
+===========================================================
+
+Add ONLY these new pages/components inside my existing React project:
+
+frontend/src/pages/
+  Agents.jsx             ← enhance existing AI Agent page only for new API integration
+  LeadForms.jsx
+  Leads.jsx
+  MapAgent.jsx
+  WhatsAppInbox.jsx
+
+frontend/src/components/
+  AgentForm.jsx
+  FormList.jsx
+  LeadList.jsx
+  MappingForm.jsx
+  InboxChat.jsx
+
+Update ONLY the Sidebar to ADD new links:
+- AI Agents (enhancement for new API only)
+- Lead Forms
+- Leads
+- Agent Mapping
+- WhatsApp Inbox
+
+Do NOT modify existing sidebar items or other pages.
+
+===========================================================
+# 3 — FEATURES BEING ADDED
+===========================================================
+
+### A) AI Agents Module
+- Create, list, and delete agents
+- Store in agents.json
+- Enhance existing AI Agent page to connect with new backend APIs
+- Do not change layout or design of the page
+
+### B) Facebook Lead Forms
+- Sync lead forms from Graph API
+- Save in forms.json
+- Display in UI without altering existing dashboard components
+
+### C) Facebook Leads
+- Sync leads for each form
+- Save in leads.json
+- Display in UI without affecting other pages
+
+### D) Agent–Form Mapping
+- Map FB Form → Agent
+- Save in mapping.json
+
+### E) WhatsApp Auto-Reply
+- GET /webhook/whatsapp → verification
+- POST /webhook/whatsapp → receive messages
+- Detect mapped form → agent
+- Send message to OpenAI
+- Send AI reply to WhatsApp user
+
+### F) OpenAI Integration
+- Service to send chat completion requests
+- Connect to AI Agent functionality
+
+===========================================================
+# 4 — ENV VARIABLES REQUIRED
+===========================================================
+
+WHATSAPP_TOKEN=
+PHONE_NUMBER_ID=
+VERIFY_TOKEN=
+FB_ACCESS_TOKEN=
+FB_PAGE_ID=
+OPENAI_API_KEY=
+OPENAI_MODEL=gpt-4.1
+
+===========================================================
+# 5 — OUTPUT REQUIREMENTS
+===========================================================
+
+✔ ONLY the new backend files  
+✔ ONLY the new frontend files or enhancements to existing AI Agent page  
+✔ Code that plugs into existing dashboard safely  
+✔ Instructions to insert new routes and integrate APIs without modifying old ones  
+✔ Example API calls for testing  
+✔ No full project regeneration  
+✔ No destructive changes  
+✔ No overwriting existing code  
+
+===========================================================
+NOW generate ONLY the ADD-ON modules, backend routes, storage adapters, and frontend enhancements as described above.
+===========================================================
