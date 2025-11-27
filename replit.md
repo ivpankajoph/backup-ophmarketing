@@ -44,7 +44,9 @@ The application uses in-memory storage with JSON file storage for new features. 
 │   ├── storage.ts           # In-memory data storage
 │   ├── modules/             # New modular features
 │   │   ├── aiAgents/        # AI Agent CRUD
+│   │   ├── broadcast/       # Broadcast messaging module
 │   │   ├── facebook/        # Facebook API integration
+│   │   ├── leadAutoReply/   # Lead auto-reply system
 │   │   ├── mapping/         # Agent-Form mapping
 │   │   ├── whatsapp/        # WhatsApp webhook
 │   │   ├── openai/          # OpenAI integration
@@ -76,6 +78,10 @@ The application uses in-memory storage with JSON file storage for new features. 
 14. **Lead Management** - View and filter leads from Facebook forms
 15. **Agent-Form Mapping** - Connect AI agents to lead forms for auto-reply
 16. **WhatsApp Webhook** - Receive and respond to WhatsApp messages with AI
+17. **Broadcast Messaging** - Enhanced bulk messaging with Template/Custom/AI Agent options
+18. **Excel/CSV Import** - Import contacts from Excel or CSV files
+19. **Broadcast Lists** - Save and manage contact lists for repeated broadcasts
+20. **Schedule Messages** - Schedule broadcasts for future delivery
 
 ## API Endpoints
 
@@ -106,6 +112,17 @@ The application uses in-memory storage with JSON file storage for new features. 
 - `POST /api/leads/auto-reply/process` - Process a single lead for auto-reply
 - `POST /api/leads/auto-reply/send/:leadId` - Send manual reply to a lead
 
+### Broadcast APIs
+- `GET/POST/PUT/DELETE /api/broadcast/lists` - Broadcast list management
+- `GET /api/broadcast/lists/:id` - Get specific broadcast list
+- `POST /api/broadcast/import-excel` - Import contacts from Excel file
+- `POST /api/broadcast/import-csv` - Import contacts from CSV file
+- `GET /api/broadcast/export-contacts` - Export contacts to Excel
+- `GET/POST/PUT/DELETE /api/broadcast/schedules` - Scheduled message management
+- `POST /api/broadcast/send` - Send broadcast to multiple contacts
+- `POST /api/broadcast/send-single` - Send message to single contact
+- `POST /api/broadcast/send-to-list/:listId` - Send broadcast to saved list
+
 ## Environment Variables
 Required secrets for full functionality:
 - `FB_ACCESS_TOKEN` - Facebook Graph API access token
@@ -119,6 +136,11 @@ Required secrets for full functionality:
 The application runs on port 5000 with `npm run dev`.
 
 ## Recent Changes
+- **Nov 27, 2025**: Added comprehensive Broadcast Messaging module with Template/Custom/AI Agent options
+- **Nov 27, 2025**: Added Excel/CSV import functionality for contacts
+- **Nov 27, 2025**: Added Broadcast Lists to save and reuse contact groups
+- **Nov 27, 2025**: Added Scheduled Messages for future delivery
+- **Nov 27, 2025**: Updated all campaign pages (Broadcast, Single, Schedule, SelectedContacts) with AI Agent integration
 - **Nov 27, 2025**: Added Lead Auto-Reply system - automatically sends WhatsApp messages to new leads using AI agents
 - **Nov 27, 2025**: Fixed NewAgent.tsx to connect with backend API for creating agents
 - **Nov 27, 2025**: Added AI Agent management with OpenAI integration

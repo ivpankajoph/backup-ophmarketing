@@ -1,17 +1,242 @@
+import { useState, useRef } from "react";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import DashboardLayout from "@/components/layout/DashboardLayout";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
-import { Calendar, Clock, MoreHorizontal, Plus, PauseCircle, PlayCircle, Trash2 } from "lucide-react";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogFooter } from "@/components/ui/dialog";
+import { Calendar, Clock, Plus, PauseCircle, PlayCircle, Trash2, Loader2, FileSpreadsheet, Bot, MessageSquare, FileText } from "lucide-react";
+import { toast } from "sonner";
 
-const schedules = [
-  { id: 1, name: "Weekly Newsletter", template: "newsletter_v1", time: "Every Mon, 9:00 AM", recipients: 2500, status: "Active", nextRun: "Nov 30, 2025" },
-  { id: 2, name: "Holiday Promo", template: "holiday_sale", time: "Dec 20, 2025, 10:00 AM", recipients: 5000, status: "Scheduled", nextRun: "Dec 20, 2025" },
-  { id: 3, name: "Feedback Request", template: "feedback_survey", time: "After 2 days", recipients: "Trigger based", status: "Paused", nextRun: "-" },
-];
+interface ScheduledMessage {
+  id: string;
+  name: string;
+  messageType: 'template' | 'custom' | 'ai_agent';
+  templateName?: string;
+  customMessage?: string;
+  agentId?: string;
+  scheduledAt: string;
+  status: 'scheduled' | 'sent' | 'failed' | 'cancelled';
+  recipientCount: number;
+  sentCount: number;
+  failedCount: number;
+  createdAt: string;
+}
+
+interface Template {
+  id: string;
+  name: string;
+  content: string;
+  status: string;
+}
+
+interface Agent {
+  id: string;
+  name: string;
+  description: string;
+  isActive: boolean;
+}
+
+interface ImportedContact {
+  name: string;
+  phone: string;
+  email?: string;
+}
 
 export default function Schedule() {
+  const [showNewSchedule, setShowNewSchedule] = useState(false);
+  const [scheduleName, setScheduleName] = useState("");
+  const [scheduleTime, setScheduleTime] = useState("");
+  const [messageType, setMessageType] = useState<"template" | "custom" | "ai_agent">("template");
+  const [selectedTemplateId, setSelectedTemplateId] = useState("");
+  const [selectedAgentId, setSelectedAgentId] = useState("");
+  const [customMessage, setCustomMessage] = useState("");
+  const [importedContacts, setImportedContacts] = useState<ImportedContact[]>([]);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const queryClient = useQueryClient();
+
+  const { data: schedules = [], isLoading } = useQuery<ScheduledMessage[]>({
+    queryKey: ["/api/broadcast/schedules"],
+    queryFn: async () => {
+      const res = await fetch("/api/broadcast/schedules");
+      if (!res.ok) throw new Error("Failed to fetch schedules");
+      return res.json();
+    },
+  });
+
+  const { data: templates = [] } = useQuery<Template[]>({
+    queryKey: ["/api/templates"],
+    queryFn: async () => {
+      const res = await fetch("/api/templates");
+      if (!res.ok) throw new Error("Failed to fetch templates");
+      return res.json();
+    },
+  });
+
+  const { data: agents = [] } = useQuery<Agent[]>({
+    queryKey: ["/api/agents"],
+    queryFn: async () => {
+      const res = await fetch("/api/agents");
+      if (!res.ok) throw new Error("Failed to fetch agents");
+      return res.json();
+    },
+  });
+
+  const approvedTemplates = templates.filter(t => t.status === "approved");
+  const activeAgents = agents.filter(a => a.isActive);
+
+  const importExcelMutation = useMutation({
+    mutationFn: async (file: File) => {
+      const formData = new FormData();
+      formData.append("file", file);
+      const res = await fetch("/api/broadcast/import-excel", {
+        method: "POST",
+        body: formData,
+      });
+      if (!res.ok) throw new Error("Failed to import file");
+      return res.json();
+    },
+    onSuccess: (data) => {
+      setImportedContacts(data.contacts);
+      toast.success(`Imported ${data.validContacts} contacts`);
+    },
+    onError: () => {
+      toast.error("Failed to import file");
+    },
+  });
+
+  const createScheduleMutation = useMutation({
+    mutationFn: async (data: any) => {
+      const res = await fetch("/api/broadcast/schedules", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(data),
+      });
+      if (!res.ok) throw new Error("Failed to create schedule");
+      return res.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/broadcast/schedules"] });
+      toast.success("Schedule created successfully");
+      handleCloseDialog();
+    },
+    onError: () => {
+      toast.error("Failed to create schedule");
+    },
+  });
+
+  const deleteScheduleMutation = useMutation({
+    mutationFn: async (id: string) => {
+      const res = await fetch(`/api/broadcast/schedules/${id}`, {
+        method: "DELETE",
+      });
+      if (!res.ok) throw new Error("Failed to delete schedule");
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/broadcast/schedules"] });
+      toast.success("Schedule deleted");
+    },
+    onError: () => {
+      toast.error("Failed to delete schedule");
+    },
+  });
+
+  const updateScheduleMutation = useMutation({
+    mutationFn: async ({ id, status }: { id: string; status: string }) => {
+      const res = await fetch(`/api/broadcast/schedules/${id}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ status }),
+      });
+      if (!res.ok) throw new Error("Failed to update schedule");
+      return res.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/broadcast/schedules"] });
+      toast.success("Schedule updated");
+    },
+    onError: () => {
+      toast.error("Failed to update schedule");
+    },
+  });
+
+  const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      importExcelMutation.mutate(file);
+    }
+  };
+
+  const handleCloseDialog = () => {
+    setShowNewSchedule(false);
+    setScheduleName("");
+    setScheduleTime("");
+    setMessageType("template");
+    setSelectedTemplateId("");
+    setSelectedAgentId("");
+    setCustomMessage("");
+    setImportedContacts([]);
+  };
+
+  const handleCreateSchedule = () => {
+    if (!scheduleName.trim()) {
+      toast.error("Please enter a schedule name");
+      return;
+    }
+
+    if (!scheduleTime) {
+      toast.error("Please select a schedule time");
+      return;
+    }
+
+    if (importedContacts.length === 0) {
+      toast.error("Please import contacts from Excel/CSV");
+      return;
+    }
+
+    if (messageType === "template" && !selectedTemplateId) {
+      toast.error("Please select a template");
+      return;
+    }
+
+    if (messageType === "custom" && !customMessage.trim()) {
+      toast.error("Please enter a message");
+      return;
+    }
+
+    if (messageType === "ai_agent" && !selectedAgentId) {
+      toast.error("Please select an AI agent");
+      return;
+    }
+
+    createScheduleMutation.mutate({
+      name: scheduleName,
+      messageType,
+      templateName: messageType === "template" ? (templates.find(t => t.id === selectedTemplateId)?.name || "hello_world") : undefined,
+      customMessage: messageType === "custom" ? customMessage : undefined,
+      agentId: messageType === "ai_agent" ? selectedAgentId : undefined,
+      scheduledAt: scheduleTime,
+      recipientCount: importedContacts.length,
+    });
+  };
+
+  const formatDateTime = (dateString: string) => {
+    return new Date(dateString).toLocaleString("en-US", {
+      month: "short",
+      day: "numeric",
+      year: "numeric",
+      hour: "numeric",
+      minute: "2-digit",
+      hour12: true,
+    });
+  };
+
   return (
     <DashboardLayout>
       <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
@@ -20,65 +245,224 @@ export default function Schedule() {
             <h2 className="text-3xl font-bold tracking-tight">Schedule Messages</h2>
             <p className="text-muted-foreground">Manage your upcoming scheduled campaigns.</p>
           </div>
-          <Button>
-            <Plus className="mr-2 h-4 w-4" />
-            New Schedule
-          </Button>
+          <Dialog open={showNewSchedule} onOpenChange={setShowNewSchedule}>
+            <DialogTrigger asChild>
+              <Button>
+                <Plus className="mr-2 h-4 w-4" />
+                New Schedule
+              </Button>
+            </DialogTrigger>
+            <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+              <DialogHeader>
+                <DialogTitle>Create Scheduled Message</DialogTitle>
+              </DialogHeader>
+              <div className="space-y-4 py-4">
+                <div className="grid gap-2">
+                  <Label>Campaign Name *</Label>
+                  <Input
+                    placeholder="e.g., Weekly Newsletter"
+                    value={scheduleName}
+                    onChange={(e) => setScheduleName(e.target.value)}
+                  />
+                </div>
+
+                <div className="grid gap-2">
+                  <Label>Schedule Time *</Label>
+                  <Input
+                    type="datetime-local"
+                    value={scheduleTime}
+                    onChange={(e) => setScheduleTime(e.target.value)}
+                    min={new Date().toISOString().slice(0, 16)}
+                  />
+                </div>
+
+                <div className="grid gap-2">
+                  <Label>Import Contacts *</Label>
+                  <input
+                    type="file"
+                    ref={fileInputRef}
+                    onChange={handleFileUpload}
+                    accept=".xlsx,.xls,.csv"
+                    className="hidden"
+                  />
+                  <Button 
+                    variant="outline" 
+                    onClick={() => fileInputRef.current?.click()}
+                    disabled={importExcelMutation.isPending}
+                  >
+                    {importExcelMutation.isPending ? (
+                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    ) : (
+                      <FileSpreadsheet className="mr-2 h-4 w-4" />
+                    )}
+                    Upload Excel/CSV
+                  </Button>
+                  {importedContacts.length > 0 && (
+                    <p className="text-sm text-green-600">
+                      {importedContacts.length} contacts imported
+                    </p>
+                  )}
+                </div>
+
+                <div className="space-y-2">
+                  <Label>Message Type</Label>
+                  <Tabs value={messageType} onValueChange={(v) => setMessageType(v as any)}>
+                    <TabsList className="w-full">
+                      <TabsTrigger value="template" className="flex-1">
+                        <FileText className="mr-1 h-4 w-4" />
+                        Template
+                      </TabsTrigger>
+                      <TabsTrigger value="custom" className="flex-1">
+                        <MessageSquare className="mr-1 h-4 w-4" />
+                        Custom
+                      </TabsTrigger>
+                      <TabsTrigger value="ai_agent" className="flex-1">
+                        <Bot className="mr-1 h-4 w-4" />
+                        AI Agent
+                      </TabsTrigger>
+                    </TabsList>
+
+                    <TabsContent value="template" className="mt-4">
+                      <Select value={selectedTemplateId} onValueChange={setSelectedTemplateId}>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Select a template..." />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="hello_world">hello_world (Default)</SelectItem>
+                          {approvedTemplates.map((template) => (
+                            <SelectItem key={template.id} value={template.id}>
+                              {template.name}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </TabsContent>
+
+                    <TabsContent value="custom" className="mt-4">
+                      <Textarea
+                        placeholder="Type your message..."
+                        value={customMessage}
+                        onChange={(e) => setCustomMessage(e.target.value)}
+                        className="min-h-[100px]"
+                      />
+                    </TabsContent>
+
+                    <TabsContent value="ai_agent" className="mt-4">
+                      <Select value={selectedAgentId} onValueChange={setSelectedAgentId}>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Select an AI agent..." />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {activeAgents.map((agent) => (
+                            <SelectItem key={agent.id} value={agent.id}>
+                              {agent.name}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </TabsContent>
+                  </Tabs>
+                </div>
+              </div>
+              <DialogFooter>
+                <Button variant="outline" onClick={handleCloseDialog}>
+                  Cancel
+                </Button>
+                <Button 
+                  onClick={handleCreateSchedule}
+                  disabled={createScheduleMutation.isPending}
+                >
+                  {createScheduleMutation.isPending && (
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  )}
+                  Create Schedule
+                </Button>
+              </DialogFooter>
+            </DialogContent>
+          </Dialog>
         </div>
 
         <Card>
           <CardHeader>
-             <CardTitle>Upcoming Schedules</CardTitle>
-             <CardDescription>View and manage your automated dispatch queue.</CardDescription>
+            <CardTitle>Upcoming Schedules</CardTitle>
+            <CardDescription>View and manage your automated dispatch queue.</CardDescription>
           </CardHeader>
           <CardContent>
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>Campaign Name</TableHead>
-                  <TableHead>Template</TableHead>
-                  <TableHead>Schedule Rule</TableHead>
-                  <TableHead>Recipients</TableHead>
-                  <TableHead>Status</TableHead>
-                  <TableHead>Next Run</TableHead>
-                  <TableHead className="text-right">Actions</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {schedules.map((item) => (
-                  <TableRow key={item.id}>
-                    <TableCell className="font-medium">{item.name}</TableCell>
-                    <TableCell className="text-muted-foreground">{item.template}</TableCell>
-                    <TableCell>
-                      <div className="flex items-center gap-2">
-                        <Clock className="h-3 w-3 text-muted-foreground" />
-                        {item.time}
-                      </div>
-                    </TableCell>
-                    <TableCell>{item.recipients}</TableCell>
-                    <TableCell>
-                      <Badge 
-                        variant={item.status === 'Active' ? 'default' : item.status === 'Scheduled' ? 'secondary' : 'outline'}
-                        className={item.status === 'Active' ? 'bg-green-500' : ''}
-                      >
-                        {item.status}
-                      </Badge>
-                    </TableCell>
-                    <TableCell>{item.nextRun}</TableCell>
-                    <TableCell className="text-right">
-                      <div className="flex justify-end gap-2">
-                        {item.status === 'Paused' ? (
-                          <Button variant="ghost" size="icon" title="Resume"><PlayCircle className="h-4 w-4" /></Button>
-                        ) : (
-                          <Button variant="ghost" size="icon" title="Pause"><PauseCircle className="h-4 w-4" /></Button>
-                        )}
-                        <Button variant="ghost" size="icon" className="text-destructive" title="Delete"><Trash2 className="h-4 w-4" /></Button>
-                      </div>
-                    </TableCell>
+            {isLoading ? (
+              <div className="flex items-center justify-center py-8">
+                <Loader2 className="h-6 w-6 animate-spin" />
+              </div>
+            ) : schedules.length === 0 ? (
+              <div className="text-center py-8 text-muted-foreground">
+                No scheduled messages. Create one to get started.
+              </div>
+            ) : (
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>Campaign Name</TableHead>
+                    <TableHead>Type</TableHead>
+                    <TableHead>Scheduled Time</TableHead>
+                    <TableHead>Recipients</TableHead>
+                    <TableHead>Status</TableHead>
+                    <TableHead className="text-right">Actions</TableHead>
                   </TableRow>
-                ))}
-              </TableBody>
-            </Table>
+                </TableHeader>
+                <TableBody>
+                  {schedules.map((schedule) => (
+                    <TableRow key={schedule.id}>
+                      <TableCell className="font-medium">{schedule.name}</TableCell>
+                      <TableCell>
+                        <Badge variant="outline">
+                          {schedule.messageType === "template" && <FileText className="mr-1 h-3 w-3" />}
+                          {schedule.messageType === "custom" && <MessageSquare className="mr-1 h-3 w-3" />}
+                          {schedule.messageType === "ai_agent" && <Bot className="mr-1 h-3 w-3" />}
+                          {schedule.messageType}
+                        </Badge>
+                      </TableCell>
+                      <TableCell>
+                        <div className="flex items-center gap-2">
+                          <Clock className="h-3 w-3 text-muted-foreground" />
+                          {formatDateTime(schedule.scheduledAt)}
+                        </div>
+                      </TableCell>
+                      <TableCell>{schedule.recipientCount}</TableCell>
+                      <TableCell>
+                        <Badge 
+                          variant={schedule.status === 'scheduled' ? 'default' : schedule.status === 'sent' ? 'secondary' : 'outline'}
+                          className={schedule.status === 'scheduled' ? 'bg-blue-500' : schedule.status === 'sent' ? 'bg-green-500' : ''}
+                        >
+                          {schedule.status}
+                        </Badge>
+                      </TableCell>
+                      <TableCell className="text-right">
+                        <div className="flex justify-end gap-2">
+                          {schedule.status === 'scheduled' && (
+                            <Button 
+                              variant="ghost" 
+                              size="icon" 
+                              title="Cancel"
+                              onClick={() => updateScheduleMutation.mutate({ id: schedule.id, status: 'cancelled' })}
+                            >
+                              <PauseCircle className="h-4 w-4" />
+                            </Button>
+                          )}
+                          <Button 
+                            variant="ghost" 
+                            size="icon" 
+                            className="text-destructive" 
+                            title="Delete"
+                            onClick={() => deleteScheduleMutation.mutate(schedule.id)}
+                          >
+                            <Trash2 className="h-4 w-4" />
+                          </Button>
+                        </div>
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            )}
           </CardContent>
         </Card>
       </div>
