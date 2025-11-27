@@ -233,3 +233,103 @@ export async function getConversation(req: Request, res: Response) {
     res.status(500).json({ error: 'Failed to get conversation' });
   }
 }
+
+// Send template message
+export async function sendTemplateMessage(to: string, templateName: string, languageCode: string = 'en', components: any[] = []) {
+  if (!WHATSAPP_TOKEN || !PHONE_NUMBER_ID) {
+    throw new Error('WhatsApp credentials not configured');
+  }
+
+  const url = `https://graph.facebook.com/v18.0/${PHONE_NUMBER_ID}/messages`;
+  
+  const payload: any = {
+    messaging_product: 'whatsapp',
+    recipient_type: 'individual',
+    to,
+    type: 'template',
+    template: {
+      name: templateName,
+      language: {
+        code: languageCode
+      }
+    }
+  };
+
+  // Add components if provided (for templates with variables)
+  if (components && components.length > 0) {
+    payload.template.components = components;
+  }
+
+  console.log(`[WhatsApp] Sending template "${templateName}" to ${to}:`, JSON.stringify(payload, null, 2));
+
+  try {
+    const response = await fetch(url, {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${WHATSAPP_TOKEN}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(payload),
+    });
+
+    const data = await response.json();
+    
+    if (!response.ok) {
+      console.error('[WhatsApp] Template send error:', data);
+      throw new Error(data.error?.message || 'Failed to send template');
+    }
+
+    console.log('[WhatsApp] Template sent successfully:', data);
+    return data;
+  } catch (error) {
+    console.error('[WhatsApp] Error sending template:', error);
+    throw error;
+  }
+}
+
+export async function sendTemplateMessageEndpoint(req: Request, res: Response) {
+  try {
+    const { to, templateName, languageCode, components } = req.body;
+    
+    if (!to || !templateName) {
+      return res.status(400).json({ error: 'Recipient (to) and templateName are required' });
+    }
+
+    const result = await sendTemplateMessage(to, templateName, languageCode || 'en', components || []);
+    
+    // Save outbound message to storage
+    try {
+      const normalizedPhone = to.replace(/\D/g, '');
+      const contacts = await storage.getContacts();
+      let contact = contacts.find(c => {
+        const contactPhone = (c.phone || '').replace(/\D/g, '');
+        return contactPhone.includes(normalizedPhone) || normalizedPhone.includes(contactPhone);
+      });
+
+      if (!contact) {
+        contact = await storage.createContact({
+          name: `WhatsApp ${to}`,
+          phone: to,
+          email: '',
+          tags: ['WhatsApp'],
+          notes: 'Auto-created from template message',
+        });
+      }
+
+      await storage.createMessage({
+        contactId: contact.id,
+        content: `[Template: ${templateName}]`,
+        type: 'text' as const,
+        direction: 'outbound',
+        status: 'sent' as const,
+      });
+    } catch (err) {
+      console.error('Error saving outbound message:', err);
+    }
+
+    res.json({ success: true, result });
+  } catch (error: any) {
+    console.error('Error sending template:', error);
+    res.status(500).json({ error: error.message || 'Failed to send template' });
+  }
+}
