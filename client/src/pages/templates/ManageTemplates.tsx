@@ -11,7 +11,8 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
-import { MoreHorizontal, Edit, Trash2, Loader2, Plus, Copy } from "lucide-react";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import { MoreHorizontal, Edit, Trash2, Loader2, Plus, Copy, RefreshCw, Send, AlertTriangle, CheckCircle2, Info, ExternalLink } from "lucide-react";
 import { toast } from "sonner";
 
 interface Template {
@@ -46,6 +47,23 @@ export default function ManageTemplates() {
     },
   });
 
+  const syncMetaTemplatesMutation = useMutation({
+    mutationFn: async () => {
+      const res = await fetch("/api/templates/sync-meta", {
+        method: "POST",
+      });
+      if (!res.ok) throw new Error("Failed to sync templates");
+      return res.json();
+    },
+    onSuccess: (data) => {
+      queryClient.invalidateQueries({ queryKey: ["/api/templates"] });
+      toast.success(`Synced ${data.synced || 0} templates from Meta`);
+    },
+    onError: () => {
+      toast.error("Failed to sync META templates. Check your API credentials.");
+    },
+  });
+
   const createMutation = useMutation({
     mutationFn: async (data: any) => {
       const res = await fetch("/api/templates", {
@@ -60,10 +78,27 @@ export default function ManageTemplates() {
       queryClient.invalidateQueries({ queryKey: ["/api/templates"] });
       setIsAddDialogOpen(false);
       resetForm();
-      toast.success("Template created successfully");
+      toast.success("Template created! It will be submitted to Meta for approval.");
     },
     onError: () => {
       toast.error("Failed to create template");
+    },
+  });
+
+  const submitForApprovalMutation = useMutation({
+    mutationFn: async (templateId: string) => {
+      const res = await fetch(`/api/templates/${templateId}/submit-approval`, {
+        method: "POST",
+      });
+      if (!res.ok) throw new Error("Failed to submit for approval");
+      return res.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/templates"] });
+      toast.success("Template submitted to Meta for approval!");
+    },
+    onError: () => {
+      toast.error("Failed to submit template for approval");
     },
   });
 
@@ -168,13 +203,82 @@ export default function ManageTemplates() {
         <div className="flex items-center justify-between">
           <div>
             <h2 className="text-3xl font-bold tracking-tight">Manage Templates</h2>
-            <p className="text-muted-foreground">Create and manage your message templates.</p>
+            <p className="text-muted-foreground">Create and manage your WhatsApp message templates.</p>
           </div>
-          <Button onClick={() => { resetForm(); setIsAddDialogOpen(true); }}>
-            <Plus className="mr-2 h-4 w-4" />
-            Create Template
-          </Button>
+          <div className="flex gap-2">
+            <Button 
+              variant="outline" 
+              onClick={() => syncMetaTemplatesMutation.mutate()}
+              disabled={syncMetaTemplatesMutation.isPending}
+            >
+              {syncMetaTemplatesMutation.isPending ? (
+                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+              ) : (
+                <RefreshCw className="mr-2 h-4 w-4" />
+              )}
+              Sync META Templates
+            </Button>
+            <Button onClick={() => { resetForm(); setIsAddDialogOpen(true); }}>
+              <Plus className="mr-2 h-4 w-4" />
+              Create Template
+            </Button>
+          </div>
         </div>
+
+        <Card className="border-blue-200 bg-blue-50/50 dark:bg-blue-950/20 dark:border-blue-900">
+          <CardHeader className="pb-3">
+            <CardTitle className="text-lg flex items-center gap-2">
+              <Info className="h-5 w-5 text-blue-600" />
+              WhatsApp Template Rules & Guidelines
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div className="grid gap-4 md:grid-cols-2">
+              <div className="space-y-2">
+                <h4 className="font-semibold text-sm flex items-center gap-2">
+                  <CheckCircle2 className="h-4 w-4 text-green-600" />
+                  Allowed Content
+                </h4>
+                <ul className="text-sm text-muted-foreground space-y-1 pl-6 list-disc">
+                  <li>Transaction confirmations (orders, bookings)</li>
+                  <li>Account updates and notifications</li>
+                  <li>Customer service responses</li>
+                  <li>One-time passwords (OTP)</li>
+                  <li>Appointment reminders</li>
+                </ul>
+              </div>
+              <div className="space-y-2">
+                <h4 className="font-semibold text-sm flex items-center gap-2">
+                  <AlertTriangle className="h-4 w-4 text-red-600" />
+                  Not Allowed
+                </h4>
+                <ul className="text-sm text-muted-foreground space-y-1 pl-6 list-disc">
+                  <li>Promotional content without opt-in</li>
+                  <li>Adult or gambling content</li>
+                  <li>Misleading or spam messages</li>
+                  <li>Political content</li>
+                  <li>Cryptocurrency promotions</li>
+                </ul>
+              </div>
+            </div>
+            <Alert>
+              <Info className="h-4 w-4" />
+              <AlertTitle>Approval Process</AlertTitle>
+              <AlertDescription>
+                Templates must be approved by Meta before use. Marketing templates may take 24-48 hours. 
+                Utility and authentication templates are usually approved faster.
+                <a 
+                  href="https://developers.facebook.com/docs/whatsapp/message-templates/guidelines" 
+                  target="_blank" 
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center gap-1 ml-2 text-blue-600 hover:underline"
+                >
+                  View Full Guidelines <ExternalLink className="h-3 w-3" />
+                </a>
+              </AlertDescription>
+            </Alert>
+          </CardContent>
+        </Card>
 
         <Card>
           <CardHeader>
@@ -191,7 +295,7 @@ export default function ManageTemplates() {
               </div>
             ) : templates.length === 0 ? (
               <div className="text-center py-8 text-muted-foreground">
-                No templates yet. Create your first template to get started.
+                No templates yet. Create your first template or sync from Meta to get started.
               </div>
             ) : (
               <Table>
@@ -237,30 +341,43 @@ export default function ManageTemplates() {
                         {formatDate(template.updatedAt)}
                       </TableCell>
                       <TableCell className="text-right">
-                        <DropdownMenu>
-                          <DropdownMenuTrigger asChild>
-                            <Button variant="ghost" size="icon">
-                              <MoreHorizontal className="h-4 w-4" />
-                            </Button>
-                          </DropdownMenuTrigger>
-                          <DropdownMenuContent align="end">
-                            <DropdownMenuItem onClick={() => copyToClipboard(template.content)}>
-                              <Copy className="mr-2 h-4 w-4" />
-                              Copy Content
-                            </DropdownMenuItem>
-                            <DropdownMenuItem onClick={() => openEditDialog(template)}>
-                              <Edit className="mr-2 h-4 w-4" />
-                              Edit
-                            </DropdownMenuItem>
-                            <DropdownMenuItem 
-                              className="text-destructive"
-                              onClick={() => deleteMutation.mutate(template.id)}
+                        <div className="flex items-center justify-end gap-2">
+                          {template.status === "pending" && (
+                            <Button 
+                              size="sm" 
+                              variant="outline"
+                              onClick={() => submitForApprovalMutation.mutate(template.id)}
+                              disabled={submitForApprovalMutation.isPending}
                             >
-                              <Trash2 className="mr-2 h-4 w-4" />
-                              Delete
-                            </DropdownMenuItem>
-                          </DropdownMenuContent>
-                        </DropdownMenu>
+                              <Send className="mr-1 h-3 w-3" />
+                              Submit
+                            </Button>
+                          )}
+                          <DropdownMenu>
+                            <DropdownMenuTrigger asChild>
+                              <Button variant="ghost" size="icon">
+                                <MoreHorizontal className="h-4 w-4" />
+                              </Button>
+                            </DropdownMenuTrigger>
+                            <DropdownMenuContent align="end">
+                              <DropdownMenuItem onClick={() => copyToClipboard(template.content)}>
+                                <Copy className="mr-2 h-4 w-4" />
+                                Copy Content
+                              </DropdownMenuItem>
+                              <DropdownMenuItem onClick={() => openEditDialog(template)}>
+                                <Edit className="mr-2 h-4 w-4" />
+                                Edit
+                              </DropdownMenuItem>
+                              <DropdownMenuItem 
+                                className="text-destructive"
+                                onClick={() => deleteMutation.mutate(template.id)}
+                              >
+                                <Trash2 className="mr-2 h-4 w-4" />
+                                Delete
+                              </DropdownMenuItem>
+                            </DropdownMenuContent>
+                          </DropdownMenu>
+                        </div>
                       </TableCell>
                     </TableRow>
                   ))}
@@ -277,31 +394,38 @@ export default function ManageTemplates() {
             <DialogTitle>Create Template</DialogTitle>
           </DialogHeader>
           <div className="space-y-4 py-4">
+            <Alert className="bg-yellow-50 border-yellow-200 dark:bg-yellow-950/20">
+              <AlertTriangle className="h-4 w-4 text-yellow-600" />
+              <AlertDescription className="text-sm">
+                This template will be submitted to Meta for approval. Approval may take up to 24-48 hours for marketing templates.
+              </AlertDescription>
+            </Alert>
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-2">
-                <Label>Template Name</Label>
+                <Label>Template Name *</Label>
                 <Input
-                  placeholder="Welcome Message"
+                  placeholder="welcome_message"
                   value={formData.name}
-                  onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                  onChange={(e) => setFormData({ ...formData, name: e.target.value.toLowerCase().replace(/\s+/g, '_') })}
                 />
+                <p className="text-xs text-muted-foreground">Use lowercase with underscores (no spaces)</p>
               </div>
               <div className="space-y-2">
-                <Label>Category</Label>
+                <Label>Category *</Label>
                 <Select value={formData.category} onValueChange={(v) => setFormData({ ...formData, category: v as any })}>
                   <SelectTrigger>
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="marketing">Marketing</SelectItem>
-                    <SelectItem value="utility">Utility</SelectItem>
-                    <SelectItem value="authentication">Authentication</SelectItem>
+                    <SelectItem value="marketing">Marketing (Promotional)</SelectItem>
+                    <SelectItem value="utility">Utility (Transactional)</SelectItem>
+                    <SelectItem value="authentication">Authentication (OTP)</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
             </div>
             <div className="space-y-2">
-              <Label>Message Content</Label>
+              <Label>Message Content *</Label>
               <Textarea
                 placeholder="Hello {{name}}, welcome to our service!"
                 value={formData.content}
@@ -309,7 +433,7 @@ export default function ManageTemplates() {
                 rows={5}
               />
               <p className="text-xs text-muted-foreground">
-                Use {"{{variable}}"} syntax for dynamic content
+                Use {"{{variable}}"} syntax for dynamic content. Max 1024 characters.
               </p>
             </div>
             <div className="space-y-2">
@@ -325,7 +449,7 @@ export default function ManageTemplates() {
             <Button variant="outline" onClick={() => setIsAddDialogOpen(false)}>Cancel</Button>
             <Button onClick={handleCreate} disabled={createMutation.isPending || !formData.name || !formData.content}>
               {createMutation.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-              Create Template
+              Create & Submit for Approval
             </Button>
           </DialogFooter>
         </DialogContent>
@@ -337,12 +461,20 @@ export default function ManageTemplates() {
             <DialogTitle>Edit Template</DialogTitle>
           </DialogHeader>
           <div className="space-y-4 py-4">
+            {selectedTemplate?.status === "approved" && (
+              <Alert className="bg-yellow-50 border-yellow-200 dark:bg-yellow-950/20">
+                <AlertTriangle className="h-4 w-4 text-yellow-600" />
+                <AlertDescription className="text-sm">
+                  Editing this approved template will require re-approval from Meta.
+                </AlertDescription>
+              </Alert>
+            )}
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-2">
                 <Label>Template Name</Label>
                 <Input
                   value={formData.name}
-                  onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                  onChange={(e) => setFormData({ ...formData, name: e.target.value.toLowerCase().replace(/\s+/g, '_') })}
                 />
               </div>
               <div className="space-y-2">
@@ -379,7 +511,7 @@ export default function ManageTemplates() {
             <Button variant="outline" onClick={() => setIsEditDialogOpen(false)}>Cancel</Button>
             <Button onClick={handleUpdate} disabled={updateMutation.isPending || !formData.name || !formData.content}>
               {updateMutation.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-              Save Changes
+              Save & Resubmit
             </Button>
           </DialogFooter>
         </DialogContent>

@@ -293,6 +293,153 @@ export async function registerRoutes(
     }
   });
 
+  // Sync templates from Meta Business Suite
+  app.post("/api/templates/sync-meta", async (req, res) => {
+    try {
+      const wabaId = process.env.WABA_ID || "848441401690739";
+      const token = process.env.WHATSAPP_TOKEN;
+      
+      if (!token) {
+        return res.status(400).json({ message: "WhatsApp token not configured" });
+      }
+
+      // Fetch templates from Meta Graph API
+      const response = await fetch(
+        `https://graph.facebook.com/v18.0/${wabaId}/message_templates?access_token=${token}`
+      );
+      
+      if (!response.ok) {
+        const errorData = await response.json();
+        console.error("Meta API Error:", errorData);
+        return res.status(response.status).json({ 
+          message: "Failed to fetch templates from Meta",
+          error: errorData.error?.message || "Unknown error"
+        });
+      }
+
+      const data = await response.json();
+      const metaTemplates = data.data || [];
+      let synced = 0;
+
+      for (const metaTemplate of metaTemplates) {
+        // Check if template already exists
+        const existingTemplates = await storage.getTemplates();
+        const exists = existingTemplates.find(t => t.name === metaTemplate.name);
+        
+        if (!exists) {
+          // Extract content from components
+          let content = "";
+          let variables: string[] = [];
+          
+          if (metaTemplate.components) {
+            const bodyComponent = metaTemplate.components.find((c: any) => c.type === "BODY");
+            if (bodyComponent) {
+              content = bodyComponent.text || "";
+              // Extract variables like {{1}}, {{2}}, etc.
+              const matches = content.match(/\{\{(\d+)\}\}/g);
+              if (matches) {
+                variables = matches.map((m: string, i: number) => `var${i + 1}`);
+              }
+            }
+          }
+
+          const newTemplate = await storage.createTemplate({
+            name: metaTemplate.name,
+            category: (metaTemplate.category || "utility").toLowerCase() as any,
+            content: content,
+            variables: variables,
+          });
+          // Update status based on Meta status
+          const status = metaTemplate.status === "APPROVED" ? "approved" : 
+                        metaTemplate.status === "REJECTED" ? "rejected" : "pending";
+          await storage.updateTemplate(newTemplate.id, { status });
+          synced++;
+        } else {
+          // Update status if changed
+          await storage.updateTemplate(exists.id, {
+            status: metaTemplate.status === "APPROVED" ? "approved" : 
+                    metaTemplate.status === "REJECTED" ? "rejected" : "pending",
+          });
+        }
+      }
+
+      res.json({ 
+        success: true, 
+        synced, 
+        total: metaTemplates.length,
+        message: `Synced ${synced} new templates from Meta`
+      });
+    } catch (error) {
+      console.error("Template sync error:", error);
+      res.status(500).json({ message: "Failed to sync templates from Meta" });
+    }
+  });
+
+  // Submit template for Meta approval
+  app.post("/api/templates/:id/submit-approval", async (req, res) => {
+    try {
+      const template = await storage.getTemplate(req.params.id);
+      if (!template) {
+        return res.status(404).json({ message: "Template not found" });
+      }
+
+      const wabaId = process.env.WABA_ID || "848441401690739";
+      const token = process.env.WHATSAPP_TOKEN;
+      
+      if (!token) {
+        return res.status(400).json({ message: "WhatsApp token not configured" });
+      }
+
+      // Prepare template for Meta submission
+      const templateData = {
+        name: template.name.toLowerCase().replace(/\s+/g, '_'),
+        category: template.category.toUpperCase(),
+        language: "en",
+        components: [
+          {
+            type: "BODY",
+            text: template.content
+          }
+        ]
+      };
+
+      // Submit to Meta Graph API
+      const response = await fetch(
+        `https://graph.facebook.com/v18.0/${wabaId}/message_templates`,
+        {
+          method: "POST",
+          headers: {
+            "Authorization": `Bearer ${token}`,
+            "Content-Type": "application/json"
+          },
+          body: JSON.stringify(templateData)
+        }
+      );
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        console.error("Meta template submission error:", data);
+        return res.status(response.status).json({ 
+          message: "Failed to submit template to Meta",
+          error: data.error?.message || "Unknown error"
+        });
+      }
+
+      // Update template status to pending
+      await storage.updateTemplate(req.params.id, { status: "pending" });
+
+      res.json({ 
+        success: true, 
+        message: "Template submitted to Meta for approval",
+        metaTemplateId: data.id
+      });
+    } catch (error) {
+      console.error("Template submission error:", error);
+      res.status(500).json({ message: "Failed to submit template for approval" });
+    }
+  });
+
   app.get("/api/automations", async (req, res) => {
     try {
       const automations = await storage.getAutomations();

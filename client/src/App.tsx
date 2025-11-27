@@ -52,6 +52,7 @@ import CustomerReplies from "@/pages/reports/CustomerReplies";
 import AgentPerformance from "@/pages/reports/AgentPerformance";
 import Spending from "@/pages/reports/Spending";
 import Credits from "@/pages/reports/Credits";
+import UserEngagement from "@/pages/reports/UserEngagement";
 
 function Router() {
   return (
@@ -103,6 +104,7 @@ function Router() {
       <Route path="/reports/agents" component={AgentPerformance} />
       <Route path="/reports/spending" component={Spending} />
       <Route path="/reports/credits" component={Credits} />
+      <Route path="/reports/user-engagement" component={UserEngagement} />
 
       <Route path="/contacts" component={Contacts} />
       <Route path="/settings" component={Settings} />

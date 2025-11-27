@@ -68,7 +68,7 @@ The application uses in-memory storage with JSON file storage for new features. 
 4. **Campaigns** - Broadcast creation, scheduling, and reporting
 5. **Automation** - Visual flow builder for chatbot logic
 6. **Keywords** - Auto-reply rules for incoming messages
-7. **Templates** - Message template management (WhatsApp approved)
+7. **Templates** - Message template management with Meta sync and approval
 8. **Team Members** - User and role management
 9. **Billing** - Credits and transaction history
 10. **WhatsApp API** - API credentials configuration
@@ -82,6 +82,10 @@ The application uses in-memory storage with JSON file storage for new features. 
 18. **Excel/CSV Import** - Import contacts from Excel or CSV files
 19. **Broadcast Lists** - Save and manage contact lists for repeated broadcasts
 20. **Schedule Messages** - Schedule broadcasts for future delivery
+21. **Meta Template Sync** - Sync templates from Meta Business Suite
+22. **Template Approval** - Submit templates to Meta for approval with guidelines
+23. **Campaign Reports** - Section-wise messages, replies, costs, template performance
+24. **User Engagement Report** - Top users by engagement % (maximum to minimum)
 
 ## API Endpoints
 
@@ -123,6 +127,10 @@ The application uses in-memory storage with JSON file storage for new features. 
 - `POST /api/broadcast/send-single` - Send message to single contact
 - `POST /api/broadcast/send-to-list/:listId` - Send broadcast to saved list
 
+### Template Sync APIs
+- `POST /api/templates/sync-meta` - Sync templates from Meta Business Suite
+- `POST /api/templates/:id/submit-approval` - Submit template to Meta for approval
+
 ## Environment Variables
 Required secrets for full functionality:
 - `FB_ACCESS_TOKEN` - Facebook Graph API access token
@@ -136,6 +144,10 @@ Required secrets for full functionality:
 The application runs on port 5000 with `npm run dev`.
 
 ## Recent Changes
+- **Nov 27, 2025**: Enhanced Manage Templates with Sync META Templates button and template rules/guidelines
+- **Nov 27, 2025**: Added Submit for Approval functionality for templates to Meta Business Suite
+- **Nov 27, 2025**: Enhanced Campaign Reports with section-wise stats, replies, costs, template performance tabs
+- **Nov 27, 2025**: Added User Engagement Report showing top users by engagement % (maximum to minimum)
 - **Nov 27, 2025**: Added comprehensive Broadcast Messaging module with Template/Custom/AI Agent options
 - **Nov 27, 2025**: Added Excel/CSV import functionality for contacts
 - **Nov 27, 2025**: Added Broadcast Lists to save and reuse contact groups
