@@ -5,7 +5,7 @@ import { generateAgentResponse } from '../openai/openai.service';
 import { getLeadById, getAllLeads } from '../facebook/fb.service';
 import { storage } from '../../storage';
 
-const WHATSAPP_TOKEN = process.env.WHATSAPP_TOKEN;
+const WHATSAPP_TOKEN = process.env.WHATSAPP_TOKEN_NEW || process.env.WHATSAPP_TOKEN;
 const PHONE_NUMBER_ID = process.env.PHONE_NUMBER_ID;
 const VERIFY_TOKEN = process.env.VERIFY_TOKEN || 'whatsapp_webhook_verify_token_2025';
 

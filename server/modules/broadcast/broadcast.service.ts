@@ -42,7 +42,7 @@ export interface SendMessageResult {
 }
 
 function getWhatsAppCredentials(): { token: string; phoneNumberId: string } | null {
-  const token = process.env.WHATSAPP_TOKEN;
+  const token = process.env.WHATSAPP_TOKEN_NEW || process.env.WHATSAPP_TOKEN;
   const phoneNumberId = process.env.PHONE_NUMBER_ID;
   
   if (!token || !phoneNumberId) {

@@ -72,6 +72,30 @@
       "notes": "Enterprise client",
       "createdAt": "2025-11-27T21:46:19.551Z",
       "updatedAt": "2025-11-27T21:46:19.551Z"
+    },
+    {
+      "name": "WhatsApp 919873138444",
+      "phone": "919873138444",
+      "email": "",
+      "tags": [
+        "WhatsApp"
+      ],
+      "notes": "Auto-created from template message",
+      "id": "8a9e2cfc-5b0b-4473-a1e1-ed26edeaa049",
+      "createdAt": "2025-11-27T22:31:14.359Z",
+      "updatedAt": "2025-11-27T22:31:14.359Z"
+    },
+    {
+      "name": "WhatsApp 916262914149",
+      "phone": "916262914149",
+      "email": "",
+      "tags": [
+        "WhatsApp"
+      ],
+      "notes": "Auto-created from template message",
+      "id": "ebcdda60-5598-47b9-bc91-80c90c122996",
+      "createdAt": "2025-11-27T22:31:22.636Z",
+      "updatedAt": "2025-11-27T22:31:22.636Z"
     }
   ],
   "messages": [
@@ -139,6 +163,24 @@
       "direction": "inbound",
       "status": "sent",
       "timestamp": "2025-11-27T21:16:19.552Z"
+    },
+    {
+      "contactId": "8a9e2cfc-5b0b-4473-a1e1-ed26edeaa049",
+      "content": "[Template: hello_world]",
+      "type": "text",
+      "direction": "outbound",
+      "status": "sent",
+      "id": "b0d4109d-1ab2-49d7-b180-9c75623c1458",
+      "timestamp": "2025-11-27T22:31:14.360Z"
+    },
+    {
+      "contactId": "ebcdda60-5598-47b9-bc91-80c90c122996",
+      "content": "[Template: hello_world]",
+      "type": "text",
+      "direction": "outbound",
+      "status": "sent",
+      "id": "e40e0793-5479-491a-8e76-bf9985de0601",
+      "timestamp": "2025-11-27T22:31:22.637Z"
     }
   ],
   "campaigns": [
@@ -353,6 +395,7 @@
       "lastMessage": "Order #12345",
       "lastMessageTime": "2025-11-27T20:49:39.552Z",
       "lastInboundMessageTime": "2025-11-27T20:49:39.552Z",
+      "lastInboundMessage": "Order #12345",
       "unreadCount": 0,
       "status": "open",
       "notes": []
@@ -375,6 +418,7 @@
       "lastMessage": "Great to hear! What would you like to know more about?",
       "lastMessageTime": "2025-11-27T19:47:59.552Z",
       "lastInboundMessageTime": "2025-11-27T19:46:19.552Z",
+      "lastInboundMessage": "Hello! I saw your ad and I'm interested",
       "unreadCount": 0,
       "status": "open",
       "notes": []
@@ -397,6 +441,7 @@
       "lastMessage": "Thanks for the quick delivery!",
       "lastMessageTime": "2025-11-26T21:46:19.552Z",
       "lastInboundMessageTime": "2025-11-26T21:46:19.552Z",
+      "lastInboundMessage": "Thanks for the quick delivery!",
       "unreadCount": 0,
       "status": "open",
       "notes": []
@@ -419,6 +464,7 @@
       "lastMessage": "Hi, can you tell me more about your services?",
       "lastMessageTime": "2025-11-27T21:16:19.552Z",
       "lastInboundMessageTime": "2025-11-27T21:16:19.552Z",
+      "lastInboundMessage": "Hi, can you tell me more about your services?",
       "unreadCount": 1,
       "status": "open",
       "notes": []
@@ -439,6 +485,48 @@
         "createdAt": "2025-11-27T21:46:19.551Z",
         "updatedAt": "2025-11-27T21:46:19.551Z"
       },
+      "unreadCount": 0,
+      "status": "open",
+      "notes": []
+    },
+    {
+      "id": "chat-8a9e2cfc-5b0b-4473-a1e1-ed26edeaa049",
+      "contactId": "8a9e2cfc-5b0b-4473-a1e1-ed26edeaa049",
+      "contact": {
+        "name": "WhatsApp 919873138444",
+        "phone": "919873138444",
+        "email": "",
+        "tags": [
+          "WhatsApp"
+        ],
+        "notes": "Auto-created from template message",
+        "id": "8a9e2cfc-5b0b-4473-a1e1-ed26edeaa049",
+        "createdAt": "2025-11-27T22:31:14.359Z",
+        "updatedAt": "2025-11-27T22:31:14.359Z"
+      },
+      "lastMessage": "[Template: hello_world]",
+      "lastMessageTime": "2025-11-27T22:31:14.360Z",
+      "unreadCount": 0,
+      "status": "open",
+      "notes": []
+    },
+    {
+      "id": "chat-ebcdda60-5598-47b9-bc91-80c90c122996",
+      "contactId": "ebcdda60-5598-47b9-bc91-80c90c122996",
+      "contact": {
+        "name": "WhatsApp 916262914149",
+        "phone": "916262914149",
+        "email": "",
+        "tags": [
+          "WhatsApp"
+        ],
+        "notes": "Auto-created from template message",
+        "id": "ebcdda60-5598-47b9-bc91-80c90c122996",
+        "createdAt": "2025-11-27T22:31:22.636Z",
+        "updatedAt": "2025-11-27T22:31:22.636Z"
+      },
+      "lastMessage": "[Template: hello_world]",
+      "lastMessageTime": "2025-11-27T22:31:22.637Z",
       "unreadCount": 0,
       "status": "open",
       "notes": []

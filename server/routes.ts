@@ -298,8 +298,8 @@ export async function registerRoutes(
     try {
       // WABA_ID is the WhatsApp Business Account ID, not the Phone Number ID
       const wabaId = process.env.WABA_ID;
-      // Use either WHATSAPP_TOKEN or FB_ACCESS_TOKEN
-      const token = process.env.WHATSAPP_TOKEN || process.env.FB_ACCESS_TOKEN;
+      // Use either WHATSAPP_TOKEN_NEW or WHATSAPP_TOKEN or FB_ACCESS_TOKEN
+      const token = process.env.WHATSAPP_TOKEN_NEW || process.env.WHATSAPP_TOKEN || process.env.FB_ACCESS_TOKEN;
       
       if (!token) {
         return res.status(400).json({ message: "WhatsApp/Facebook access token not configured. Please add WHATSAPP_TOKEN or FB_ACCESS_TOKEN." });
@@ -408,7 +408,7 @@ export async function registerRoutes(
       }
 
       const wabaId = process.env.WABA_ID;
-      const token = process.env.WHATSAPP_TOKEN || process.env.FB_ACCESS_TOKEN;
+      const token = process.env.WHATSAPP_TOKEN_NEW || process.env.WHATSAPP_TOKEN || process.env.FB_ACCESS_TOKEN;
       
       if (!token) {
         return res.status(400).json({ message: "WhatsApp/Facebook access token not configured. Please add WHATSAPP_TOKEN to your secrets." });
