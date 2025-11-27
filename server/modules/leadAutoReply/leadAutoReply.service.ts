@@ -19,17 +19,32 @@ export interface Lead {
   autoReplySentAt?: string;
 }
 
-const WHATSAPP_TOKEN = process.env.WHATSAPP_TOKEN || '';
-const PHONE_NUMBER_ID = process.env.PHONE_NUMBER_ID || '';
+function getWhatsAppCredentials(): { token: string; phoneNumberId: string } | null {
+  const token = process.env.WHATSAPP_TOKEN;
+  const phoneNumberId = process.env.PHONE_NUMBER_ID;
+  
+  if (!token || !phoneNumberId) {
+    return null;
+  }
+  
+  return { token, phoneNumberId };
+}
 
 async function sendWhatsAppMessage(to: string, message: string): Promise<{ success: boolean; error?: string; messageId?: string }> {
+  const credentials = getWhatsAppCredentials();
+  
+  if (!credentials) {
+    console.error('[AutoReply] WhatsApp credentials not configured (WHATSAPP_TOKEN or PHONE_NUMBER_ID missing)');
+    return { success: false, error: 'WhatsApp credentials not configured' };
+  }
+
   try {
     const response = await fetch(
-      `https://graph.facebook.com/v18.0/${PHONE_NUMBER_ID}/messages`,
+      `https://graph.facebook.com/v18.0/${credentials.phoneNumberId}/messages`,
       {
         method: 'POST',
         headers: {
-          'Authorization': `Bearer ${WHATSAPP_TOKEN}`,
+          'Authorization': `Bearer ${credentials.token}`,
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
@@ -182,12 +197,30 @@ function buildLeadContext(lead: Lead): string {
 function formatPhoneNumber(phone: string): string {
   let cleaned = phone.replace(/\D/g, '');
   
-  if (cleaned.startsWith('0')) {
-    cleaned = '92' + cleaned.substring(1);
+  // If number starts with +, it was already in international format
+  if (phone.trim().startsWith('+')) {
+    return cleaned;
   }
   
-  if (!cleaned.startsWith('92') && cleaned.length === 10) {
-    cleaned = '92' + cleaned;
+  // If number starts with 00, remove the leading zeros (international prefix)
+  if (cleaned.startsWith('00')) {
+    cleaned = cleaned.substring(2);
+    return cleaned;
+  }
+  
+  // If number is already in E.164 format (starts with country code), return as is
+  // Common country codes: 1 (US/CA), 44 (UK), 91 (India), 92 (Pakistan), 971 (UAE), etc.
+  const commonCountryCodes = ['1', '44', '91', '92', '93', '94', '971', '966', '965', '974', '20', '27', '61', '64', '81', '86'];
+  for (const code of commonCountryCodes) {
+    if (cleaned.startsWith(code) && cleaned.length >= 10) {
+      return cleaned;
+    }
+  }
+  
+  // If still short and starts with 0 (local format), default to Pakistan (+92)
+  // This is a fallback - ideally country should be detected from lead data
+  if (cleaned.startsWith('0')) {
+    cleaned = '92' + cleaned.substring(1);
   }
 
   return cleaned;

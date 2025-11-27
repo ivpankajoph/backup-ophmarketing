@@ -25,6 +25,9 @@ export interface Lead {
   phone?: string;
   email?: string;
   name?: string;
+  autoReplySent?: boolean;
+  autoReplyMessage?: string;
+  autoReplySentAt?: string;
 }
 
 const FORMS_COLLECTION = 'forms';
@@ -147,9 +150,9 @@ export async function syncLeadsForForm(formId: string): Promise<Lead[]> {
     const allLeads = [...existingLeads, ...newLeads];
     writeCollection(LEADS_COLLECTION, allLeads);
     
-    // Trigger auto-reply for new leads
+    // Trigger auto-reply for new leads that haven't been contacted yet
     for (const lead of newLeads) {
-      if (lead.phone) {
+      if (lead.phone && !lead.autoReplySent) {
         console.log(`[FB Service] Triggering auto-reply for new lead: ${lead.id}`);
         const autoReplyLead: leadAutoReply.Lead = {
           id: lead.id,
@@ -160,8 +163,22 @@ export async function syncLeadsForForm(formId: string): Promise<Lead[]> {
           phoneNumber: lead.phone,
           fieldData: lead.fieldData,
           createdTime: lead.createdTime,
+          autoReplySent: lead.autoReplySent,
         };
-        leadAutoReply.processNewLead(autoReplyLead).catch(err => {
+        leadAutoReply.processNewLead(autoReplyLead).then(result => {
+          if (result.success) {
+            // Update the lead in storage with auto-reply status
+            const currentLeads = readCollection<Lead>(LEADS_COLLECTION);
+            const idx = currentLeads.findIndex(l => l.id === lead.id);
+            if (idx !== -1) {
+              currentLeads[idx].autoReplySent = true;
+              currentLeads[idx].autoReplyMessage = result.message;
+              currentLeads[idx].autoReplySentAt = new Date().toISOString();
+              writeCollection(LEADS_COLLECTION, currentLeads);
+              console.log(`[FB Service] Auto-reply status saved for lead ${lead.id}`);
+            }
+          }
+        }).catch(err => {
           console.error(`[FB Service] Auto-reply failed for lead ${lead.id}:`, err);
         });
       }
