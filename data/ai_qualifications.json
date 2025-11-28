@@ -1,1 +1,18 @@
-[]
+[
+  {
+    "id": "qual_miigk3olbszf4vfao",
+    "contactId": "4d460e87-b06f-4c96-ab75-3a484e9a18ad",
+    "phone": "919911064724",
+    "name": "WhatsApp 919911064724",
+    "source": "lead_form",
+    "category": "pending",
+    "score": 50,
+    "totalMessages": 1,
+    "lastMessageAt": "2025-11-28T06:04:55.077Z",
+    "firstContactAt": "2025-11-28T06:04:55.077Z",
+    "keywords": [],
+    "notes": "",
+    "createdAt": "2025-11-28T06:04:55.077Z",
+    "updatedAt": "2025-11-28T06:04:55.077Z"
+  }
+]

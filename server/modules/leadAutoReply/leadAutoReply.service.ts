@@ -1,7 +1,7 @@
 import * as openaiService from '../openai/openai.service';
 import * as mappingService from '../mapping/mapping.service';
 import * as agentService from '../aiAgents/agent.service';
-import * as jsonAdapter from '../storage/json.adapter';
+import * as mongodb from '../storage/mongodb.adapter';
 import * as templateService from './templateMessages.service';
 
 export interface Lead {
@@ -95,13 +95,13 @@ export async function processNewLead(lead: Lead): Promise<{ success: boolean; me
       return { success: false, error: 'Auto-reply already sent' };
     }
 
-    const mapping = mappingService.getMappingByFormId(lead.formId);
+    const mapping = await mappingService.getMappingByFormId(lead.formId);
     if (!mapping || !mapping.isActive) {
       console.log(`[AutoReply] No active mapping for form ${lead.formId}`);
       return { success: false, error: 'No active agent mapping for this form' };
     }
 
-    const agent = agentService.getAgentById(mapping.agentId);
+    const agent = await agentService.getAgentById(mapping.agentId);
     if (!agent || !agent.isActive) {
       console.log(`[AutoReply] Agent ${mapping.agentId} not found or inactive`);
       return { success: false, error: 'Agent not found or inactive' };
@@ -136,7 +136,7 @@ export async function processNewLead(lead: Lead): Promise<{ success: boolean; me
 }
 
 export async function processAllPendingLeads(): Promise<{ processed: number; successful: number; failed: number }> {
-  const leads = jsonAdapter.readCollection<Lead>('leads');
+  const leads = await mongodb.readCollection<Lead>('leads');
   const pendingLeads = leads.filter((l: Lead) => !l.autoReplySent && getLeadPhone(l));
 
   let successful = 0;
@@ -156,8 +156,7 @@ export async function processAllPendingLeads(): Promise<{ processed: number; suc
 }
 
 export async function sendManualReply(leadId: string, message: string): Promise<{ success: boolean; error?: string }> {
-  const leads = jsonAdapter.readCollection<Lead>('leads');
-  const lead = leads.find((l: Lead) => l.id === leadId);
+  const lead = await mongodb.findOne<Lead>('leads', { id: leadId });
 
   if (!lead) {
     return { success: false, error: 'Lead not found' };
@@ -172,10 +171,11 @@ export async function sendManualReply(leadId: string, message: string): Promise<
   const result = await templateService.sendHelloWorldTemplate(formattedPhone);
 
   if (result.success) {
-    lead.autoReplySent = true;
-    lead.autoReplyMessage = 'Welcome message sent via WhatsApp template';
-    lead.autoReplySentAt = new Date().toISOString();
-    await updateLead(lead);
+    await mongodb.updateOne('leads', { id: leadId }, {
+      autoReplySent: true,
+      autoReplyMessage: 'Welcome message sent via WhatsApp template',
+      autoReplySentAt: new Date().toISOString(),
+    });
   }
 
   return result;
@@ -205,19 +205,15 @@ function buildLeadContext(lead: Lead): string {
 function formatPhoneNumber(phone: string): string {
   let cleaned = phone.replace(/\D/g, '');
   
-  // If number starts with +, it was already in international format
   if (phone.trim().startsWith('+')) {
     return cleaned;
   }
   
-  // If number starts with 00, remove the leading zeros (international prefix)
   if (cleaned.startsWith('00')) {
     cleaned = cleaned.substring(2);
     return cleaned;
   }
   
-  // If number is already in E.164 format (starts with country code), return as is
-  // Common country codes: 1 (US/CA), 44 (UK), 91 (India), 92 (Pakistan), 971 (UAE), etc.
   const commonCountryCodes = ['1', '44', '91', '92', '93', '94', '971', '966', '965', '974', '20', '27', '61', '64', '81', '86'];
   for (const code of commonCountryCodes) {
     if (cleaned.startsWith(code) && cleaned.length >= 10) {
@@ -225,8 +221,6 @@ function formatPhoneNumber(phone: string): string {
     }
   }
   
-  // If still short and starts with 0 (local format), default to Pakistan (+92)
-  // This is a fallback - ideally country should be detected from lead data
   if (cleaned.startsWith('0')) {
     cleaned = '92' + cleaned.substring(1);
   }
@@ -235,10 +229,5 @@ function formatPhoneNumber(phone: string): string {
 }
 
 async function updateLead(lead: Lead): Promise<void> {
-  const leads = jsonAdapter.readCollection<Lead>('leads');
-  const index = leads.findIndex((l: Lead) => l.id === lead.id);
-  if (index !== -1) {
-    leads[index] = lead;
-    jsonAdapter.writeCollection('leads', leads);
-  }
+  await mongodb.updateOne('leads', { id: lead.id }, lead);
 }

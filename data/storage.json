@@ -96,6 +96,18 @@
       "id": "ebcdda60-5598-47b9-bc91-80c90c122996",
       "createdAt": "2025-11-27T22:31:22.636Z",
       "updatedAt": "2025-11-27T22:31:22.636Z"
+    },
+    {
+      "name": "WhatsApp 919911064724",
+      "phone": "919911064724",
+      "email": "",
+      "tags": [
+        "WhatsApp"
+      ],
+      "notes": "Auto-created from WhatsApp message",
+      "id": "4d460e87-b06f-4c96-ab75-3a484e9a18ad",
+      "createdAt": "2025-11-28T06:04:55.063Z",
+      "updatedAt": "2025-11-28T06:04:55.063Z"
     }
   ],
   "messages": [
@@ -523,6 +535,15 @@
       "status": "sent",
       "id": "c1cbdb55-ea54-4344-8249-a1636a4b5fdf",
       "timestamp": "2025-11-27T23:10:19.586Z"
+    },
+    {
+      "contactId": "4d460e87-b06f-4c96-ab75-3a484e9a18ad",
+      "content": "Hey",
+      "type": "text",
+      "direction": "inbound",
+      "status": "sent",
+      "id": "29e25268-c73b-483c-8e06-2fdc8c98135c",
+      "timestamp": "2025-11-28T06:04:55.066Z"
     }
   ],
   "campaigns": [
@@ -874,6 +895,29 @@
       "lastInboundMessageTime": "2025-11-27T23:09:58.660Z",
       "lastInboundMessage": "Ffr",
       "unreadCount": 7,
+      "status": "open",
+      "notes": []
+    },
+    {
+      "id": "chat-4d460e87-b06f-4c96-ab75-3a484e9a18ad",
+      "contactId": "4d460e87-b06f-4c96-ab75-3a484e9a18ad",
+      "contact": {
+        "name": "WhatsApp 919911064724",
+        "phone": "919911064724",
+        "email": "",
+        "tags": [
+          "WhatsApp"
+        ],
+        "notes": "Auto-created from WhatsApp message",
+        "id": "4d460e87-b06f-4c96-ab75-3a484e9a18ad",
+        "createdAt": "2025-11-28T06:04:55.063Z",
+        "updatedAt": "2025-11-28T06:04:55.063Z"
+      },
+      "lastMessage": "Hey",
+      "lastMessageTime": "2025-11-28T06:04:55.066Z",
+      "lastInboundMessageTime": "2025-11-28T06:04:55.070Z",
+      "lastInboundMessage": "Hey",
+      "unreadCount": 1,
       "status": "open",
       "notes": []
     }

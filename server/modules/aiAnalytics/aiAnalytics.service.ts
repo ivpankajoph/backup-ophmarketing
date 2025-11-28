@@ -1,4 +1,4 @@
-import * as jsonAdapter from '../storage/json.adapter';
+import * as mongodb from '../storage/mongodb.adapter';
 
 export interface AIChatQualification {
   id: string;
@@ -11,13 +11,13 @@ export interface AIChatQualification {
   agentId?: string;
   agentName?: string;
   category: 'interested' | 'not_interested' | 'pending';
-  score: number; // 0-100 qualification score
+  score: number;
   totalMessages: number;
   lastMessageAt: string;
   firstContactAt: string;
-  keywords: string[]; // Keywords that indicate interest
+  keywords: string[];
   notes: string;
-  aiAnalysis?: string; // AI-generated analysis of the conversation
+  aiAnalysis?: string;
   createdAt: string;
   updatedAt: string;
 }
@@ -32,7 +32,6 @@ export interface QualificationStats {
   pendingPercent: number;
 }
 
-// Interest keywords for AI to detect
 const INTEREST_KEYWORDS = [
   'interested', 'yes', 'tell me more', 'how much', 'price', 'cost', 
   'register', 'sign up', 'book', 'schedule', 'appointment', 'buy',
@@ -51,44 +50,40 @@ function generateId(): string {
   return 'qual_' + Date.now().toString(36) + Math.random().toString(36).substr(2, 9);
 }
 
-export function getQualifications(): AIChatQualification[] {
-  return jsonAdapter.readCollection<AIChatQualification>('ai_qualifications');
+export async function getQualifications(): Promise<AIChatQualification[]> {
+  return mongodb.readCollection<AIChatQualification>('ai_qualifications');
 }
 
-export function getQualificationById(id: string): AIChatQualification | undefined {
-  const qualifications = getQualifications();
-  return qualifications.find(q => q.id === id);
+export async function getQualificationById(id: string): Promise<AIChatQualification | undefined> {
+  const result = await mongodb.findOne<AIChatQualification>('ai_qualifications', { id });
+  return result || undefined;
 }
 
-export function getQualificationByPhone(phone: string): AIChatQualification | undefined {
-  const qualifications = getQualifications();
+export async function getQualificationByPhone(phone: string): Promise<AIChatQualification | undefined> {
+  const qualifications = await getQualifications();
   const normalizedPhone = phone.replace(/\D/g, '');
   return qualifications.find(q => q.phone.replace(/\D/g, '').includes(normalizedPhone) || 
     normalizedPhone.includes(q.phone.replace(/\D/g, '')));
 }
 
-export function getQualificationsByCategory(category: 'interested' | 'not_interested' | 'pending'): AIChatQualification[] {
-  const qualifications = getQualifications();
-  return qualifications.filter(q => q.category === category);
+export async function getQualificationsByCategory(category: 'interested' | 'not_interested' | 'pending'): Promise<AIChatQualification[]> {
+  return mongodb.findMany<AIChatQualification>('ai_qualifications', { category });
 }
 
-export function getQualificationsBySource(source: string): AIChatQualification[] {
-  const qualifications = getQualifications();
-  return qualifications.filter(q => q.source === source);
+export async function getQualificationsBySource(source: string): Promise<AIChatQualification[]> {
+  return mongodb.findMany<AIChatQualification>('ai_qualifications', { source });
 }
 
-export function getQualificationsByCampaign(campaignId: string): AIChatQualification[] {
-  const qualifications = getQualifications();
-  return qualifications.filter(q => q.campaignId === campaignId);
+export async function getQualificationsByCampaign(campaignId: string): Promise<AIChatQualification[]> {
+  return mongodb.findMany<AIChatQualification>('ai_qualifications', { campaignId });
 }
 
-export function getQualificationsByAgent(agentId: string): AIChatQualification[] {
-  const qualifications = getQualifications();
-  return qualifications.filter(q => q.agentId === agentId);
+export async function getQualificationsByAgent(agentId: string): Promise<AIChatQualification[]> {
+  return mongodb.findMany<AIChatQualification>('ai_qualifications', { agentId });
 }
 
-export function getQualificationStats(): QualificationStats {
-  const qualifications = getQualifications();
+export async function getQualificationStats(): Promise<QualificationStats> {
+  const qualifications = await getQualifications();
   const total = qualifications.length;
   const interested = qualifications.filter(q => q.category === 'interested').length;
   const notInterested = qualifications.filter(q => q.category === 'not_interested').length;
@@ -110,22 +105,19 @@ export function analyzeMessage(message: string): { category: 'interested' | 'not
   const foundInterestKeywords: string[] = [];
   const foundNotInterestedKeywords: string[] = [];
   
-  // Check for interest keywords
   for (const keyword of INTEREST_KEYWORDS) {
     if (lowerMessage.includes(keyword.toLowerCase())) {
       foundInterestKeywords.push(keyword);
     }
   }
   
-  // Check for not interested keywords
   for (const keyword of NOT_INTERESTED_KEYWORDS) {
     if (lowerMessage.includes(keyword.toLowerCase())) {
       foundNotInterestedKeywords.push(keyword);
     }
   }
   
-  // Calculate score and category
-  let score = 50; // Start neutral
+  let score = 50;
   let category: 'interested' | 'not_interested' | 'pending' = 'pending';
   
   if (foundNotInterestedKeywords.length > 0) {
@@ -143,7 +135,7 @@ export function analyzeMessage(message: string): { category: 'interested' | 'not
   };
 }
 
-export function createOrUpdateQualification(
+export async function createOrUpdateQualification(
   phone: string,
   name: string,
   message: string,
@@ -155,17 +147,14 @@ export function createOrUpdateQualification(
     agentName?: string;
     contactId?: string;
   }
-): AIChatQualification {
-  const qualifications = getQualifications();
-  const existing = getQualificationByPhone(phone);
+): Promise<AIChatQualification> {
+  const existing = await getQualificationByPhone(phone);
   const analysis = analyzeMessage(message);
   const now = new Date().toISOString();
   
   if (existing) {
-    // Update existing qualification
     const updatedKeywords = Array.from(new Set([...existing.keywords, ...analysis.keywords]));
     
-    // If new message shows stronger signal, update category
     let newCategory = existing.category;
     let newScore = existing.score;
     
@@ -188,20 +177,15 @@ export function createOrUpdateQualification(
       lastMessageAt: now,
       keywords: updatedKeywords,
       updatedAt: now,
-      // Update campaign/agent info if provided
       campaignId: options?.campaignId || existing.campaignId,
       campaignName: options?.campaignName || existing.campaignName,
       agentId: options?.agentId || existing.agentId,
       agentName: options?.agentName || existing.agentName,
     };
     
-    const index = qualifications.findIndex(q => q.id === existing.id);
-    qualifications[index] = updated;
-    jsonAdapter.writeCollection('ai_qualifications', qualifications);
-    
+    await mongodb.updateOne('ai_qualifications', { id: existing.id }, updated);
     return updated;
   } else {
-    // Create new qualification
     const newQualification: AIChatQualification = {
       id: generateId(),
       contactId: options?.contactId || generateId(),
@@ -223,70 +207,56 @@ export function createOrUpdateQualification(
       updatedAt: now,
     };
     
-    qualifications.push(newQualification);
-    jsonAdapter.writeCollection('ai_qualifications', qualifications);
-    
+    await mongodb.insertOne('ai_qualifications', newQualification);
     return newQualification;
   }
 }
 
-export function updateQualificationCategory(
+export async function updateQualificationCategory(
   id: string, 
   category: 'interested' | 'not_interested' | 'pending',
   notes?: string
-): AIChatQualification | null {
-  const qualifications = getQualifications();
-  const index = qualifications.findIndex(q => q.id === id);
+): Promise<AIChatQualification | null> {
+  const existing = await getQualificationById(id);
+  if (!existing) return null;
   
-  if (index === -1) return null;
-  
-  qualifications[index] = {
-    ...qualifications[index],
+  const updated = {
+    ...existing,
     category,
-    notes: notes || qualifications[index].notes,
+    notes: notes || existing.notes,
     updatedAt: new Date().toISOString(),
   };
   
-  jsonAdapter.writeCollection('ai_qualifications', qualifications);
-  return qualifications[index];
+  await mongodb.updateOne('ai_qualifications', { id }, updated);
+  return updated;
 }
 
-export function updateQualificationNotes(id: string, notes: string): AIChatQualification | null {
-  const qualifications = getQualifications();
-  const index = qualifications.findIndex(q => q.id === id);
+export async function updateQualificationNotes(id: string, notes: string): Promise<AIChatQualification | null> {
+  const existing = await getQualificationById(id);
+  if (!existing) return null;
   
-  if (index === -1) return null;
-  
-  qualifications[index] = {
-    ...qualifications[index],
+  const updated = {
+    ...existing,
     notes,
     updatedAt: new Date().toISOString(),
   };
   
-  jsonAdapter.writeCollection('ai_qualifications', qualifications);
-  return qualifications[index];
+  await mongodb.updateOne('ai_qualifications', { id }, updated);
+  return updated;
 }
 
-export function deleteQualification(id: string): boolean {
-  const qualifications = getQualifications();
-  const filtered = qualifications.filter(q => q.id !== id);
-  
-  if (filtered.length === qualifications.length) return false;
-  
-  jsonAdapter.writeCollection('ai_qualifications', filtered);
-  return true;
+export async function deleteQualification(id: string): Promise<boolean> {
+  return mongodb.deleteOne('ai_qualifications', { id });
 }
 
-// Get report data grouped by source
-export function getQualificationReport(): {
+export async function getQualificationReport(): Promise<{
   bySource: Record<string, QualificationStats>;
   byCampaign: Record<string, QualificationStats & { campaignName: string }>;
   byAgent: Record<string, QualificationStats & { agentName: string }>;
   overall: QualificationStats;
-} {
-  const qualifications = getQualifications();
+}> {
+  const qualifications = await getQualifications();
   
-  // Group by source
   const bySource: Record<string, QualificationStats> = {};
   const sources = ['ai_chat', 'campaign', 'ad', 'lead_form', 'manual'];
   
@@ -308,7 +278,6 @@ export function getQualificationReport(): {
     };
   }
   
-  // Group by campaign
   const byCampaign: Record<string, QualificationStats & { campaignName: string }> = {};
   const campaignIds = Array.from(new Set(qualifications.filter(q => q.campaignId).map(q => q.campaignId!)));
   
@@ -331,7 +300,6 @@ export function getQualificationReport(): {
     };
   }
   
-  // Group by agent
   const byAgent: Record<string, QualificationStats & { agentName: string }> = {};
   const agentIds = Array.from(new Set(qualifications.filter(q => q.agentId).map(q => q.agentId!)));
   
@@ -358,6 +326,6 @@ export function getQualificationReport(): {
     bySource,
     byCampaign,
     byAgent,
-    overall: getQualificationStats()
+    overall: await getQualificationStats()
   };
 }

@@ -4,7 +4,7 @@ import { generateAgentResponse } from '../openai/openai.service';
 
 export async function listAgents(req: Request, res: Response) {
   try {
-    const agents = agentService.getAllAgents();
+    const agents = await agentService.getAllAgents();
     res.json(agents);
   } catch (error) {
     console.error('Error listing agents:', error);
@@ -15,7 +15,7 @@ export async function listAgents(req: Request, res: Response) {
 export async function getAgent(req: Request, res: Response) {
   try {
     const { id } = req.params;
-    const agent = agentService.getAgentById(id);
+    const agent = await agentService.getAgentById(id);
     if (!agent) {
       return res.status(404).json({ error: 'Agent not found' });
     }
@@ -34,7 +34,7 @@ export async function createAgent(req: Request, res: Response) {
       return res.status(400).json({ error: 'Name and system prompt are required' });
     }
 
-    const agent = agentService.createAgent({
+    const agent = await agentService.createAgent({
       name,
       description: description || '',
       systemPrompt,
@@ -55,7 +55,7 @@ export async function updateAgent(req: Request, res: Response) {
     const { id } = req.params;
     const updates = req.body;
 
-    const agent = agentService.updateAgent(id, updates);
+    const agent = await agentService.updateAgent(id, updates);
     if (!agent) {
       return res.status(404).json({ error: 'Agent not found' });
     }
@@ -70,7 +70,7 @@ export async function updateAgent(req: Request, res: Response) {
 export async function deleteAgent(req: Request, res: Response) {
   try {
     const { id } = req.params;
-    const deleted = agentService.deleteAgent(id);
+    const deleted = await agentService.deleteAgent(id);
     
     if (!deleted) {
       return res.status(404).json({ error: 'Agent not found' });
@@ -92,7 +92,7 @@ export async function testAgent(req: Request, res: Response) {
       return res.status(400).json({ error: 'Message is required' });
     }
 
-    const agent = agentService.getAgentById(id);
+    const agent = await agentService.getAgentById(id);
     if (!agent) {
       return res.status(404).json({ error: 'Agent not found' });
     }

@@ -1,4 +1,4 @@
-import { readCollection, writeCollection, addItem, updateItem, deleteItem, findById, findByField } from '../storage';
+import { readCollection, addItem, updateItem, deleteItem, findById } from '../storage';
 
 export interface AgentFormMapping {
   id: string;
@@ -17,34 +17,35 @@ function generateId(): string {
   return `map-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
 }
 
-export function getAllMappings(): AgentFormMapping[] {
+export async function getAllMappings(): Promise<AgentFormMapping[]> {
   return readCollection<AgentFormMapping>(COLLECTION);
 }
 
-export function getMappingById(id: string): AgentFormMapping | null {
+export async function getMappingById(id: string): Promise<AgentFormMapping | null> {
   return findById<AgentFormMapping>(COLLECTION, id);
 }
 
-export function getMappingByFormId(formId: string): AgentFormMapping | null {
-  const mappings = readCollection<AgentFormMapping>(COLLECTION);
+export async function getMappingByFormId(formId: string): Promise<AgentFormMapping | null> {
+  const mappings = await readCollection<AgentFormMapping>(COLLECTION);
   return mappings.find(m => m.formId === formId && m.isActive) || null;
 }
 
-export function getMappingByAgentId(agentId: string): AgentFormMapping[] {
-  const mappings = readCollection<AgentFormMapping>(COLLECTION);
+export async function getMappingByAgentId(agentId: string): Promise<AgentFormMapping[]> {
+  const mappings = await readCollection<AgentFormMapping>(COLLECTION);
   return mappings.filter(m => m.agentId === agentId);
 }
 
-export function createMapping(data: Omit<AgentFormMapping, 'id' | 'createdAt' | 'updatedAt'>): AgentFormMapping {
-  const existingMappings = readCollection<AgentFormMapping>(COLLECTION);
+export async function createMapping(data: Omit<AgentFormMapping, 'id' | 'createdAt' | 'updatedAt'>): Promise<AgentFormMapping> {
+  const existingMappings = await readCollection<AgentFormMapping>(COLLECTION);
   const existingForForm = existingMappings.find(m => m.formId === data.formId);
   
   if (existingForForm) {
-    return updateMapping(existingForForm.id, {
+    const updated = await updateMapping(existingForForm.id, {
       agentId: data.agentId,
       agentName: data.agentName,
       isActive: data.isActive,
-    })!;
+    });
+    return updated!;
   }
 
   const now = new Date().toISOString();
@@ -57,13 +58,13 @@ export function createMapping(data: Omit<AgentFormMapping, 'id' | 'createdAt' | 
   return addItem<AgentFormMapping>(COLLECTION, mapping);
 }
 
-export function updateMapping(id: string, data: Partial<Omit<AgentFormMapping, 'id' | 'createdAt'>>): AgentFormMapping | null {
+export async function updateMapping(id: string, data: Partial<Omit<AgentFormMapping, 'id' | 'createdAt'>>): Promise<AgentFormMapping | null> {
   return updateItem<AgentFormMapping>(COLLECTION, id, {
     ...data,
     updatedAt: new Date().toISOString(),
   });
 }
 
-export function deleteMapping(id: string): boolean {
+export async function deleteMapping(id: string): Promise<boolean> {
   return deleteItem<AgentFormMapping>(COLLECTION, id);
 }

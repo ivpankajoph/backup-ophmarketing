@@ -3,7 +3,7 @@ import * as mappingService from './mapping.service';
 
 export async function listMappings(req: Request, res: Response) {
   try {
-    const mappings = mappingService.getAllMappings();
+    const mappings = await mappingService.getAllMappings();
     res.json(mappings);
   } catch (error) {
     console.error('Error listing mappings:', error);
@@ -14,7 +14,7 @@ export async function listMappings(req: Request, res: Response) {
 export async function getMapping(req: Request, res: Response) {
   try {
     const { id } = req.params;
-    const mapping = mappingService.getMappingById(id);
+    const mapping = await mappingService.getMappingById(id);
     if (!mapping) {
       return res.status(404).json({ error: 'Mapping not found' });
     }
@@ -28,7 +28,7 @@ export async function getMapping(req: Request, res: Response) {
 export async function getMappingByForm(req: Request, res: Response) {
   try {
     const { formId } = req.params;
-    const mapping = mappingService.getMappingByFormId(formId);
+    const mapping = await mappingService.getMappingByFormId(formId);
     if (!mapping) {
       return res.status(404).json({ error: 'No mapping found for this form' });
     }
@@ -47,7 +47,7 @@ export async function createMapping(req: Request, res: Response) {
       return res.status(400).json({ error: 'Form ID and Agent ID are required' });
     }
 
-    const mapping = mappingService.createMapping({
+    const mapping = await mappingService.createMapping({
       formId,
       formName: formName || 'Unknown Form',
       agentId,
@@ -67,7 +67,7 @@ export async function updateMapping(req: Request, res: Response) {
     const { id } = req.params;
     const updates = req.body;
 
-    const mapping = mappingService.updateMapping(id, updates);
+    const mapping = await mappingService.updateMapping(id, updates);
     if (!mapping) {
       return res.status(404).json({ error: 'Mapping not found' });
     }
@@ -82,7 +82,7 @@ export async function updateMapping(req: Request, res: Response) {
 export async function deleteMapping(req: Request, res: Response) {
   try {
     const { id } = req.params;
-    const deleted = mappingService.deleteMapping(id);
+    const deleted = await mappingService.deleteMapping(id);
     
     if (!deleted) {
       return res.status(404).json({ error: 'Mapping not found' });

@@ -1,4 +1,4 @@
-import * as jsonAdapter from '../storage/json.adapter';
+import * as mongodb from '../storage/mongodb.adapter';
 import * as templateService from '../leadAutoReply/templateMessages.service';
 import * as openaiService from '../openai/openai.service';
 import * as agentService from '../aiAgents/agent.service';
@@ -78,17 +78,16 @@ function formatPhoneNumber(phone: string): string {
   return cleaned;
 }
 
-export function getBroadcastLists(): BroadcastList[] {
-  return jsonAdapter.readCollection<BroadcastList>('broadcast_lists');
+export async function getBroadcastLists(): Promise<BroadcastList[]> {
+  return mongodb.readCollection<BroadcastList>('broadcast_lists');
 }
 
-export function getBroadcastListById(id: string): BroadcastList | undefined {
-  const lists = getBroadcastLists();
-  return lists.find(l => l.id === id);
+export async function getBroadcastListById(id: string): Promise<BroadcastList | undefined> {
+  const result = await mongodb.findOne<BroadcastList>('broadcast_lists', { id });
+  return result || undefined;
 }
 
-export function createBroadcastList(name: string, contacts: BroadcastContact[]): BroadcastList {
-  const lists = getBroadcastLists();
+export async function createBroadcastList(name: string, contacts: BroadcastContact[]): Promise<BroadcastList> {
   const newList: BroadcastList = {
     id: `list-${Date.now()}`,
     name,
@@ -96,40 +95,33 @@ export function createBroadcastList(name: string, contacts: BroadcastContact[]):
     createdAt: new Date().toISOString(),
     updatedAt: new Date().toISOString(),
   };
-  lists.push(newList);
-  jsonAdapter.writeCollection('broadcast_lists', lists);
+  await mongodb.insertOne('broadcast_lists', newList);
   return newList;
 }
 
-export function updateBroadcastList(id: string, name: string, contacts: BroadcastContact[]): BroadcastList | null {
-  const lists = getBroadcastLists();
-  const index = lists.findIndex(l => l.id === id);
-  if (index === -1) return null;
+export async function updateBroadcastList(id: string, name: string, contacts: BroadcastContact[]): Promise<BroadcastList | null> {
+  const existing = await getBroadcastListById(id);
+  if (!existing) return null;
   
-  lists[index] = {
-    ...lists[index],
+  const updated: BroadcastList = {
+    ...existing,
     name,
     contacts,
     updatedAt: new Date().toISOString(),
   };
-  jsonAdapter.writeCollection('broadcast_lists', lists);
-  return lists[index];
+  await mongodb.updateOne('broadcast_lists', { id }, updated);
+  return updated;
 }
 
-export function deleteBroadcastList(id: string): boolean {
-  const lists = getBroadcastLists();
-  const filtered = lists.filter(l => l.id !== id);
-  if (filtered.length === lists.length) return false;
-  jsonAdapter.writeCollection('broadcast_lists', filtered);
-  return true;
+export async function deleteBroadcastList(id: string): Promise<boolean> {
+  return mongodb.deleteOne('broadcast_lists', { id });
 }
 
-export function getScheduledMessages(): ScheduledMessage[] {
-  return jsonAdapter.readCollection<ScheduledMessage>('scheduled_messages');
+export async function getScheduledMessages(): Promise<ScheduledMessage[]> {
+  return mongodb.readCollection<ScheduledMessage>('scheduled_messages');
 }
 
-export function createScheduledMessage(data: Omit<ScheduledMessage, 'id' | 'createdAt' | 'sentCount' | 'failedCount'>): ScheduledMessage {
-  const messages = getScheduledMessages();
+export async function createScheduledMessage(data: Omit<ScheduledMessage, 'id' | 'createdAt' | 'sentCount' | 'failedCount'>): Promise<ScheduledMessage> {
   const newMessage: ScheduledMessage = {
     ...data,
     id: `schedule-${Date.now()}`,
@@ -137,35 +129,26 @@ export function createScheduledMessage(data: Omit<ScheduledMessage, 'id' | 'crea
     sentCount: 0,
     failedCount: 0,
   };
-  messages.push(newMessage);
-  jsonAdapter.writeCollection('scheduled_messages', messages);
+  await mongodb.insertOne('scheduled_messages', newMessage);
   return newMessage;
 }
 
-export function updateScheduledMessage(id: string, updates: Partial<ScheduledMessage>): ScheduledMessage | null {
-  const messages = getScheduledMessages();
-  const index = messages.findIndex(m => m.id === id);
-  if (index === -1) return null;
+export async function updateScheduledMessage(id: string, updates: Partial<ScheduledMessage>): Promise<ScheduledMessage | null> {
+  const existing = await mongodb.findOne<ScheduledMessage>('scheduled_messages', { id });
+  if (!existing) return null;
   
-  messages[index] = { ...messages[index], ...updates };
-  jsonAdapter.writeCollection('scheduled_messages', messages);
-  return messages[index];
+  const updated = { ...existing, ...updates };
+  await mongodb.updateOne('scheduled_messages', { id }, updated);
+  return updated;
 }
 
-export function deleteScheduledMessage(id: string): boolean {
-  const messages = getScheduledMessages();
-  const filtered = messages.filter(m => m.id !== id);
-  if (filtered.length === messages.length) return false;
-  jsonAdapter.writeCollection('scheduled_messages', filtered);
-  return true;
+export async function deleteScheduledMessage(id: string): Promise<boolean> {
+  return mongodb.deleteOne('scheduled_messages', { id });
 }
 
 export async function sendTemplateMessage(phone: string, templateName: string, contactName?: string): Promise<SendMessageResult> {
-  // Build components with named parameters if the template has variables
   const components: templateService.TemplateComponent[] = [];
   
-  // If template has named parameters like {{name}}, include them
-  // Use parameter_name for named variables in Meta templates
   if (templateName.includes('awards') || templateName.includes('marketing')) {
     components.push({
       type: 'body',
@@ -173,7 +156,7 @@ export async function sendTemplateMessage(phone: string, templateName: string, c
         {
           type: 'text',
           text: contactName || 'Valued Customer',
-          parameter_name: 'name',  // Named parameter for {{name}} variable
+          parameter_name: 'name',
         }
       ]
     });
@@ -181,7 +164,7 @@ export async function sendTemplateMessage(phone: string, templateName: string, c
   
   const result = await templateService.sendTemplateMessage(formatPhoneNumber(phone), {
     name: templateName,
-    languageCode: 'en',  // Use 'en' as base language for awards templates
+    languageCode: 'en',
     components: components.length > 0 ? components : undefined,
   });
   return result;
@@ -227,7 +210,6 @@ export async function sendCustomMessage(phone: string, message: string): Promise
       const errorCode = data.error?.code;
       console.error(`[CustomMessage] Failed (code: ${errorCode}): ${errorMsg}`);
       
-      // Check for 24-hour window error
       if (errorCode === 131047 || errorMsg.includes('24 hour') || errorMsg.includes('Re-engagement')) {
         return { 
           success: false, 
@@ -244,7 +226,7 @@ export async function sendCustomMessage(phone: string, message: string): Promise
 }
 
 export async function sendAIAgentMessage(phone: string, agentId: string, context?: string): Promise<SendMessageResult> {
-  const agent = agentService.getAgentById(agentId);
+  const agent = await agentService.getAgentById(agentId);
   if (!agent) {
     console.error(`[AIAgent] Agent not found: ${agentId}`);
     return { success: false, error: 'Agent not found' };
@@ -262,10 +244,8 @@ export async function sendAIAgentMessage(phone: string, agentId: string, context
 
   console.log(`[AIAgent] AI generated: "${aiMessage.substring(0, 100)}..."`);
 
-  // Try sending as custom message first (works within 24-hour window)
   const customResult = await sendCustomMessage(phone, aiMessage);
   
-  // If custom message fails due to 24-hour window, fall back to hello_world template
   if (!customResult.success && (customResult.error?.includes('24') || customResult.error?.includes('window'))) {
     console.log('[AIAgent] Custom message failed (outside 24-hour window), falling back to hello_world template');
     return await templateService.sendHelloWorldTemplate(formatPhoneNumber(phone));

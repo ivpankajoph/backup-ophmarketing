@@ -6,11 +6,12 @@ A complete WhatsApp Business API Dashboard built with React frontend and Node.js
 ## Current State
 **Status**: Fully Functional (Development Mode)
 
-The application uses in-memory storage with JSON file storage for new features. All CRUD operations are functional and data persists during the session.
+The application uses MongoDB (Atlas) for data persistence in the new modular features. All CRUD operations are functional and data persists across server restarts.
 
 ## Tech Stack
 - **Frontend**: React + TypeScript, Vite, TailwindCSS, Shadcn/UI
 - **Backend**: Node.js, Express, TypeScript
+- **Database**: MongoDB Atlas (mongoose ODM)
 - **State Management**: React Query (TanStack Query)
 - **UI Components**: Radix UI primitives
 - **Flow Builder**: React Flow (@xyflow/react)
@@ -52,14 +53,8 @@ The application uses in-memory storage with JSON file storage for new features. 
 │   │   ├── whatsapp/        # WhatsApp webhook
 │   │   ├── openai/          # OpenAI integration
 │   │   ├── aiAnalytics/     # AI lead qualification tracking
-│   │   └── storage/         # JSON file adapter
+│   │   └── storage/         # MongoDB adapter + JSON fallback
 │   └── index.ts             # Server entry point
-├── data/                     # JSON data storage
-│   ├── agents.json          # AI agents
-│   ├── forms.json           # Facebook lead forms
-│   ├── leads.json           # Lead data
-│   ├── mapping.json         # Agent-form mappings
-│   └── ai_qualifications.json # AI lead qualifications
 └── shared/                   # Shared types and schemas
     └── schema.ts            # Database schema definitions
 ```
@@ -157,6 +152,9 @@ Required secrets for full functionality:
 The application runs on port 5000 with `npm run dev`.
 
 ## Recent Changes
+- **Nov 28, 2025**: Migrated storage layer from JSON files to MongoDB Atlas for better scalability and data persistence
+- **Nov 28, 2025**: Updated all modular services (aiAgents, facebook, mapping, broadcast, aiAnalytics, leadAutoReply) to async/await for MongoDB
+- **Nov 28, 2025**: Added mongodb.adapter.ts with mongoose connection and collection management
 - **Nov 27, 2025**: Added AI Agent Reports page for tracking lead qualification (Interested/Not Interested/Pending) from AI conversations
 - **Nov 27, 2025**: Added AI Analytics backend module with automatic keyword-based lead classification
 - **Nov 27, 2025**: Integrated AI qualification tracking with WhatsApp webhook for automatic lead scoring
@@ -194,7 +192,8 @@ The application runs on port 5000 with `npm run dev`.
 
 ## Development Notes
 - Existing features use in-memory storage (data resets on server restart)
-- New AI/Facebook features use JSON file storage (data persists)
+- New AI/Facebook features use MongoDB Atlas for persistent storage
+- MongoDB connection is initialized at server startup via connectToMongoDB()
 - Designed to connect to real WhatsApp Business API with user credentials
 - All forms include validation and error handling with toast notifications
 - WhatsApp webhook URL: `https://your-domain/api/webhook/whatsapp`

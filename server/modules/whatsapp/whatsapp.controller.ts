@@ -2,7 +2,7 @@ import { Request, Response } from 'express';
 import { getMappingByFormId } from '../mapping/mapping.service';
 import { getAgentById, getAllAgents } from '../aiAgents/agent.service';
 import { generateAgentResponse } from '../openai/openai.service';
-import { getLeadById, getAllLeads } from '../facebook/fb.service';
+import { getAllLeads } from '../facebook/fb.service';
 import { storage } from '../../storage';
 import * as aiAnalytics from '../aiAnalytics/aiAnalytics.service';
 
@@ -57,25 +57,24 @@ export async function handleWebhook(req: Request, res: Response) {
 
     console.log(`Received message from ${from}: ${messageText}`);
 
-    // Save inbound message to storage and update chat
     await saveInboundMessage(from, messageText, messageType);
 
     if (messageType !== 'text' || !messageText) {
       return res.sendStatus(200);
     }
 
-    const lead = findLeadByPhone(from);
+    const lead = await findLeadByPhone(from);
     let agentToUse = null;
 
     if (lead) {
-      const mapping = getMappingByFormId(lead.formId);
+      const mapping = await getMappingByFormId(lead.formId);
       if (mapping && mapping.isActive) {
-        agentToUse = getAgentById(mapping.agentId);
+        agentToUse = await getAgentById(mapping.agentId);
       }
     }
 
     if (!agentToUse) {
-      const agents = getAllAgents();
+      const agents = await getAllAgents();
       agentToUse = agents.find((a: any) => a.isActive);
     }
 
@@ -97,7 +96,6 @@ export async function handleWebhook(req: Request, res: Response) {
 
     await sendWhatsAppMessage(from, aiResponse);
     
-    // Save the AI response to storage
     await saveOutboundMessage(from, aiResponse);
 
     return res.sendStatus(200);
@@ -107,8 +105,8 @@ export async function handleWebhook(req: Request, res: Response) {
   }
 }
 
-function findLeadByPhone(phone: string) {
-  const leads = getAllLeads();
+async function findLeadByPhone(phone: string) {
+  const leads = await getAllLeads();
   const normalizedPhone = phone.replace(/\D/g, '');
   
   return leads.find(lead => {
@@ -121,7 +119,6 @@ async function saveInboundMessage(from: string, content: string, type: string) {
   try {
     const normalizedPhone = from.replace(/\D/g, '');
     
-    // Find or create contact
     const contacts = await storage.getContacts();
     let contact = contacts.find(c => {
       const contactPhone = (c.phone || '').replace(/\D/g, '');
@@ -129,7 +126,6 @@ async function saveInboundMessage(from: string, content: string, type: string) {
     });
 
     if (!contact) {
-      // Create new contact
       contact = await storage.createContact({
         name: `WhatsApp ${from}`,
         phone: from,
@@ -140,7 +136,6 @@ async function saveInboundMessage(from: string, content: string, type: string) {
       console.log('Created new contact:', contact.id);
     }
 
-    // Save the message
     const message = await storage.createMessage({
       contactId: contact.id,
       content: content || `[${type} message]`,
@@ -150,30 +145,28 @@ async function saveInboundMessage(from: string, content: string, type: string) {
     });
     console.log('Saved inbound message:', message.id);
 
-    // Update or create chat with lastInboundMessageTime
     await storage.updateChatInboundTime(contact.id);
     console.log('Updated chat inbound time for contact:', contact.id);
 
-    // Track AI qualification for this contact
     try {
-      const lead = findLeadByPhone(from);
+      const lead = await findLeadByPhone(from);
       let agentToUse = null;
       let source: 'ai_chat' | 'campaign' | 'ad' | 'lead_form' | 'manual' = 'ai_chat';
       
       if (lead) {
         source = 'lead_form';
-        const mapping = getMappingByFormId(lead.formId);
+        const mapping = await getMappingByFormId(lead.formId);
         if (mapping && mapping.isActive) {
-          agentToUse = getAgentById(mapping.agentId);
+          agentToUse = await getAgentById(mapping.agentId);
         }
       }
       
       if (!agentToUse) {
-        const agents = getAllAgents();
+        const agents = await getAllAgents();
         agentToUse = agents.find((a: any) => a.isActive);
       }
       
-      aiAnalytics.createOrUpdateQualification(
+      await aiAnalytics.createOrUpdateQualification(
         from,
         contact.name || `WhatsApp ${from}`,
         content,
@@ -198,7 +191,6 @@ async function saveOutboundMessage(to: string, content: string) {
   try {
     const normalizedPhone = to.replace(/\D/g, '');
     
-    // Find contact
     const contacts = await storage.getContacts();
     const contact = contacts.find(c => {
       const contactPhone = (c.phone || '').replace(/\D/g, '');
@@ -210,7 +202,6 @@ async function saveOutboundMessage(to: string, content: string) {
       return;
     }
 
-    // Save the outbound message
     const message = await storage.createMessage({
       contactId: contact.id,
       content: content,
@@ -304,7 +295,6 @@ export async function getConversation(req: Request, res: Response) {
   }
 }
 
-// Send template message with support for named parameters
 export async function sendTemplateMessage(
   to: string, 
   templateName: string, 
@@ -331,7 +321,6 @@ export async function sendTemplateMessage(
     }
   };
 
-  // If named parameters are provided, format them correctly for Meta API
   if (namedParams && Object.keys(namedParams).length > 0) {
     payload.template.components = [
       {
@@ -344,7 +333,6 @@ export async function sendTemplateMessage(
       }
     ];
   } else if (components && components.length > 0) {
-    // Use provided components array
     payload.template.components = components;
   }
 
@@ -383,7 +371,6 @@ export async function sendTemplateMessageEndpoint(req: Request, res: Response) {
       return res.status(400).json({ error: 'Recipient (to) and templateName are required' });
     }
 
-    // Try multiple language codes if not specified
     const languageCodesToTry = languageCode ? [languageCode] : ['en', 'en_US', 'en_GB'];
     let result = null;
     let lastError = null;
@@ -393,11 +380,10 @@ export async function sendTemplateMessageEndpoint(req: Request, res: Response) {
         console.log(`[WhatsApp] Trying template "${templateName}" with language code: ${langCode}`);
         result = await sendTemplateMessage(to, templateName, langCode, components || [], namedParams);
         console.log(`[WhatsApp] Success with language code: ${langCode}`);
-        break; // Success, exit loop
+        break;
       } catch (err: any) {
         lastError = err;
         console.log(`[WhatsApp] Failed with language code ${langCode}: ${err.message}`);
-        // Continue to try next language code
       }
     }
 
@@ -405,7 +391,6 @@ export async function sendTemplateMessageEndpoint(req: Request, res: Response) {
       throw lastError || new Error('Failed to send template with all language codes');
     }
     
-    // Save outbound message to storage
     try {
       const normalizedPhone = to.replace(/\D/g, '');
       const contacts = await storage.getContacts();

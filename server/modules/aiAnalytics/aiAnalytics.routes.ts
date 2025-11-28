@@ -3,11 +3,11 @@ import * as aiAnalyticsService from './aiAnalytics.service';
 
 const router = Router();
 
-router.get('/qualifications', (req: Request, res: Response) => {
+router.get('/qualifications', async (req: Request, res: Response) => {
   try {
     const { category, source, campaignId, agentId } = req.query;
     
-    let qualifications = aiAnalyticsService.getQualifications();
+    let qualifications = await aiAnalyticsService.getQualifications();
     
     if (category && typeof category === 'string') {
       qualifications = qualifications.filter(q => q.category === category);
@@ -34,9 +34,9 @@ router.get('/qualifications', (req: Request, res: Response) => {
   }
 });
 
-router.get('/qualifications/stats', (req: Request, res: Response) => {
+router.get('/qualifications/stats', async (req: Request, res: Response) => {
   try {
-    const stats = aiAnalyticsService.getQualificationStats();
+    const stats = await aiAnalyticsService.getQualificationStats();
     res.json(stats);
   } catch (error) {
     console.error('Error getting qualification stats:', error);
@@ -44,9 +44,9 @@ router.get('/qualifications/stats', (req: Request, res: Response) => {
   }
 });
 
-router.get('/qualifications/report', (req: Request, res: Response) => {
+router.get('/qualifications/report', async (req: Request, res: Response) => {
   try {
-    const report = aiAnalyticsService.getQualificationReport();
+    const report = await aiAnalyticsService.getQualificationReport();
     res.json(report);
   } catch (error) {
     console.error('Error getting qualification report:', error);
@@ -54,9 +54,9 @@ router.get('/qualifications/report', (req: Request, res: Response) => {
   }
 });
 
-router.get('/qualifications/:id', (req: Request, res: Response) => {
+router.get('/qualifications/:id', async (req: Request, res: Response) => {
   try {
-    const qualification = aiAnalyticsService.getQualificationById(req.params.id);
+    const qualification = await aiAnalyticsService.getQualificationById(req.params.id);
     if (!qualification) {
       return res.status(404).json({ error: 'Qualification not found' });
     }
@@ -67,7 +67,7 @@ router.get('/qualifications/:id', (req: Request, res: Response) => {
   }
 });
 
-router.post('/qualifications', (req: Request, res: Response) => {
+router.post('/qualifications', async (req: Request, res: Response) => {
   try {
     const { phone, name, message, source, campaignId, campaignName, agentId, agentName, contactId } = req.body;
     
@@ -75,7 +75,7 @@ router.post('/qualifications', (req: Request, res: Response) => {
       return res.status(400).json({ error: 'Phone and name are required' });
     }
     
-    const qualification = aiAnalyticsService.createOrUpdateQualification(
+    const qualification = await aiAnalyticsService.createOrUpdateQualification(
       phone,
       name,
       message || '',
@@ -90,7 +90,7 @@ router.post('/qualifications', (req: Request, res: Response) => {
   }
 });
 
-router.put('/qualifications/:id/category', (req: Request, res: Response) => {
+router.put('/qualifications/:id/category', async (req: Request, res: Response) => {
   try {
     const { category, notes } = req.body;
     
@@ -98,7 +98,7 @@ router.put('/qualifications/:id/category', (req: Request, res: Response) => {
       return res.status(400).json({ error: 'Valid category is required (interested, not_interested, pending)' });
     }
     
-    const qualification = aiAnalyticsService.updateQualificationCategory(req.params.id, category, notes);
+    const qualification = await aiAnalyticsService.updateQualificationCategory(req.params.id, category, notes);
     if (!qualification) {
       return res.status(404).json({ error: 'Qualification not found' });
     }
@@ -110,11 +110,11 @@ router.put('/qualifications/:id/category', (req: Request, res: Response) => {
   }
 });
 
-router.put('/qualifications/:id/notes', (req: Request, res: Response) => {
+router.put('/qualifications/:id/notes', async (req: Request, res: Response) => {
   try {
     const { notes } = req.body;
     
-    const qualification = aiAnalyticsService.updateQualificationNotes(req.params.id, notes || '');
+    const qualification = await aiAnalyticsService.updateQualificationNotes(req.params.id, notes || '');
     if (!qualification) {
       return res.status(404).json({ error: 'Qualification not found' });
     }
@@ -126,9 +126,9 @@ router.put('/qualifications/:id/notes', (req: Request, res: Response) => {
   }
 });
 
-router.delete('/qualifications/:id', (req: Request, res: Response) => {
+router.delete('/qualifications/:id', async (req: Request, res: Response) => {
   try {
-    const success = aiAnalyticsService.deleteQualification(req.params.id);
+    const success = await aiAnalyticsService.deleteQualification(req.params.id);
     if (!success) {
       return res.status(404).json({ error: 'Qualification not found' });
     }
@@ -139,9 +139,9 @@ router.delete('/qualifications/:id', (req: Request, res: Response) => {
   }
 });
 
-router.get('/qualifications/by-phone/:phone', (req: Request, res: Response) => {
+router.get('/qualifications/by-phone/:phone', async (req: Request, res: Response) => {
   try {
-    const qualification = aiAnalyticsService.getQualificationByPhone(req.params.phone);
+    const qualification = await aiAnalyticsService.getQualificationByPhone(req.params.phone);
     if (!qualification) {
       return res.status(404).json({ error: 'Qualification not found for this phone' });
     }

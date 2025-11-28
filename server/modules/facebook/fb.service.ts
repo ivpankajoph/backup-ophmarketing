@@ -1,4 +1,4 @@
-import { readCollection, writeCollection, addItem, findById, findByField } from '../storage';
+import { readCollection, writeCollection, findById, findByField } from '../storage';
 import * as leadAutoReply from '../leadAutoReply/leadAutoReply.service';
 
 const FB_ACCESS_TOKEN = process.env.FB_ACCESS_TOKEN;
@@ -56,7 +56,7 @@ export async function syncLeadForms(): Promise<LeadForm[]> {
     const now = new Date().toISOString();
 
     for (const fbForm of data.data || []) {
-      const existingForm = findByField<LeadForm>(FORMS_COLLECTION, 'fbFormId', fbForm.id);
+      const existingForm = await findByField<LeadForm>(FORMS_COLLECTION, 'fbFormId', fbForm.id);
       
       const form: LeadForm = {
         id: existingForm?.id || generateId('form'),
@@ -71,7 +71,7 @@ export async function syncLeadForms(): Promise<LeadForm[]> {
       forms.push(form);
     }
 
-    writeCollection(FORMS_COLLECTION, forms);
+    await writeCollection(FORMS_COLLECTION, forms);
     return forms;
   } catch (error) {
     console.error('Error syncing lead forms:', error);
@@ -79,15 +79,15 @@ export async function syncLeadForms(): Promise<LeadForm[]> {
   }
 }
 
-export function getAllForms(): LeadForm[] {
+export async function getAllForms(): Promise<LeadForm[]> {
   return readCollection<LeadForm>(FORMS_COLLECTION);
 }
 
-export function getFormById(id: string): LeadForm | null {
+export async function getFormById(id: string): Promise<LeadForm | null> {
   return findById<LeadForm>(FORMS_COLLECTION, id);
 }
 
-export function getFormByFbId(fbFormId: string): LeadForm | null {
+export async function getFormByFbId(fbFormId: string): Promise<LeadForm | null> {
   return findByField<LeadForm>(FORMS_COLLECTION, 'fbFormId', fbFormId);
 }
 
@@ -96,7 +96,7 @@ export async function syncLeadsForForm(formId: string): Promise<Lead[]> {
     throw new Error('Facebook credentials not configured');
   }
 
-  const form = findById<LeadForm>(FORMS_COLLECTION, formId);
+  const form = await findById<LeadForm>(FORMS_COLLECTION, formId);
   if (!form) {
     throw new Error('Form not found');
   }
@@ -111,7 +111,7 @@ export async function syncLeadsForForm(formId: string): Promise<Lead[]> {
     }
 
     const data = await response.json();
-    const existingLeads = readCollection<Lead>(LEADS_COLLECTION);
+    const existingLeads = await readCollection<Lead>(LEADS_COLLECTION);
     const now = new Date().toISOString();
     const newLeads: Lead[] = [];
 
@@ -148,9 +148,8 @@ export async function syncLeadsForForm(formId: string): Promise<Lead[]> {
     }
 
     const allLeads = [...existingLeads, ...newLeads];
-    writeCollection(LEADS_COLLECTION, allLeads);
+    await writeCollection(LEADS_COLLECTION, allLeads);
     
-    // Trigger auto-reply for new leads that haven't been contacted yet
     for (const lead of newLeads) {
       if (lead.phone && !lead.autoReplySent) {
         console.log(`[FB Service] Triggering auto-reply for new lead: ${lead.id}`);
@@ -165,16 +164,15 @@ export async function syncLeadsForForm(formId: string): Promise<Lead[]> {
           createdTime: lead.createdTime,
           autoReplySent: lead.autoReplySent,
         };
-        leadAutoReply.processNewLead(autoReplyLead).then(result => {
+        leadAutoReply.processNewLead(autoReplyLead).then(async result => {
           if (result.success) {
-            // Update the lead in storage with auto-reply status
-            const currentLeads = readCollection<Lead>(LEADS_COLLECTION);
+            const currentLeads = await readCollection<Lead>(LEADS_COLLECTION);
             const idx = currentLeads.findIndex(l => l.id === lead.id);
             if (idx !== -1) {
               currentLeads[idx].autoReplySent = true;
               currentLeads[idx].autoReplyMessage = result.message;
               currentLeads[idx].autoReplySentAt = new Date().toISOString();
-              writeCollection(LEADS_COLLECTION, currentLeads);
+              await writeCollection(LEADS_COLLECTION, currentLeads);
               console.log(`[FB Service] Auto-reply status saved for lead ${lead.id}`);
             }
           }
@@ -191,15 +189,15 @@ export async function syncLeadsForForm(formId: string): Promise<Lead[]> {
   }
 }
 
-export function getAllLeads(): Lead[] {
+export async function getAllLeads(): Promise<Lead[]> {
   return readCollection<Lead>(LEADS_COLLECTION);
 }
 
-export function getLeadsByFormId(formId: string): Lead[] {
-  const leads = readCollection<Lead>(LEADS_COLLECTION);
+export async function getLeadsByFormId(formId: string): Promise<Lead[]> {
+  const leads = await readCollection<Lead>(LEADS_COLLECTION);
   return leads.filter(lead => lead.formId === formId);
 }
 
-export function getLeadById(id: string): Lead | null {
+export async function getLeadById(id: string): Promise<Lead | null> {
   return findById<Lead>(LEADS_COLLECTION, id);
 }

@@ -13,7 +13,7 @@ export async function syncForms(req: Request, res: Response) {
 
 export async function listForms(req: Request, res: Response) {
   try {
-    const forms = fbService.getAllForms();
+    const forms = await fbService.getAllForms();
     res.json(forms);
   } catch (error) {
     console.error('Error listing forms:', error);
@@ -24,7 +24,7 @@ export async function listForms(req: Request, res: Response) {
 export async function getForm(req: Request, res: Response) {
   try {
     const { id } = req.params;
-    const form = fbService.getFormById(id);
+    const form = await fbService.getFormById(id);
     if (!form) {
       return res.status(404).json({ error: 'Form not found' });
     }
@@ -50,8 +50,8 @@ export async function listLeads(req: Request, res: Response) {
   try {
     const { formId } = req.query;
     const leads = formId 
-      ? fbService.getLeadsByFormId(formId as string)
-      : fbService.getAllLeads();
+      ? await fbService.getLeadsByFormId(formId as string)
+      : await fbService.getAllLeads();
     res.json(leads);
   } catch (error) {
     console.error('Error listing leads:', error);
@@ -62,7 +62,7 @@ export async function listLeads(req: Request, res: Response) {
 export async function getLead(req: Request, res: Response) {
   try {
     const { id } = req.params;
-    const lead = fbService.getLeadById(id);
+    const lead = await fbService.getLeadById(id);
     if (!lead) {
       return res.status(404).json({ error: 'Lead not found' });
     }

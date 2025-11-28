@@ -1,4 +1,4 @@
-import { readCollection, writeCollection, addItem, updateItem, deleteItem, findById } from '../storage';
+import { readCollection, addItem, updateItem, deleteItem, findById } from '../storage';
 
 export interface Agent {
   id: string;
@@ -18,15 +18,15 @@ function generateId(): string {
   return `agent-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
 }
 
-export function getAllAgents(): Agent[] {
+export async function getAllAgents(): Promise<Agent[]> {
   return readCollection<Agent>(COLLECTION);
 }
 
-export function getAgentById(id: string): Agent | null {
+export async function getAgentById(id: string): Promise<Agent | null> {
   return findById<Agent>(COLLECTION, id);
 }
 
-export function createAgent(data: Omit<Agent, 'id' | 'createdAt' | 'updatedAt'>): Agent {
+export async function createAgent(data: Omit<Agent, 'id' | 'createdAt' | 'updatedAt'>): Promise<Agent> {
   const now = new Date().toISOString();
   const agent: Agent = {
     id: generateId(),
@@ -37,13 +37,13 @@ export function createAgent(data: Omit<Agent, 'id' | 'createdAt' | 'updatedAt'>)
   return addItem<Agent>(COLLECTION, agent);
 }
 
-export function updateAgent(id: string, data: Partial<Omit<Agent, 'id' | 'createdAt'>>): Agent | null {
+export async function updateAgent(id: string, data: Partial<Omit<Agent, 'id' | 'createdAt'>>): Promise<Agent | null> {
   return updateItem<Agent>(COLLECTION, id, {
     ...data,
     updatedAt: new Date().toISOString(),
   });
 }
 
-export function deleteAgent(id: string): boolean {
+export async function deleteAgent(id: string): Promise<boolean> {
   return deleteItem<Agent>(COLLECTION, id);
 }
