@@ -207,7 +207,9 @@ router.delete('/schedules/:id', async (req: Request, res: Response) => {
 
 router.post('/send', async (req: Request, res: Response) => {
   try {
-    const { contacts, messageType, templateName, customMessage, agentId } = req.body;
+    const { contacts, messageType, templateName, customMessage, agentId, campaignName } = req.body;
+    
+    console.log('[Broadcast API] Received request:', { contacts: contacts?.length, messageType, templateName, campaignName });
     
     if (!contacts || !Array.isArray(contacts) || contacts.length === 0) {
       return res.status(400).json({ error: 'Contacts are required' });
@@ -221,8 +223,10 @@ router.post('/send', async (req: Request, res: Response) => {
       templateName,
       customMessage,
       agentId,
+      campaignName,
     });
     
+    console.log('[Broadcast API] Result:', result);
     res.json(result);
   } catch (error) {
     console.error('Broadcast send error:', error);
@@ -257,7 +261,7 @@ router.post('/send-single', async (req: Request, res: Response) => {
 
 router.post('/send-to-list/:listId', async (req: Request, res: Response) => {
   try {
-    const { messageType, templateName, customMessage, agentId } = req.body;
+    const { messageType, templateName, customMessage, agentId, campaignName } = req.body;
     const list = await broadcastService.getBroadcastListById(req.params.listId);
     
     if (!list) {
@@ -272,12 +276,30 @@ router.post('/send-to-list/:listId', async (req: Request, res: Response) => {
       templateName,
       customMessage,
       agentId,
+      campaignName,
     });
     
     res.json(result);
   } catch (error) {
     console.error('List broadcast send error:', error);
     res.status(500).json({ error: 'Failed to send broadcast to list' });
+  }
+});
+
+router.get('/logs', async (req: Request, res: Response) => {
+  try {
+    const { campaignName, status, phone, limit, offset } = req.query;
+    const logs = await broadcastService.getBroadcastLogs({
+      campaignName: campaignName as string | undefined,
+      status: status as string | undefined,
+      phone: phone as string | undefined,
+      limit: limit ? parseInt(limit as string, 10) : 100,
+      offset: offset ? parseInt(offset as string, 10) : 0,
+    });
+    res.json(logs);
+  } catch (error) {
+    console.error('Failed to get broadcast logs:', error);
+    res.status(500).json({ error: 'Failed to get broadcast logs' });
   }
 });
 

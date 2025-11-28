@@ -254,6 +254,57 @@ export async function sendAIAgentMessage(phone: string, agentId: string, context
   return customResult;
 }
 
+export interface BroadcastLog {
+  id: string;
+  campaignName: string;
+  contactName: string;
+  contactPhone: string;
+  messageType: 'template' | 'custom' | 'ai_agent';
+  templateName?: string;
+  message?: string;
+  status: 'sent' | 'delivered' | 'failed' | 'pending';
+  messageId?: string;
+  error?: string;
+  timestamp: string;
+}
+
+export async function logBroadcastMessage(log: Omit<BroadcastLog, 'id'>): Promise<BroadcastLog> {
+  const newLog: BroadcastLog = {
+    ...log,
+    id: `broadcast-log-${Date.now()}-${Math.random().toString(36).substring(7)}`,
+  };
+  await mongodb.insertOne('broadcast_logs', newLog);
+  return newLog;
+}
+
+export async function getBroadcastLogs(filters?: { 
+  campaignName?: string; 
+  status?: string; 
+  phone?: string;
+  limit?: number;
+  offset?: number;
+}): Promise<BroadcastLog[]> {
+  let logs = await mongodb.readCollection<BroadcastLog>('broadcast_logs');
+  
+  if (filters) {
+    if (filters.campaignName) {
+      logs = logs.filter(l => l.campaignName.toLowerCase().includes(filters.campaignName!.toLowerCase()));
+    }
+    if (filters.status) {
+      logs = logs.filter(l => l.status === filters.status);
+    }
+    if (filters.phone) {
+      logs = logs.filter(l => l.contactPhone.includes(filters.phone!));
+    }
+  }
+  
+  logs = logs.sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime());
+  
+  const offset = filters?.offset || 0;
+  const limit = filters?.limit || 100;
+  return logs.slice(offset, offset + limit);
+}
+
 export async function sendBroadcast(
   contacts: BroadcastContact[],
   messageType: 'template' | 'custom' | 'ai_agent',
@@ -261,28 +312,51 @@ export async function sendBroadcast(
     templateName?: string;
     customMessage?: string;
     agentId?: string;
+    campaignName?: string;
   }
 ): Promise<{ total: number; successful: number; failed: number; results: Array<{ phone: string; success: boolean; error?: string }> }> {
   const results: Array<{ phone: string; success: boolean; error?: string }> = [];
   let successful = 0;
   let failed = 0;
+  const campaignName = options.campaignName || `Broadcast ${new Date().toISOString()}`;
+
+  console.log(`[Broadcast] Starting broadcast to ${contacts.length} contacts`);
+  console.log(`[Broadcast] Campaign: ${campaignName}, Type: ${messageType}`);
 
   for (const contact of contacts) {
     let result: SendMessageResult;
+    let messageContent = '';
 
     switch (messageType) {
       case 'template':
         result = await sendTemplateMessage(contact.phone, options.templateName || 'hello_world', contact.name);
+        messageContent = `[Template: ${options.templateName || 'hello_world'}]`;
         break;
       case 'custom':
         result = await sendCustomMessage(contact.phone, options.customMessage || '');
+        messageContent = options.customMessage || '';
         break;
       case 'ai_agent':
         result = await sendAIAgentMessage(contact.phone, options.agentId || '', `Contact name: ${contact.name}`);
+        messageContent = '[AI Generated Message]';
         break;
       default:
         result = { success: false, error: 'Invalid message type' };
+        messageContent = '';
     }
+
+    await logBroadcastMessage({
+      campaignName,
+      contactName: contact.name,
+      contactPhone: contact.phone,
+      messageType,
+      templateName: options.templateName,
+      message: messageContent,
+      status: result.success ? 'sent' : 'failed',
+      messageId: result.messageId,
+      error: result.error,
+      timestamp: new Date().toISOString(),
+    });
 
     results.push({
       phone: contact.phone,
@@ -292,12 +366,16 @@ export async function sendBroadcast(
 
     if (result.success) {
       successful++;
+      console.log(`[Broadcast] Sent to ${contact.phone} (${contact.name})`);
     } else {
       failed++;
+      console.log(`[Broadcast] Failed for ${contact.phone}: ${result.error}`);
     }
 
     await new Promise(resolve => setTimeout(resolve, 500));
   }
+
+  console.log(`[Broadcast] Complete: ${successful} successful, ${failed} failed`);
 
   return {
     total: contacts.length,

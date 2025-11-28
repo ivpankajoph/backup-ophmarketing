@@ -592,6 +592,33 @@
       "status": "sent",
       "id": "e8f8e077-c6c1-4036-8a05-2fa1cbe40307",
       "timestamp": "2025-11-28T06:18:11.185Z"
+    },
+    {
+      "contactId": "8a9e2cfc-5b0b-4473-a1e1-ed26edeaa049",
+      "content": "[button message]",
+      "type": "text",
+      "direction": "inbound",
+      "status": "sent",
+      "id": "6ef1c5a0-7020-4251-8809-db0600bd2ed5",
+      "timestamp": "2025-11-28T06:51:35.439Z"
+    },
+    {
+      "contactId": "4d460e87-b06f-4c96-ab75-3a484e9a18ad",
+      "content": "Hi",
+      "type": "text",
+      "direction": "inbound",
+      "status": "sent",
+      "id": "34e61539-45ea-4e61-bace-eb9c701c482b",
+      "timestamp": "2025-11-28T06:52:22.758Z"
+    },
+    {
+      "contactId": "4d460e87-b06f-4c96-ab75-3a484e9a18ad",
+      "content": "Hello! How can I assist you today?",
+      "type": "text",
+      "direction": "outbound",
+      "status": "sent",
+      "id": "1db4a946-a0dc-4f4d-b025-7079072270ce",
+      "timestamp": "2025-11-28T06:52:26.299Z"
     }
   ],
   "campaigns": [
@@ -915,11 +942,11 @@
         "createdAt": "2025-11-27T22:31:14.359Z",
         "updatedAt": "2025-11-27T22:31:14.359Z"
       },
-      "lastMessage": "It seems like your message is incomplete. Could you please provide more context or clarify what you need help with?",
-      "lastMessageTime": "2025-11-27T23:10:19.586Z",
-      "lastInboundMessageTime": "2025-11-27T23:10:17.766Z",
-      "lastInboundMessage": "Uue",
-      "unreadCount": 14,
+      "lastMessage": "[button message]",
+      "lastMessageTime": "2025-11-28T06:51:35.439Z",
+      "lastInboundMessageTime": "2025-11-28T06:51:35.439Z",
+      "lastInboundMessage": "[button message]",
+      "unreadCount": 15,
       "status": "open",
       "notes": []
     },
@@ -961,11 +988,11 @@
         "createdAt": "2025-11-28T06:04:55.063Z",
         "updatedAt": "2025-11-28T06:04:55.063Z"
       },
-      "lastMessage": "hii thanks for message",
-      "lastMessageTime": "2025-11-28T06:12:50.288Z",
-      "lastInboundMessageTime": "2025-11-28T06:12:23.121Z",
-      "lastInboundMessage": "Cool",
-      "unreadCount": 2,
+      "lastMessage": "Hello! How can I assist you today?",
+      "lastMessageTime": "2025-11-28T06:52:26.299Z",
+      "lastInboundMessageTime": "2025-11-28T06:52:22.758Z",
+      "lastInboundMessage": "Hi",
+      "unreadCount": 3,
       "status": "open",
       "notes": []
     },

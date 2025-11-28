@@ -1,0 +1,120 @@
+You are the original AI agent who generated this project.
+I am attaching the dashboard screenshots and codebase.
+Please analyze the entire project and fix/add the following features without breaking existing functionality:
+
+1. Excel Upload → Contact Import
+
+Add a feature where the user can upload an Excel (.xlsx) file.
+From that file:
+
+Import name and mobile number columns
+
+Show them in a table on the dashboard
+
+Store imported contacts in backend DB (MongoDB / JSON / existing system)
+
+2. Select Template → Send WhatsApp Message
+
+Inside the dashboard:
+
+When I select multiple contacts and choose a WhatsApp template
+
+Send template message through Meta WhatsApp Cloud API
+
+Show success / failed status for each number
+
+All sending must work even for batches of 1000 numbers
+
+3. Create Full Message Report
+
+Whenever a message is sent:
+Store in DB:
+
+Contact name
+
+Contact number
+
+Template name
+
+Variables used
+
+Timestamp (IST)
+
+Message delivery status
+
+Add a new “Reports” page to display:
+
+Date
+
+Number
+
+Message sent
+
+Status
+
+Time
+
+Search + filter options
+
+4. Receive User Replies (24×7 Window)
+
+Add a webhook handler:
+
+Whenever a user replies to a template within 24 hours
+
+Store reply in DB
+
+Show reply in dashboard under Inbox → Recent Replies
+
+Each reply must show:
+
+Number
+
+Message
+
+Timestamp
+
+5. Fix Missing/Incomplete Code
+
+Some parts of the project are incomplete.
+You must:
+
+Read the entire codebase
+
+Understand the existing structure
+
+Identify missing or incorrect parts
+
+Implement all required features fully
+
+Do NOT rewrite everything; extend the existing architecture
+
+6. After Completing Changes
+
+Provide:
+
+Updated frontend code
+
+Updated backend code
+
+Updated API routes
+
+List of new files added
+
+Setup instructions
+
+Testing instructions
+
+End-to-end workflow so everything runs perfectly
+
+Important
+
+Do NOT change project structure unless absolutely required
+
+Keep code clean and documented
+
+Keep UI consistent with dashboard theme
+
+Fix only required features
+
+Preserve all existing working parts

@@ -10,7 +10,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogFooter } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogFooter, DialogDescription } from "@/components/ui/dialog";
 import { toast } from "sonner";
 import { useLocation } from "wouter";
 
@@ -55,6 +55,7 @@ export default function Broadcast() {
   const [message, setMessage] = useState("");
   const [campaignName, setCampaignName] = useState("");
   const [selectedTemplateId, setSelectedTemplateId] = useState("");
+  const [selectedTemplateName, setSelectedTemplateName] = useState("");
   const [selectedAgentId, setSelectedAgentId] = useState("");
   const [messageType, setMessageType] = useState<"template" | "custom" | "ai_agent">("template");
   const [scheduledTime, setScheduledTime] = useState("");
@@ -62,6 +63,7 @@ export default function Broadcast() {
   const [selectedListId, setSelectedListId] = useState("");
   const [newListName, setNewListName] = useState("");
   const [showCreateList, setShowCreateList] = useState(false);
+  const [isSending, setIsSending] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const queryClient = useQueryClient();
 
@@ -145,25 +147,6 @@ export default function Broadcast() {
     },
   });
 
-  const sendBroadcastMutation = useMutation({
-    mutationFn: async (data: any) => {
-      const res = await fetch("/api/broadcast/send", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(data),
-      });
-      if (!res.ok) throw new Error("Failed to send broadcast");
-      return res.json();
-    },
-    onSuccess: (result) => {
-      toast.success(`Broadcast sent: ${result.successful} successful, ${result.failed} failed`);
-      setLocation("/campaigns");
-    },
-    onError: () => {
-      toast.error("Failed to send broadcast");
-    },
-  });
-
   const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
@@ -172,19 +155,28 @@ export default function Broadcast() {
   };
 
   const handleTemplateSelect = (templateId: string) => {
+    console.log("Template selected:", templateId);
     setSelectedTemplateId(templateId);
-    const template = templates.find(t => t.id === templateId);
-    if (template) {
-      setMessage(template.content);
+    if (templateId === "hello_world") {
+      setSelectedTemplateName("hello_world");
+      setMessage("Welcome and congratulations!! This message demonstrates your ability to send a WhatsApp message notification from the Cloud API, hosted by Meta.");
+    } else {
+      const template = templates.find(t => t.id === templateId);
+      if (template) {
+        setSelectedTemplateName(template.name);
+        setMessage(template.content);
+      }
     }
   };
 
-  const toggleContact = (contactId: string) => {
-    setSelectedContactIds(prev => 
-      prev.includes(contactId) 
-        ? prev.filter(id => id !== contactId)
-        : [...prev, contactId]
-    );
+  const toggleContact = (contactId: string, checked: boolean | "indeterminate") => {
+    const isChecked = checked === true;
+    console.log("Toggle contact:", contactId, isChecked);
+    if (isChecked) {
+      setSelectedContactIds(prev => [...prev, contactId]);
+    } else {
+      setSelectedContactIds(prev => prev.filter(id => id !== contactId));
+    }
   };
 
   const selectAllContacts = () => {
@@ -195,7 +187,13 @@ export default function Broadcast() {
     }
   };
 
-  const handleSendBroadcast = () => {
+  const handleSendBroadcast = async () => {
+    console.log("handleSendBroadcast called");
+    console.log("selectedContactIds:", selectedContactIds);
+    console.log("selectedTemplateId:", selectedTemplateId);
+    console.log("selectedTemplateName:", selectedTemplateName);
+    console.log("messageType:", messageType);
+    
     let targetContacts: Array<{ name: string; phone: string }> = [];
 
     if (selectedListId) {
@@ -211,13 +209,10 @@ export default function Broadcast() {
         .map(c => ({ name: c.name, phone: c.phone }));
     }
 
+    console.log("targetContacts:", targetContacts);
+
     if (targetContacts.length === 0) {
       toast.error("Please select contacts or import from Excel");
-      return;
-    }
-
-    if (!campaignName.trim()) {
-      toast.error("Please enter a campaign name");
       return;
     }
 
@@ -236,13 +231,58 @@ export default function Broadcast() {
       return;
     }
 
-    sendBroadcastMutation.mutate({
-      contacts: targetContacts,
-      messageType,
-      templateName: messageType === "template" ? (templates.find(t => t.id === selectedTemplateId)?.name || "hello_world") : undefined,
-      customMessage: messageType === "custom" ? message : undefined,
-      agentId: messageType === "ai_agent" ? selectedAgentId : undefined,
-    });
+    setIsSending(true);
+    
+    try {
+      const payload = {
+        contacts: targetContacts,
+        messageType,
+        templateName: messageType === "template" ? (selectedTemplateName || "hello_world") : undefined,
+        customMessage: messageType === "custom" ? message : undefined,
+        agentId: messageType === "ai_agent" ? selectedAgentId : undefined,
+        campaignName: campaignName || `Broadcast ${new Date().toLocaleString()}`,
+      };
+      
+      console.log("Sending payload:", payload);
+      
+      const res = await fetch("/api/broadcast/send", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+      });
+      
+      console.log("Response status:", res.status);
+      
+      const result = await res.json();
+      
+      if (!res.ok) {
+        console.error("Broadcast API error:", result);
+        toast.error(result.error || `Failed to send broadcast (${res.status})`);
+        setIsSending(false);
+        return;
+      }
+      
+      console.log("Result:", result);
+      
+      if (result.failed > 0) {
+        toast.warning(`Broadcast partially sent: ${result.successful} successful, ${result.failed} failed`);
+      } else {
+        toast.success(`Broadcast sent successfully to ${result.successful} contacts`);
+      }
+      
+      setSelectedContactIds([]);
+      setImportedContacts([]);
+      setCampaignName("");
+      setSelectedTemplateId("");
+      setSelectedTemplateName("");
+      setMessage("");
+      setIsSending(false);
+      
+    } catch (error: any) {
+      console.error("Broadcast error:", error);
+      toast.error(error.message || "Failed to send broadcast");
+      setIsSending(false);
+    }
   };
 
   const handleCreateList = () => {
@@ -268,7 +308,6 @@ export default function Broadcast() {
     createListMutation.mutate({ name: newListName, contacts: listContacts });
   };
 
-  const isPending = sendBroadcastMutation.isPending;
   const totalSelected = selectedListId 
     ? broadcastLists.find(l => l.id === selectedListId)?.contacts.length || 0
     : importedContacts.length > 0 
@@ -284,7 +323,7 @@ export default function Broadcast() {
         </div>
 
         <div className="space-y-2">
-          <Label>Campaign Name</Label>
+          <Label>Campaign Name (Optional)</Label>
           <Input
             placeholder="e.g., Black Friday Sale"
             value={campaignName}
@@ -313,6 +352,7 @@ export default function Broadcast() {
                 <Button 
                   variant="outline" 
                   size="sm" 
+                  type="button"
                   onClick={() => fileInputRef.current?.click()}
                   disabled={importExcelMutation.isPending}
                 >
@@ -325,7 +365,7 @@ export default function Broadcast() {
                 </Button>
                 <Dialog open={showCreateList} onOpenChange={setShowCreateList}>
                   <DialogTrigger asChild>
-                    <Button variant="outline" size="sm">
+                    <Button variant="outline" size="sm" type="button">
                       <Plus className="mr-2 h-4 w-4" />
                       Save as List
                     </Button>
@@ -333,6 +373,7 @@ export default function Broadcast() {
                   <DialogContent>
                     <DialogHeader>
                       <DialogTitle>Create Broadcast List</DialogTitle>
+                      <DialogDescription>Save selected contacts as a reusable list</DialogDescription>
                     </DialogHeader>
                     <div className="space-y-4 py-4">
                       <div className="space-y-2">
@@ -348,7 +389,7 @@ export default function Broadcast() {
                       </p>
                     </div>
                     <DialogFooter>
-                      <Button onClick={handleCreateList} disabled={createListMutation.isPending}>
+                      <Button type="button" onClick={handleCreateList} disabled={createListMutation.isPending}>
                         {createListMutation.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
                         Create List
                       </Button>
@@ -360,12 +401,18 @@ export default function Broadcast() {
               {broadcastLists.length > 0 && (
                 <div className="space-y-2">
                   <Label>Or Select Existing List</Label>
-                  <Select value={selectedListId} onValueChange={setSelectedListId}>
+                  <Select value={selectedListId} onValueChange={(value) => {
+                    setSelectedListId(value);
+                    if (value) {
+                      setSelectedContactIds([]);
+                      setImportedContacts([]);
+                    }
+                  }}>
                     <SelectTrigger>
                       <SelectValue placeholder="Choose a broadcast list..." />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="">None (Select manually)</SelectItem>
+                      <SelectItem value="none">None (Select manually)</SelectItem>
                       {broadcastLists.map((list) => (
                         <SelectItem key={list.id} value={list.id}>
                           {list.name} ({list.contacts.length} contacts)
@@ -384,6 +431,7 @@ export default function Broadcast() {
                   <Button 
                     variant="ghost" 
                     size="sm" 
+                    type="button"
                     className="mt-2 text-xs"
                     onClick={() => setImportedContacts([])}
                   >
@@ -395,7 +443,7 @@ export default function Broadcast() {
               {!selectedListId && importedContacts.length === 0 && (
                 <>
                   <div className="flex items-center justify-between">
-                    <Button variant="outline" size="sm" onClick={selectAllContacts}>
+                    <Button variant="outline" size="sm" type="button" onClick={selectAllContacts}>
                       {selectedContactIds.length === contacts.length ? "Deselect All" : "Select All"}
                     </Button>
                     <span className="text-sm text-muted-foreground">{contacts.length} total contacts</span>
@@ -406,11 +454,11 @@ export default function Broadcast() {
                       <div 
                         key={contact.id} 
                         className="flex items-center gap-3 p-3 border-b last:border-b-0 hover:bg-muted/50 cursor-pointer"
-                        onClick={() => toggleContact(contact.id)}
+                        onClick={() => toggleContact(contact.id, !selectedContactIds.includes(contact.id))}
                       >
                         <Checkbox 
                           checked={selectedContactIds.includes(contact.id)}
-                          onCheckedChange={() => toggleContact(contact.id)}
+                          onCheckedChange={(checked) => toggleContact(contact.id, checked === true)}
                         />
                         <div className="flex-1">
                           <div className="font-medium">{contact.name}</div>
@@ -463,9 +511,10 @@ export default function Broadcast() {
                       </SelectContent>
                     </Select>
                   </div>
-                  {selectedTemplateId && selectedTemplateId !== "hello_world" && (
+                  {selectedTemplateId && (
                     <div className="p-3 bg-muted rounded-lg">
-                      <p className="text-sm">{message}</p>
+                      <p className="text-sm font-medium mb-1">Template: {selectedTemplateName}</p>
+                      <p className="text-sm text-muted-foreground">{message}</p>
                     </div>
                   )}
                 </TabsContent>
@@ -494,7 +543,7 @@ export default function Broadcast() {
                       </SelectTrigger>
                       <SelectContent>
                         {activeAgents.length === 0 ? (
-                          <SelectItem value="" disabled>No active agents. Create one first.</SelectItem>
+                          <SelectItem value="none" disabled>No active agents. Create one first.</SelectItem>
                         ) : (
                           activeAgents.map((agent) => (
                             <SelectItem key={agent.id} value={agent.id}>
@@ -517,7 +566,7 @@ export default function Broadcast() {
                 <Checkbox 
                   id="schedule"
                   checked={isScheduled}
-                  onCheckedChange={(checked) => setIsScheduled(checked as boolean)}
+                  onCheckedChange={(checked) => setIsScheduled(checked === true)}
                 />
                 <Label htmlFor="schedule" className="cursor-pointer">Schedule for later</Label>
               </div>
@@ -536,17 +585,18 @@ export default function Broadcast() {
               
               <Button 
                 className="w-full" 
+                type="button"
                 onClick={handleSendBroadcast}
-                disabled={isPending}
+                disabled={isSending}
               >
-                {isPending ? (
+                {isSending ? (
                   <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                 ) : isScheduled ? (
                   <Calendar className="mr-2 h-4 w-4" />
                 ) : (
                   <Send className="mr-2 h-4 w-4" />
                 )}
-                {isScheduled ? "Schedule Broadcast" : `Send to ${totalSelected} Contacts`}
+                {isSending ? "Sending..." : isScheduled ? "Schedule Broadcast" : `Send to ${totalSelected} Contacts`}
               </Button>
             </CardContent>
           </Card>

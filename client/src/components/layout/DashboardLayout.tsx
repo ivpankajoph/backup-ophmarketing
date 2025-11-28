@@ -121,6 +121,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
       href: "/reports",
       subItems: [
         { label: "Delivery Report", href: "/reports/delivery" },
+        { label: "Broadcast Report", href: "/reports/broadcast" },
         { label: "Campaign Perf.", href: "/reports/campaigns" },
         { label: "Replies", href: "/reports/replies" },
         { label: "Agent Perf.", href: "/reports/agents" },
