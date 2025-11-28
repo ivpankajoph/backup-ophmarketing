@@ -537,7 +537,7 @@ export default function Broadcast() {
               <Button 
                 className="w-full" 
                 onClick={handleSendBroadcast}
-                disabled={isPending || totalSelected === 0}
+                disabled={isPending}
               >
                 {isPending ? (
                   <Loader2 className="mr-2 h-4 w-4 animate-spin" />
