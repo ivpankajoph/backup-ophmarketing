@@ -537,7 +537,11 @@ export default function Broadcast() {
               <Button 
                 className="w-full" 
                 onClick={handleSendBroadcast}
-                disabled={isPending || totalSelected === 0 || !campaignName.trim()}
+                disabled={isPending || totalSelected === 0 || 
+                  (messageType === "template" && !selectedTemplateId) ||
+                  (messageType === "custom" && !message.trim()) ||
+                  (messageType === "ai_agent" && !selectedAgentId)
+                }
               >
                 {isPending ? (
                   <Loader2 className="mr-2 h-4 w-4 animate-spin" />
