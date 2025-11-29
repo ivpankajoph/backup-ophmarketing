@@ -71,22 +71,36 @@ router.post('/import-excel', upload.single('file'), (req: Request, res: Response
       return res.status(400).json({ error: 'No file uploaded' });
     }
 
+    console.log(`[ImportExcel] Processing file: ${req.file.originalname}, size: ${req.file.size} bytes`);
+    
     const workbook = XLSX.read(req.file.buffer, { type: 'buffer' });
     const sheetName = workbook.SheetNames[0];
     const worksheet = workbook.Sheets[sheetName];
     const data = XLSX.utils.sheet_to_json(worksheet);
 
-    const contacts = broadcastService.parseExcelContacts(data);
+    console.log(`[ImportExcel] Raw rows from Excel: ${data.length}`);
+    
+    const result = broadcastService.parseExcelContacts(data);
+    
+    if (result.validContacts === 0 && data.length > 0) {
+      const columnNames = data[0] ? Object.keys(data[0] as object).join(', ') : 'none found';
+      return res.status(400).json({ 
+        error: `No valid contacts found. Detected columns: ${columnNames}. Make sure your file has 'Name' and 'Mobile' (or 'Phone') columns.`,
+        errors: result.errors,
+        totalRows: result.totalRows,
+      });
+    }
     
     res.json({
       success: true,
-      contacts,
-      totalRows: data.length,
-      validContacts: contacts.length,
+      contacts: result.contacts,
+      totalRows: result.totalRows,
+      validContacts: result.validContacts,
+      errors: result.errors,
     });
   } catch (error) {
     console.error('Excel import error:', error);
-    res.status(500).json({ error: 'Failed to parse Excel file' });
+    res.status(500).json({ error: 'Failed to parse Excel file. Make sure it is a valid .xlsx, .xls, or .csv file.' });
   }
 });
 
@@ -96,22 +110,36 @@ router.post('/import-csv', upload.single('file'), (req: Request, res: Response) 
       return res.status(400).json({ error: 'No file uploaded' });
     }
 
+    console.log(`[ImportCSV] Processing file: ${req.file.originalname}, size: ${req.file.size} bytes`);
+    
     const workbook = XLSX.read(req.file.buffer, { type: 'buffer' });
     const sheetName = workbook.SheetNames[0];
     const worksheet = workbook.Sheets[sheetName];
     const data = XLSX.utils.sheet_to_json(worksheet);
 
-    const contacts = broadcastService.parseExcelContacts(data);
+    console.log(`[ImportCSV] Raw rows from CSV: ${data.length}`);
+    
+    const result = broadcastService.parseExcelContacts(data);
+    
+    if (result.validContacts === 0 && data.length > 0) {
+      const columnNames = data[0] ? Object.keys(data[0] as object).join(', ') : 'none found';
+      return res.status(400).json({ 
+        error: `No valid contacts found. Detected columns: ${columnNames}. Make sure your file has 'Name' and 'Mobile' (or 'Phone') columns.`,
+        errors: result.errors,
+        totalRows: result.totalRows,
+      });
+    }
     
     res.json({
       success: true,
-      contacts,
-      totalRows: data.length,
-      validContacts: contacts.length,
+      contacts: result.contacts,
+      totalRows: result.totalRows,
+      validContacts: result.validContacts,
+      errors: result.errors,
     });
   } catch (error) {
     console.error('CSV import error:', error);
-    res.status(500).json({ error: 'Failed to parse CSV file' });
+    res.status(500).json({ error: 'Failed to parse CSV file. Make sure it is a valid .csv file.' });
   }
 });
 
@@ -227,6 +255,15 @@ router.post('/send', async (req: Request, res: Response) => {
     });
     
     console.log('[Broadcast API] Result:', result);
+    
+    // Return error status if credentials are missing
+    if (result.credentialError) {
+      return res.status(400).json({ 
+        error: result.credentialError,
+        ...result,
+      });
+    }
+    
     res.json(result);
   } catch (error) {
     console.error('Broadcast send error:', error);

@@ -303,11 +303,17 @@ export default function WindowInbox() {
     const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
     
     if (hours === 0) {
-      return `${minutes}m ago`;
+      return `${minutes} min ago`;
     } else if (hours < 24) {
-      return `${hours}h ${minutes}m ago`;
+      return `${hours} hr ${minutes} min ago`;
     } else {
-      return date.toLocaleTimeString("en-US", { hour: "numeric", minute: "2-digit", hour12: true });
+      return date.toLocaleDateString("en-US", { 
+        month: "short", 
+        day: "numeric",
+        hour: "numeric", 
+        minute: "2-digit", 
+        hour12: true 
+      });
     }
   };
 
@@ -319,13 +325,19 @@ export default function WindowInbox() {
     if (diff <= 0) return "Expired";
     const hours = Math.floor(diff / (1000 * 60 * 60));
     const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
-    return `${hours}h ${minutes}m`;
+    return `${hours} hr ${minutes} min left`;
   };
 
-  const filteredChats = chats.filter(chat => 
-    chat.contact.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    chat.contact.phone.includes(searchQuery)
-  );
+  const filteredChats = chats
+    .filter(chat => 
+      chat.contact.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      chat.contact.phone.includes(searchQuery)
+    )
+    .sort((a, b) => {
+      const aTime = a.lastMessageTime || a.lastInboundMessageTime || a.windowExpiresAt || '';
+      const bTime = b.lastMessageTime || b.lastInboundMessageTime || b.windowExpiresAt || '';
+      return new Date(bTime).getTime() - new Date(aTime).getTime();
+    });
 
   const approvedTemplates = templates.filter(t => t.status === "approved");
 

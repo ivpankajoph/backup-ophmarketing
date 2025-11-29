@@ -152,6 +152,12 @@ Required secrets for full functionality:
 The application runs on port 5000 with `npm run dev`.
 
 ## Recent Changes
+- **Nov 29, 2025**: Fixed CSV import to accept Mobile/Name columns (case-insensitive header mapping)
+- **Nov 29, 2025**: Added scientific notation handling for phone numbers from Excel
+- **Nov 29, 2025**: Fixed time display in 24-Hour Window Inbox (now shows "X hr Y min ago" format)
+- **Nov 29, 2025**: Added message sorting in inbox (newest messages at top)
+- **Nov 29, 2025**: Added BroadcastLog MongoDB schema for proper data persistence
+- **Nov 29, 2025**: Improved error handling with detailed import validation feedback
 - **Nov 28, 2025**: Fixed Campaign/Broadcast page - button click now working, contact selection fixed, template selection fixed
 - **Nov 28, 2025**: Added comprehensive message logging to MongoDB for all broadcast messages
 - **Nov 28, 2025**: Created Broadcast Reports page with filters, search, export CSV, and pagination

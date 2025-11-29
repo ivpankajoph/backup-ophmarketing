@@ -121,6 +121,20 @@ const ScheduledMessageSchema = new Schema({
   createdAt: { type: String, required: true },
 }, { collection: 'scheduled_messages' });
 
+const BroadcastLogSchema = new Schema({
+  id: { type: String, required: true, unique: true },
+  campaignName: { type: String, required: true },
+  contactName: { type: String, required: true },
+  contactPhone: { type: String, required: true },
+  messageType: { type: String, enum: ['template', 'custom', 'ai_agent'], required: true },
+  templateName: { type: String },
+  message: { type: String },
+  status: { type: String, enum: ['sent', 'delivered', 'failed', 'pending'], default: 'pending' },
+  messageId: { type: String },
+  error: { type: String },
+  timestamp: { type: String, required: true },
+}, { collection: 'broadcast_logs' });
+
 export const Agent = mongoose.models.Agent || mongoose.model('Agent', AgentSchema);
 export const Form = mongoose.models.Form || mongoose.model('Form', FormSchema);
 export const Lead = mongoose.models.Lead || mongoose.model('Lead', LeadSchema);
@@ -128,6 +142,7 @@ export const Mapping = mongoose.models.Mapping || mongoose.model('Mapping', Mapp
 export const Qualification = mongoose.models.Qualification || mongoose.model('Qualification', QualificationSchema);
 export const BroadcastList = mongoose.models.BroadcastList || mongoose.model('BroadcastList', BroadcastListSchema);
 export const ScheduledMessage = mongoose.models.ScheduledMessage || mongoose.model('ScheduledMessage', ScheduledMessageSchema);
+export const BroadcastLog = mongoose.models.BroadcastLog || mongoose.model('BroadcastLog', BroadcastLogSchema);
 
 const modelMap: Record<string, Model<any>> = {
   agents: Agent,
@@ -137,6 +152,7 @@ const modelMap: Record<string, Model<any>> = {
   ai_qualifications: Qualification,
   broadcast_lists: BroadcastList,
   scheduled_messages: ScheduledMessage,
+  broadcast_logs: BroadcastLog,
 };
 
 export async function readCollection<T>(collectionName: string): Promise<T[]> {

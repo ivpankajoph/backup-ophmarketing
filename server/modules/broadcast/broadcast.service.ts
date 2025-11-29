@@ -273,8 +273,14 @@ export async function logBroadcastMessage(log: Omit<BroadcastLog, 'id'>): Promis
     ...log,
     id: `broadcast-log-${Date.now()}-${Math.random().toString(36).substring(7)}`,
   };
-  await mongodb.insertOne('broadcast_logs', newLog);
-  return newLog;
+  try {
+    const result = await mongodb.insertOne('broadcast_logs', newLog);
+    console.log(`[BroadcastLog] Saved log for ${log.contactPhone}: ${log.status}`);
+    return result || newLog;
+  } catch (error) {
+    console.error('[BroadcastLog] Failed to save log:', error);
+    return newLog;
+  }
 }
 
 export async function getBroadcastLogs(filters?: { 
@@ -284,25 +290,31 @@ export async function getBroadcastLogs(filters?: {
   limit?: number;
   offset?: number;
 }): Promise<BroadcastLog[]> {
-  let logs = await mongodb.readCollection<BroadcastLog>('broadcast_logs');
-  
-  if (filters) {
-    if (filters.campaignName) {
-      logs = logs.filter(l => l.campaignName.toLowerCase().includes(filters.campaignName!.toLowerCase()));
+  try {
+    let logs = await mongodb.readCollection<BroadcastLog>('broadcast_logs');
+    console.log(`[BroadcastLogs] Fetched ${logs.length} logs from MongoDB`);
+    
+    if (filters) {
+      if (filters.campaignName) {
+        logs = logs.filter(l => l.campaignName.toLowerCase().includes(filters.campaignName!.toLowerCase()));
+      }
+      if (filters.status) {
+        logs = logs.filter(l => l.status === filters.status);
+      }
+      if (filters.phone) {
+        logs = logs.filter(l => l.contactPhone.includes(filters.phone!));
+      }
     }
-    if (filters.status) {
-      logs = logs.filter(l => l.status === filters.status);
-    }
-    if (filters.phone) {
-      logs = logs.filter(l => l.contactPhone.includes(filters.phone!));
-    }
+    
+    logs = logs.sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime());
+    
+    const offset = filters?.offset || 0;
+    const limit = filters?.limit || 100;
+    return logs.slice(offset, offset + limit);
+  } catch (error) {
+    console.error('[BroadcastLogs] Failed to fetch logs:', error);
+    return [];
   }
-  
-  logs = logs.sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime());
-  
-  const offset = filters?.offset || 0;
-  const limit = filters?.limit || 100;
-  return logs.slice(offset, offset + limit);
 }
 
 export async function sendBroadcast(
@@ -314,7 +326,7 @@ export async function sendBroadcast(
     agentId?: string;
     campaignName?: string;
   }
-): Promise<{ total: number; successful: number; failed: number; results: Array<{ phone: string; success: boolean; error?: string }> }> {
+): Promise<{ total: number; successful: number; failed: number; results: Array<{ phone: string; success: boolean; error?: string }>; credentialError?: string }> {
   const results: Array<{ phone: string; success: boolean; error?: string }> = [];
   let successful = 0;
   let failed = 0;
@@ -322,6 +334,19 @@ export async function sendBroadcast(
 
   console.log(`[Broadcast] Starting broadcast to ${contacts.length} contacts`);
   console.log(`[Broadcast] Campaign: ${campaignName}, Type: ${messageType}`);
+  
+  // Check WhatsApp credentials before starting
+  const credentials = getWhatsAppCredentials();
+  if (!credentials) {
+    console.error('[Broadcast] WhatsApp credentials not configured');
+    return {
+      total: contacts.length,
+      successful: 0,
+      failed: contacts.length,
+      results: contacts.map(c => ({ phone: c.phone, success: false, error: 'WhatsApp credentials not configured' })),
+      credentialError: 'WhatsApp API credentials (WHATSAPP_TOKEN and PHONE_NUMBER_ID) are not configured. Please add them in Settings > WhatsApp API.',
+    };
+  }
 
   for (const contact of contacts) {
     let result: SendMessageResult;
@@ -407,27 +432,120 @@ export async function sendSingleMessage(
   }
 }
 
-export function parseExcelContacts(data: unknown[]): BroadcastContact[] {
+export interface ParseResult {
+  contacts: BroadcastContact[];
+  totalRows: number;
+  validContacts: number;
+  errors: string[];
+}
+
+export function parseExcelContacts(data: unknown[]): ParseResult {
   const contacts: BroadcastContact[] = [];
+  const errors: string[] = [];
+  let rowNum = 1;
   
   for (const row of data) {
+    rowNum++;
     if (typeof row !== 'object' || row === null) continue;
     
     const record = row as Record<string, unknown>;
-    const name = String(record['name'] || record['Name'] || record['FULL_NAME'] || record['full_name'] || '').trim();
-    const phone = String(record['phone'] || record['Phone'] || record['PHONE'] || record['phone_number'] || record['mobile'] || record['Mobile'] || '').trim();
-    const email = String(record['email'] || record['Email'] || record['EMAIL'] || '').trim();
+    const keys = Object.keys(record);
     
-    if (name && phone) {
-      contacts.push({
-        name,
-        phone,
-        email: email || undefined,
-      });
+    // Log column names for first row
+    if (rowNum === 2) {
+      console.log(`[ParseExcel] Detected columns: ${keys.join(', ')}`);
     }
+    
+    // Check all possible name column variations (case insensitive)
+    let name = '';
+    for (const key of keys) {
+      const lowerKey = key.toLowerCase().trim();
+      if (lowerKey === 'name' || lowerKey === 'full_name' || lowerKey === 'fullname' || 
+          lowerKey === 'contact_name' || lowerKey === 'customer_name' || lowerKey === 'customer') {
+        name = String(record[key] || '').trim();
+        break;
+      }
+    }
+    
+    // Check all possible phone column variations (case insensitive)
+    let phone = '';
+    for (const key of keys) {
+      const lowerKey = key.toLowerCase().trim();
+      if (lowerKey === 'phone' || lowerKey === 'mobile' || lowerKey === 'phone_number' || 
+          lowerKey === 'mobile_number' || lowerKey === 'phonenumber' || lowerKey === 'mobilenumber' ||
+          lowerKey === 'contact' || lowerKey === 'whatsapp' || lowerKey === 'cell' || lowerKey === 'telephone') {
+        phone = String(record[key] || '').trim();
+        break;
+      }
+    }
+    
+    // Check for email column
+    let email = '';
+    for (const key of keys) {
+      const lowerKey = key.toLowerCase().trim();
+      if (lowerKey === 'email' || lowerKey === 'email_address' || lowerKey === 'emailaddress') {
+        email = String(record[key] || '').trim();
+        break;
+      }
+    }
+    
+    // Handle scientific notation from Excel (9.2E+11 format)
+    if (phone) {
+      // If it looks like scientific notation, convert it
+      if (phone.includes('E') || phone.includes('e')) {
+        try {
+          const numValue = parseFloat(phone);
+          if (!isNaN(numValue)) {
+            phone = Math.round(numValue).toString();
+          }
+        } catch (e) {
+          // Keep original if parsing fails
+        }
+      }
+      
+      // Remove any non-digit characters except leading +
+      phone = phone.replace(/[^\d+]/g, '');
+      
+      // Clean up: remove + if not at start
+      if (phone.includes('+') && !phone.startsWith('+')) {
+        phone = phone.replace(/\+/g, '');
+      }
+    }
+    
+    // Validation with specific error messages
+    if (!phone) {
+      errors.push(`Row ${rowNum}: Missing phone number`);
+      continue;
+    }
+    
+    if (phone.length < 8) {
+      errors.push(`Row ${rowNum}: Phone number too short (${phone})`);
+      continue;
+    }
+    
+    // If name is missing, use phone as name
+    if (!name) {
+      name = `Contact ${phone.slice(-4)}`;
+    }
+    
+    contacts.push({
+      name,
+      phone,
+      email: email || undefined,
+    });
   }
   
-  return contacts;
+  console.log(`[ParseExcel] Parsed ${contacts.length} valid contacts from ${data.length} rows`);
+  if (errors.length > 0) {
+    console.log(`[ParseExcel] Errors: ${errors.slice(0, 5).join('; ')}${errors.length > 5 ? '...' : ''}`);
+  }
+  
+  return {
+    contacts,
+    totalRows: data.length,
+    validContacts: contacts.length,
+    errors: errors.slice(0, 10), // Return first 10 errors
+  };
 }
 
 export function exportContactsToJSON(contacts: BroadcastContact[]): object[] {

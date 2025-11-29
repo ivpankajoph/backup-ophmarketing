@@ -114,15 +114,22 @@ export default function Broadcast() {
         method: "POST",
         body: formData,
       });
-      if (!res.ok) throw new Error("Failed to import file");
-      return res.json();
+      const data = await res.json();
+      if (!res.ok) {
+        throw new Error(data.error || "Failed to import file");
+      }
+      return data;
     },
     onSuccess: (data) => {
       setImportedContacts(data.contacts);
-      toast.success(`Imported ${data.validContacts} contacts from ${data.totalRows} rows`);
+      if (data.errors && data.errors.length > 0) {
+        toast.warning(`Imported ${data.validContacts} of ${data.totalRows} rows. ${data.errors.length} rows had issues.`);
+      } else {
+        toast.success(`Successfully imported ${data.validContacts} contacts from ${data.totalRows} rows`);
+      }
     },
-    onError: () => {
-      toast.error("Failed to import Excel file");
+    onError: (error: Error) => {
+      toast.error(error.message || "Failed to import file. Check that your file has 'Name' and 'Mobile' columns.");
     },
   });
 
