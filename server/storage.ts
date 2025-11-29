@@ -164,6 +164,8 @@ export interface IStorage {
   getChats(): Promise<Chat[]>;
   getChat(id: string): Promise<Chat | undefined>;
   updateChatInboundTime(contactId: string): Promise<void>;
+  markMessagesAsRead(contactId: string): Promise<void>;
+  incrementUnreadCount(contactId: string): Promise<void>;
 }
 
 export class MemStorage implements IStorage {
@@ -562,6 +564,7 @@ export class MemStorage implements IStorage {
     if (chatIndex >= 0) {
       // Update existing chat
       this.data.chats[chatIndex].lastInboundMessageTime = now;
+      this.data.chats[chatIndex].unreadCount = (this.data.chats[chatIndex].unreadCount || 0) + 1;
       
       // Also update lastMessageTime if needed
       const contactMessages = this.data.messages.filter(m => m.contactId === contactId);
@@ -592,6 +595,32 @@ export class MemStorage implements IStorage {
     }
     
     this.save();
+  }
+
+  async markMessagesAsRead(contactId: string): Promise<void> {
+    // Update all inbound messages for this contact to "read" status
+    this.data.messages = this.data.messages.map(m => {
+      if (m.contactId === contactId && m.direction === 'inbound' && m.status !== 'read') {
+        return { ...m, status: 'read' as const };
+      }
+      return m;
+    });
+    
+    // Reset unread count for this chat
+    const chatIndex = this.data.chats.findIndex(c => c.contactId === contactId);
+    if (chatIndex >= 0) {
+      this.data.chats[chatIndex].unreadCount = 0;
+    }
+    
+    this.save();
+  }
+
+  async incrementUnreadCount(contactId: string): Promise<void> {
+    const chatIndex = this.data.chats.findIndex(c => c.contactId === contactId);
+    if (chatIndex >= 0) {
+      this.data.chats[chatIndex].unreadCount = (this.data.chats[chatIndex].unreadCount || 0) + 1;
+      this.save();
+    }
   }
 }
 

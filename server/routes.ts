@@ -154,6 +154,33 @@ export async function registerRoutes(
     }
   });
 
+  app.post("/api/chats/:contactId/mark-read", async (req, res) => {
+    try {
+      await storage.markMessagesAsRead(req.params.contactId);
+      res.json({ success: true });
+    } catch (error) {
+      res.status(500).json({ message: "Failed to mark messages as read" });
+    }
+  });
+
+  app.get("/api/chats/window", async (req, res) => {
+    try {
+      const chats = await storage.getChats();
+      const now = new Date();
+      const windowChats = chats.filter(chat => {
+        if (chat.lastInboundMessageTime) {
+          const lastInbound = new Date(chat.lastInboundMessageTime);
+          const hoursDiff = (now.getTime() - lastInbound.getTime()) / (1000 * 60 * 60);
+          return hoursDiff <= 24;
+        }
+        return false;
+      });
+      res.json(windowChats);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to get window chats" });
+    }
+  });
+
   app.get("/api/campaigns", async (req, res) => {
     try {
       const campaigns = await storage.getCampaigns();

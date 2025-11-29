@@ -808,6 +808,24 @@
       "status": "sent",
       "id": "cbc76520-aed4-47ff-a582-2e749b8c9de1",
       "timestamp": "2025-11-29T06:59:02.118Z"
+    },
+    {
+      "contactId": "4d460e87-b06f-4c96-ab75-3a484e9a18ad",
+      "content": "Yes, I am Interested",
+      "type": "text",
+      "direction": "inbound",
+      "status": "sent",
+      "id": "9be11cd2-871a-4886-b668-e3f706e5ebbd",
+      "timestamp": "2025-11-29T07:03:18.989Z"
+    },
+    {
+      "contactId": "4d460e87-b06f-4c96-ab75-3a484e9a18ad",
+      "content": "Thanks for your feedback, we will keep in touch with you soon.",
+      "type": "text",
+      "direction": "outbound",
+      "status": "sent",
+      "id": "fbb8b48b-85a4-4bd3-b672-02d827b371a1",
+      "timestamp": "2025-11-29T07:03:20.241Z"
     }
   ],
   "campaigns": [
@@ -1189,11 +1207,11 @@
         "createdAt": "2025-11-28T06:04:55.063Z",
         "updatedAt": "2025-11-28T06:04:55.063Z"
       },
-      "lastMessage": "To help you effectively, could you please specify what you want to participate in? Whether it's a particular event, program, group, or activity, providing more details will allow me to give you the best guidance.",
-      "lastMessageTime": "2025-11-29T06:52:31.416Z",
-      "lastInboundMessageTime": "2025-11-29T06:52:27.281Z",
-      "lastInboundMessage": "How can I participate",
-      "unreadCount": 11,
+      "lastMessage": "Thanks for your feedback, we will keep in touch with you soon.",
+      "lastMessageTime": "2025-11-29T07:03:20.241Z",
+      "lastInboundMessageTime": "2025-11-29T07:03:18.989Z",
+      "lastInboundMessage": "Yes, I am Interested",
+      "unreadCount": 12,
       "status": "open",
       "notes": []
     },

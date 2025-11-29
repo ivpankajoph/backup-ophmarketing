@@ -125,6 +125,28 @@ export default function Inbox() {
     }
   }, [chats, selectedChatId]);
 
+  // Mark messages as read when selecting a chat
+  const markAsReadMutation = useMutation({
+    mutationFn: async (contactId: string) => {
+      const res = await fetch(`/api/chats/${contactId}/mark-read`, {
+        method: "POST",
+      });
+      if (!res.ok) throw new Error("Failed to mark as read");
+      return res.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/chats"] });
+    },
+  });
+
+  const handleSelectChat = (chatId: string) => {
+    setSelectedChatId(chatId);
+    const chat = chats.find(c => c.id === chatId);
+    if (chat && chat.unreadCount > 0) {
+      markAsReadMutation.mutate(chat.contactId);
+    }
+  };
+
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages]);
@@ -268,7 +290,7 @@ export default function Inbox() {
                   <div 
                     key={chat.id} 
                     className={`p-4 flex items-start gap-3 hover:bg-muted/50 cursor-pointer transition-colors ${chat.id === selectedChatId ? 'bg-muted/50' : ''}`}
-                    onClick={() => setSelectedChatId(chat.id)}
+                    onClick={() => handleSelectChat(chat.id)}
                   >
                     <Avatar>
                       <AvatarFallback className="bg-primary/10 text-primary">
@@ -277,7 +299,7 @@ export default function Inbox() {
                     </Avatar>
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center justify-between mb-1">
-                        <span className="font-medium truncate">{chat.contact.name}</span>
+                        <span className={`font-medium truncate ${chat.unreadCount > 0 ? 'font-bold' : ''}`}>{chat.contact.name}</span>
                         <span className="text-xs text-muted-foreground whitespace-nowrap">
                           {chat.lastMessageTime ? formatTime(chat.lastMessageTime) : ""}
                         </span>
@@ -349,8 +371,8 @@ export default function Inbox() {
                           <span className="text-[10px] text-muted-foreground/80 block text-right mt-1">
                             {formatTime(msg.timestamp)}
                             {msg.direction === 'outbound' && (
-                              <span className="ml-1">
-                                {msg.status === 'read' ? '✓✓' : msg.status === 'delivered' ? '✓✓' : '✓'}
+                              <span className={`ml-1 ${msg.status === 'read' ? 'text-blue-500' : msg.status === 'failed' ? 'text-red-500' : ''}`}>
+                                {msg.status === 'read' ? '✓✓' : msg.status === 'delivered' ? '✓✓' : msg.status === 'failed' ? '✗' : '✓'}
                               </span>
                             )}
                           </span>
