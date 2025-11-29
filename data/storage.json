@@ -862,6 +862,24 @@
       "status": "sent",
       "id": "e3d4a31c-c7cd-4106-bd9d-5ca8460d8b4c",
       "timestamp": "2025-11-29T07:13:37.172Z"
+    },
+    {
+      "contactId": "4d460e87-b06f-4c96-ab75-3a484e9a18ad",
+      "content": "Yes, I am Interested",
+      "type": "text",
+      "direction": "inbound",
+      "status": "read",
+      "id": "4ae790f7-dec3-431d-bf51-06cbf63ebddf",
+      "timestamp": "2025-11-29T07:37:43.373Z"
+    },
+    {
+      "contactId": "4d460e87-b06f-4c96-ab75-3a484e9a18ad",
+      "content": "Thanks for your feedback, we will keep in touch with you soon.",
+      "type": "text",
+      "direction": "outbound",
+      "status": "sent",
+      "id": "208e34e7-dc79-40f8-80a2-ab7b648e2f6c",
+      "timestamp": "2025-11-29T07:37:44.721Z"
     }
   ],
   "campaigns": [
@@ -1244,8 +1262,8 @@
         "updatedAt": "2025-11-28T06:04:55.063Z"
       },
       "lastMessage": "Thanks for your feedback, we will keep in touch with you soon.",
-      "lastMessageTime": "2025-11-29T07:13:37.172Z",
-      "lastInboundMessageTime": "2025-11-29T07:13:35.822Z",
+      "lastMessageTime": "2025-11-29T07:37:44.721Z",
+      "lastInboundMessageTime": "2025-11-29T07:37:43.373Z",
       "lastInboundMessage": "Yes, I am Interested",
       "unreadCount": 0,
       "status": "open",

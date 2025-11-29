@@ -288,24 +288,42 @@ export async function logBroadcastMessage(log: Omit<BroadcastLog, 'id'>): Promis
 export async function markBroadcastLogAsReplied(phone: string): Promise<number> {
   try {
     const normalizedPhone = phone.replace(/\D/g, '');
+    console.log(`[BroadcastLog] Looking for broadcast logs to mark as replied for phone: ${normalizedPhone}`);
+    
     const logs = await mongodb.readCollection<BroadcastLog>('broadcast_logs');
+    console.log(`[BroadcastLog] Found ${logs.length} total broadcast logs`);
+    
     let updatedCount = 0;
     const now = new Date().toISOString();
     
     for (const log of logs) {
       const logPhone = log.contactPhone.replace(/\D/g, '');
-      // Match if phones are similar (contains each other or match at the end)
-      if ((logPhone.includes(normalizedPhone) || normalizedPhone.includes(logPhone) || 
-           logPhone.endsWith(normalizedPhone.slice(-10)) || normalizedPhone.endsWith(logPhone.slice(-10))) && 
-          !log.replied) {
-        log.replied = true;
-        log.repliedAt = now;
-        await mongodb.updateOne('broadcast_logs', { id: log.id }, log);
-        updatedCount++;
-        console.log(`[BroadcastLog] Marked as replied: ${log.id} for phone ${phone}`);
+      const last10Digits = normalizedPhone.slice(-10);
+      const logLast10Digits = logPhone.slice(-10);
+      
+      // Match if phones share the same last 10 digits (ignoring country code)
+      const phoneMatches = last10Digits === logLast10Digits || 
+                          logPhone.includes(normalizedPhone) || 
+                          normalizedPhone.includes(logPhone);
+      
+      if (phoneMatches && !log.replied) {
+        console.log(`[BroadcastLog] Phone match found! Log phone: ${logPhone}, Incoming: ${normalizedPhone}`);
+        
+        const updateResult = await mongodb.updateOne('broadcast_logs', { id: log.id }, { 
+          replied: true, 
+          repliedAt: now 
+        });
+        
+        if (updateResult) {
+          updatedCount++;
+          console.log(`[BroadcastLog] Successfully marked as replied: ${log.id} (${log.contactPhone})`);
+        } else {
+          console.log(`[BroadcastLog] Failed to update log: ${log.id}`);
+        }
       }
     }
     
+    console.log(`[BroadcastLog] Total logs marked as replied: ${updatedCount}`);
     return updatedCount;
   } catch (error) {
     console.error('[BroadcastLog] Error marking as replied:', error);

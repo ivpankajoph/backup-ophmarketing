@@ -133,6 +133,8 @@ const BroadcastLogSchema = new Schema({
   messageId: { type: String },
   error: { type: String },
   timestamp: { type: String, required: true },
+  replied: { type: Boolean, default: false },
+  repliedAt: { type: String },
 }, { collection: 'broadcast_logs' });
 
 const ImportedContactSchema = new Schema({
