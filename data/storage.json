@@ -564,6 +564,18 @@
       "id": "432ee252-f771-4f7e-9459-c642c7921577",
       "createdAt": "2025-11-29T09:11:45.263Z",
       "updatedAt": "2025-11-29T09:11:45.263Z"
+    },
+    {
+      "name": "+919503182369",
+      "phone": "919503182369",
+      "email": "",
+      "tags": [
+        "WhatsApp"
+      ],
+      "notes": "Auto-created from WhatsApp message",
+      "id": "9a5dbbd4-7a68-4f6b-b956-0f04620c6ed9",
+      "createdAt": "2025-11-29T10:28:21.428Z",
+      "updatedAt": "2025-11-29T10:28:21.428Z"
     }
   ],
   "messages": [
@@ -2500,7 +2512,7 @@
       "content": "hello",
       "type": "text",
       "direction": "inbound",
-      "status": "sent",
+      "status": "read",
       "id": "9f555da1-e145-40a9-9ff9-ede23ca89533",
       "timestamp": "2025-11-29T10:13:40.611Z"
     },
@@ -2518,7 +2530,7 @@
       "content": "nothing",
       "type": "text",
       "direction": "inbound",
-      "status": "sent",
+      "status": "read",
       "id": "642fd66d-92e6-40b2-962e-77d71f17330b",
       "timestamp": "2025-11-29T10:14:11.904Z"
     },
@@ -2530,6 +2542,159 @@
       "status": "sent",
       "id": "8ae4b97d-3604-4f95-9f93-d64e0ac3f4a0",
       "timestamp": "2025-11-29T10:14:14.852Z"
+    },
+    {
+      "contactId": "4d460e87-b06f-4c96-ab75-3a484e9a18ad",
+      "content": "Hey there! 🌟 Just wanted to drop a quick hello and see how you're doing. Hope your day is going great! 😊 Feel free to share any updates or just say hi. Take care!",
+      "type": "text",
+      "direction": "outbound",
+      "status": "sent",
+      "id": "47a9db69-7a00-4c82-918f-0b991f9d42b3",
+      "timestamp": "2025-11-29T10:23:04.366Z"
+    },
+    {
+      "contactId": "4d460e87-b06f-4c96-ab75-3a484e9a18ad",
+      "content": "I'm here to help with all your fish and fishing questions! If you'd like to chat about your favorite fishing spots or techniques, just let me know! 🎣",
+      "type": "text",
+      "direction": "outbound",
+      "status": "sent",
+      "id": "8840ca7e-150b-40af-8289-99aa93956e4f",
+      "timestamp": "2025-11-29T10:23:56.580Z"
+    },
+    {
+      "contactId": "4d460e87-b06f-4c96-ab75-3a484e9a18ad",
+      "content": "how are you",
+      "type": "text",
+      "direction": "outbound",
+      "status": "sent",
+      "id": "9bcfcdae-c66d-4e39-9435-c5c60899c907",
+      "timestamp": "2025-11-29T10:24:07.108Z"
+    },
+    {
+      "contactId": "4d460e87-b06f-4c96-ab75-3a484e9a18ad",
+      "content": "Are you a fish",
+      "type": "text",
+      "direction": "inbound",
+      "status": "sent",
+      "id": "d5d0537b-737b-4644-82f6-0623c0ba694b",
+      "timestamp": "2025-11-29T10:24:18.202Z"
+    },
+    {
+      "contactId": "4d460e87-b06f-4c96-ab75-3a484e9a18ad",
+      "content": "No, I'm not a fish. I'm an artificial intelligence language model created by OpenAI. How can I assist you today?",
+      "type": "text",
+      "direction": "outbound",
+      "status": "sent",
+      "id": "4e71d216-1257-487c-8f02-2cdcd7b36449",
+      "timestamp": "2025-11-29T10:24:21.214Z"
+    },
+    {
+      "contactId": "4d460e87-b06f-4c96-ab75-3a484e9a18ad",
+      "content": "Ohh  you are a trained fish according to your costom training",
+      "type": "text",
+      "direction": "inbound",
+      "status": "sent",
+      "id": "eb40ae2a-f977-4873-9f05-d310fb964e6b",
+      "timestamp": "2025-11-29T10:25:07.975Z"
+    },
+    {
+      "contactId": "4d460e87-b06f-4c96-ab75-3a484e9a18ad",
+      "content": "I understand the humor, but no, I'm not a trained fish. I'm a computer program designed to process and generate human language. If you have any questions or need information, feel free to ask!",
+      "type": "text",
+      "direction": "outbound",
+      "status": "sent",
+      "id": "c4eda452-daff-48e6-9b5e-39694f3711a8",
+      "timestamp": "2025-11-29T10:25:11.595Z"
+    },
+    {
+      "contactId": "4d460e87-b06f-4c96-ab75-3a484e9a18ad",
+      "content": "I’m here to help with all your fish and fishing questions! If you have a favorite species or fishing spot, let’s chat about it! 🎣🐟",
+      "type": "text",
+      "direction": "outbound",
+      "status": "sent",
+      "id": "38072a6a-6a1d-449e-bf6b-8abaeddf5fd0",
+      "timestamp": "2025-11-29T10:25:52.359Z"
+    },
+    {
+      "contactId": "4d460e87-b06f-4c96-ab75-3a484e9a18ad",
+      "content": "How are you",
+      "type": "text",
+      "direction": "inbound",
+      "status": "sent",
+      "id": "da206184-af16-4ca9-b69e-463bb54c2a11",
+      "timestamp": "2025-11-29T10:26:04.246Z"
+    },
+    {
+      "contactId": "4d460e87-b06f-4c96-ab75-3a484e9a18ad",
+      "content": "Thank you for asking! I don't have feelings or emotions, but I'm here and ready to help you. How can I assist you today?",
+      "type": "text",
+      "direction": "outbound",
+      "status": "sent",
+      "id": "2d6e8621-acaf-4374-b132-e8671cb887ee",
+      "timestamp": "2025-11-29T10:26:07.269Z"
+    },
+    {
+      "contactId": "9a5dbbd4-7a68-4f6b-b956-0f04620c6ed9",
+      "content": "Fees",
+      "type": "text",
+      "direction": "inbound",
+      "status": "sent",
+      "id": "dad2bf65-9e24-4a46-8db5-a66c2b12094e",
+      "timestamp": "2025-11-29T10:28:21.431Z"
+    },
+    {
+      "contactId": "9a5dbbd4-7a68-4f6b-b956-0f04620c6ed9",
+      "content": "It seems like your query is quite broad. Could you please provide more context or specify the type of fees you are referring to? For instance, are you asking about bank fees, college tuition fees, service charges, or something else entirely? Providing more details will help me give you a more accurate and helpful response.",
+      "type": "text",
+      "direction": "outbound",
+      "status": "sent",
+      "id": "0143465c-f4e6-4d0f-9b17-697375487edd",
+      "timestamp": "2025-11-29T10:28:24.410Z"
+    },
+    {
+      "contactId": "8a9e2cfc-5b0b-4473-a1e1-ed26edeaa049",
+      "content": "Hi! 😊 I'm Aarohi from Top Life Changers Awards 2026. Ready to discover your perfect award category? 🏆✨ Let's chat and make it happen! 🌟",
+      "type": "text",
+      "direction": "outbound",
+      "status": "sent",
+      "id": "7b113112-c031-423e-858f-88d5aecb03f2",
+      "timestamp": "2025-11-29T10:29:49.778Z"
+    },
+    {
+      "contactId": "8a9e2cfc-5b0b-4473-a1e1-ed26edeaa049",
+      "content": "any fees",
+      "type": "text",
+      "direction": "inbound",
+      "status": "sent",
+      "id": "405487b4-9ffb-4c0e-a21a-b844046f5a44",
+      "timestamp": "2025-11-29T10:30:18.017Z"
+    },
+    {
+      "contactId": "8a9e2cfc-5b0b-4473-a1e1-ed26edeaa049",
+      "content": "Could you provide more context or specify what kind of fees you're referring to? Are you asking about fees related to a specific service, product, or event?",
+      "type": "text",
+      "direction": "outbound",
+      "status": "sent",
+      "id": "cc3b2616-da9b-40f9-9172-7da39911089d",
+      "timestamp": "2025-11-29T10:30:20.847Z"
+    },
+    {
+      "contactId": "8a9e2cfc-5b0b-4473-a1e1-ed26edeaa049",
+      "content": "is this paid awards ?",
+      "type": "text",
+      "direction": "inbound",
+      "status": "sent",
+      "id": "425a6066-0337-43ff-bc1c-60e20e444659",
+      "timestamp": "2025-11-29T10:30:51.401Z"
+    },
+    {
+      "contactId": "8a9e2cfc-5b0b-4473-a1e1-ed26edeaa049",
+      "content": "Could you please provide more details about the specific awards you're referring to? There are many types of awards across various industries and fields, and the fee structure can vary widely depending on the organization and the nature of the award. Some awards may have an entry or nomination fee, while others might be free to enter.",
+      "type": "text",
+      "direction": "outbound",
+      "status": "sent",
+      "id": "0c41758d-e079-4f10-ba39-19af10ac9b82",
+      "timestamp": "2025-11-29T10:30:54.427Z"
     }
   ],
   "campaigns": [
@@ -2865,11 +3030,11 @@
         "createdAt": "2025-11-27T22:31:14.359Z",
         "updatedAt": "2025-11-27T22:31:14.359Z"
       },
-      "lastMessage": "Could you please provide more context or specify which award you are referring to? There are many awards across different fields, some of which come with monetary prizes and others that do not.",
-      "lastMessageTime": "2025-11-29T09:16:33.247Z",
-      "lastInboundMessageTime": "2025-11-29T09:16:30.480Z",
-      "lastInboundMessage": "Is this paid award",
-      "unreadCount": 0,
+      "lastMessage": "Could you please provide more details about the specific awards you're referring to? There are many types of awards across various industries and fields, and the fee structure can vary widely depending on the organization and the nature of the award. Some awards may have an entry or nomination fee, while others might be free to enter.",
+      "lastMessageTime": "2025-11-29T10:30:54.427Z",
+      "lastInboundMessageTime": "2025-11-29T10:30:51.401Z",
+      "lastInboundMessage": "is this paid awards ?",
+      "unreadCount": 2,
       "status": "open",
       "notes": []
     },
@@ -2911,11 +3076,11 @@
         "createdAt": "2025-11-28T06:04:55.063Z",
         "updatedAt": "2025-11-28T06:04:55.063Z"
       },
-      "lastMessage": "Alright, feel free to reach out if you have any questions or need assistance with anything. Have a great day!",
-      "lastMessageTime": "2025-11-29T10:14:14.852Z",
-      "lastInboundMessageTime": "2025-11-29T10:14:11.904Z",
-      "lastInboundMessage": "nothing",
-      "unreadCount": 2,
+      "lastMessage": "Thank you for asking! I don't have feelings or emotions, but I'm here and ready to help you. How can I assist you today?",
+      "lastMessageTime": "2025-11-29T10:26:07.269Z",
+      "lastInboundMessageTime": "2025-11-29T10:26:04.246Z",
+      "lastInboundMessage": "How are you",
+      "unreadCount": 3,
       "status": "open",
       "notes": []
     },
@@ -3789,6 +3954,29 @@
       "lastMessageTime": "2025-11-29T09:11:46.643Z",
       "lastInboundMessageTime": "2025-11-29T09:11:45.267Z",
       "lastInboundMessage": "Yes, I am Interested",
+      "unreadCount": 1,
+      "status": "open",
+      "notes": []
+    },
+    {
+      "id": "chat-9a5dbbd4-7a68-4f6b-b956-0f04620c6ed9",
+      "contactId": "9a5dbbd4-7a68-4f6b-b956-0f04620c6ed9",
+      "contact": {
+        "name": "+919503182369",
+        "phone": "919503182369",
+        "email": "",
+        "tags": [
+          "WhatsApp"
+        ],
+        "notes": "Auto-created from WhatsApp message",
+        "id": "9a5dbbd4-7a68-4f6b-b956-0f04620c6ed9",
+        "createdAt": "2025-11-29T10:28:21.428Z",
+        "updatedAt": "2025-11-29T10:28:21.428Z"
+      },
+      "lastMessage": "It seems like your query is quite broad. Could you please provide more context or specify the type of fees you are referring to? For instance, are you asking about bank fees, college tuition fees, service charges, or something else entirely? Providing more details will help me give you a more accurate and helpful response.",
+      "lastMessageTime": "2025-11-29T10:28:24.410Z",
+      "lastInboundMessageTime": "2025-11-29T10:28:21.431Z",
+      "lastInboundMessage": "Fees",
       "unreadCount": 1,
       "status": "open",
       "notes": []
