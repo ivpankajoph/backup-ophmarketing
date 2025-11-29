@@ -184,8 +184,9 @@ async function saveInboundMessage(from: string, content: string, type: string, b
     });
 
     if (!contact) {
+      const formattedPhone = from.startsWith('+') ? from : `+${from}`;
       contact = await storage.createContact({
-        name: `WhatsApp ${from}`,
+        name: formattedPhone,
         phone: from,
         email: '',
         tags: ['WhatsApp'],
@@ -234,9 +235,12 @@ async function saveInboundMessage(from: string, content: string, type: string, b
         agentToUse = agents.find((a: any) => a.isActive);
       }
       
+      const displayName = contact.name && !contact.name.startsWith('WhatsApp ') 
+        ? contact.name 
+        : (from.startsWith('+') ? from : `+${from}`);
       await aiAnalytics.createOrUpdateQualification(
         from,
-        contact.name || `WhatsApp ${from}`,
+        displayName,
         content,
         source,
         {
@@ -468,8 +472,9 @@ export async function sendTemplateMessageEndpoint(req: Request, res: Response) {
       });
 
       if (!contact) {
+        const formattedPhone = to.startsWith('+') ? to : `+${to}`;
         contact = await storage.createContact({
-          name: `WhatsApp ${to}`,
+          name: formattedPhone,
           phone: to,
           email: '',
           tags: ['WhatsApp'],

@@ -2332,6 +2332,87 @@
       "status": "sent",
       "id": "bd9645bd-5565-4273-b536-cdaff9e5229c",
       "timestamp": "2025-11-29T09:11:46.643Z"
+    },
+    {
+      "contactId": "4d460e87-b06f-4c96-ab75-3a484e9a18ad",
+      "content": "Hi there! 😊 Just wanted to drop by and say hello. Hope you're having a fantastic day! If you need anything or just want to chat, I'm here. Take care! 🌟",
+      "type": "text",
+      "direction": "outbound",
+      "status": "sent",
+      "id": "a9cd7957-1f8d-4834-99bc-2c040a11e220",
+      "timestamp": "2025-11-29T09:14:29.428Z"
+    },
+    {
+      "contactId": "4d460e87-b06f-4c96-ab75-3a484e9a18ad",
+      "content": "How is the price",
+      "type": "text",
+      "direction": "inbound",
+      "status": "sent",
+      "id": "43d9df8e-48f7-4838-8362-0c8e1a5a1dec",
+      "timestamp": "2025-11-29T09:14:44.202Z"
+    },
+    {
+      "contactId": "4d460e87-b06f-4c96-ab75-3a484e9a18ad",
+      "content": "I'm sorry, but you haven't specified what product or service you're asking about. Could you please provide more details so I can assist you better?",
+      "type": "text",
+      "direction": "outbound",
+      "status": "sent",
+      "id": "91339071-c8e6-4a7b-9d9f-a4762574c2ed",
+      "timestamp": "2025-11-29T09:14:46.381Z"
+    },
+    {
+      "contactId": "8a9e2cfc-5b0b-4473-a1e1-ed26edeaa049",
+      "content": "Hey there! 😊 Just wanted to say hi and hope you're having a great day! If you need anything or just want to chat, I'm here. Take care! 🌟",
+      "type": "text",
+      "direction": "outbound",
+      "status": "sent",
+      "id": "af3ff072-6c88-4107-b980-ed4374c29844",
+      "timestamp": "2025-11-29T09:15:44.780Z"
+    },
+    {
+      "contactId": "4d460e87-b06f-4c96-ab75-3a484e9a18ad",
+      "content": "Hi there! 😊 Just wanted to drop by and say hello. Hope you're having a fantastic day! If you need anything or just want to chat, I'm here. Take care! 🌟",
+      "type": "text",
+      "direction": "outbound",
+      "status": "sent",
+      "id": "737f0210-55d6-475b-a608-b5bd692add58",
+      "timestamp": "2025-11-29T09:15:46.651Z"
+    },
+    {
+      "contactId": "8a9e2cfc-5b0b-4473-a1e1-ed26edeaa049",
+      "content": "Hi",
+      "type": "text",
+      "direction": "inbound",
+      "status": "read",
+      "id": "2c155c0a-f04b-4b6d-a041-7165a57ccc96",
+      "timestamp": "2025-11-29T09:16:11.845Z"
+    },
+    {
+      "contactId": "8a9e2cfc-5b0b-4473-a1e1-ed26edeaa049",
+      "content": "Hello! How can I help you today?",
+      "type": "text",
+      "direction": "outbound",
+      "status": "sent",
+      "id": "ed5ad5fd-a459-4088-9fab-a90dd5f11b50",
+      "timestamp": "2025-11-29T09:16:14.176Z"
+    },
+    {
+      "contactId": "8a9e2cfc-5b0b-4473-a1e1-ed26edeaa049",
+      "content": "Is this paid award",
+      "type": "text",
+      "direction": "inbound",
+      "status": "read",
+      "id": "e7c456be-9db4-4119-8c4c-d920677c3f52",
+      "timestamp": "2025-11-29T09:16:30.480Z"
+    },
+    {
+      "contactId": "8a9e2cfc-5b0b-4473-a1e1-ed26edeaa049",
+      "content": "Could you please provide more context or specify which award you are referring to? There are many awards across different fields, some of which come with monetary prizes and others that do not.",
+      "type": "text",
+      "direction": "outbound",
+      "status": "sent",
+      "id": "af4f7370-e28b-4f67-8208-05dec9064264",
+      "timestamp": "2025-11-29T09:16:33.247Z"
     }
   ],
   "campaigns": [
@@ -2667,10 +2748,10 @@
         "createdAt": "2025-11-27T22:31:14.359Z",
         "updatedAt": "2025-11-27T22:31:14.359Z"
       },
-      "lastMessage": "Thanks for your feedback, we will keep in touch with you soon.",
-      "lastMessageTime": "2025-11-29T07:13:30.674Z",
-      "lastInboundMessageTime": "2025-11-29T07:13:29.423Z",
-      "lastInboundMessage": "Yes, I am Interested",
+      "lastMessage": "Could you please provide more context or specify which award you are referring to? There are many awards across different fields, some of which come with monetary prizes and others that do not.",
+      "lastMessageTime": "2025-11-29T09:16:33.247Z",
+      "lastInboundMessageTime": "2025-11-29T09:16:30.480Z",
+      "lastInboundMessage": "Is this paid award",
       "unreadCount": 0,
       "status": "open",
       "notes": []
@@ -2713,11 +2794,11 @@
         "createdAt": "2025-11-28T06:04:55.063Z",
         "updatedAt": "2025-11-28T06:04:55.063Z"
       },
-      "lastMessage": "cool",
-      "lastMessageTime": "2025-11-29T09:11:05.241Z",
-      "lastInboundMessageTime": "2025-11-29T07:44:18.953Z",
-      "lastInboundMessage": "Yes, I am Interested",
-      "unreadCount": 0,
+      "lastMessage": "Hi there! 😊 Just wanted to drop by and say hello. Hope you're having a fantastic day! If you need anything or just want to chat, I'm here. Take care! 🌟",
+      "lastMessageTime": "2025-11-29T09:15:46.651Z",
+      "lastInboundMessageTime": "2025-11-29T09:14:44.202Z",
+      "lastInboundMessage": "How is the price",
+      "unreadCount": 1,
       "status": "open",
       "notes": []
     },

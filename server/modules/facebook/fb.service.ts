@@ -154,9 +154,35 @@ export async function syncLeadsForForm(formId: string): Promise<Lead[]> {
     throw new Error('Facebook credentials not configured. Please set FB_PAGE_ACCESS_TOKEN.');
   }
 
-  const form = await findById<LeadForm>(FORMS_COLLECTION, formId);
+  console.log(`[FB Service] Looking for form with id: ${formId}`);
+  
+  let form = await findById<LeadForm>(FORMS_COLLECTION, formId);
+  
   if (!form) {
-    throw new Error('Form not found');
+    console.log(`[FB Service] Form not found by id, checking by fbFormId...`);
+    form = await findByField<LeadForm>(FORMS_COLLECTION, 'fbFormId', formId);
+    
+    if (!form) {
+      console.log(`[FB Service] Form not found by fbFormId either, checking all forms...`);
+      const allForms = await readCollection<LeadForm>(FORMS_COLLECTION);
+      console.log(`[FB Service] Total forms in database: ${allForms.length}`);
+      if (allForms.length > 0) {
+        allForms.forEach(f => console.log(`[FB Service] Form: id=${f.id}, fbFormId=${f.fbFormId}, name=${f.name}`));
+      }
+      
+      const foundForm = allForms.find(f => f.id === formId || f.fbFormId === formId);
+      if (!foundForm) {
+        console.log(`[FB Service] Form still not found after checking all forms`);
+        throw new Error('Form not found');
+      }
+      form = foundForm;
+    }
+  }
+  
+  console.log(`[FB Service] Found form: ${form.name} (fbFormId: ${form.fbFormId})`);
+  
+  if (!form.fbFormId) {
+    throw new Error('Form is missing Facebook Form ID. Please re-sync forms from Facebook.');
   }
 
   try {

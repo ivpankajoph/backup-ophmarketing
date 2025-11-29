@@ -405,6 +405,22 @@ export default function WindowInbox() {
     return `${hours} hr ${minutes} min left`;
   };
 
+  const formatContactName = (name: string, phone: string) => {
+    if (name.startsWith('WhatsApp ')) {
+      const phoneNumber = phone.startsWith('+') ? phone : `+${phone}`;
+      return phoneNumber;
+    }
+    return name;
+  };
+
+  const getInitials = (name: string, phone: string) => {
+    const displayName = formatContactName(name, phone);
+    if (displayName.startsWith('+')) {
+      return displayName.slice(-2);
+    }
+    return displayName.split(' ').map(n => n[0]).join('').slice(0, 2).toUpperCase();
+  };
+
   const filteredChats = chats
     .filter(chat => 
       chat.contact.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -499,14 +515,14 @@ export default function WindowInbox() {
                       >
                         <Avatar>
                           <AvatarFallback className="bg-primary/10 text-primary">
-                            {chat.contact.name.split(' ').map(n => n[0]).join('').slice(0, 2)}
+                            {getInitials(chat.contact.name, chat.contact.phone)}
                           </AvatarFallback>
                         </Avatar>
                         <div className="flex-1 min-w-0">
                           <div className="flex items-center justify-between mb-1">
                             <div className="flex items-center gap-2">
                               <span className={`font-medium truncate ${chat.unreadCount > 0 ? 'font-bold' : ''}`}>
-                                {chat.contact.name}
+                                {formatContactName(chat.contact.name, chat.contact.phone)}
                               </span>
                               {chat.unreadCount > 0 && (
                                 <span className="h-5 w-5 rounded-full bg-primary text-primary-foreground text-[10px] flex items-center justify-center font-medium">
@@ -544,11 +560,11 @@ export default function WindowInbox() {
                   <div className="flex items-center gap-3">
                     <Avatar>
                       <AvatarFallback className="bg-primary/10 text-primary">
-                        {selectedChat.contact.name.split(' ').map(n => n[0]).join('').slice(0, 2)}
+                        {getInitials(selectedChat.contact.name, selectedChat.contact.phone)}
                       </AvatarFallback>
                     </Avatar>
                     <div>
-                      <h3 className="font-medium">{selectedChat.contact.name}</h3>
+                      <h3 className="font-medium">{formatContactName(selectedChat.contact.name, selectedChat.contact.phone)}</h3>
                       <div className="flex items-center gap-2">
                         <span className="text-xs text-muted-foreground">{selectedChat.contact.phone}</span>
                         <Badge variant="outline" className="text-xs bg-green-50 text-green-700 border-green-200">

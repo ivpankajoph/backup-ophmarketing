@@ -38,24 +38,29 @@ const AgentSchema = new Schema({
 
 const FormSchema = new Schema({
   id: { type: String, required: true, unique: true },
+  fbFormId: { type: String, required: true },
   name: { type: String, required: true },
   status: { type: String, default: 'active' },
   pageId: { type: String },
   pageName: { type: String },
   leadCount: { type: Number, default: 0 },
-  createdAt: { type: String, required: true },
+  createdTime: { type: String },
+  createdAt: { type: String },
   syncedAt: { type: String, required: true },
 }, { collection: 'forms' });
 
 const LeadSchema = new Schema({
   id: { type: String, required: true, unique: true },
+  fbLeadId: { type: String },
   formId: { type: String, required: true },
   formName: { type: String },
   name: { type: String, default: '' },
   email: { type: String, default: '' },
   phone: { type: String, default: '' },
   fieldData: { type: Schema.Types.Mixed, default: {} },
-  createdAt: { type: String, required: true },
+  createdTime: { type: String },
+  createdAt: { type: String },
+  syncedAt: { type: String },
   autoReplySent: { type: Boolean, default: false },
   autoReplyMessage: { type: String },
   autoReplySentAt: { type: String },
