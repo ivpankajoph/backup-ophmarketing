@@ -147,30 +147,49 @@ export default function WindowInbox() {
   });
 
   const sendMessageMutation = useMutation({
-    mutationFn: async (content: string) => {
-      if (!selectedContactId) throw new Error("No contact selected");
+    mutationFn: async ({ content, phone, contactId }: { content: string; phone: string; contactId: string }) => {
+      // Send via WhatsApp API
+      const waRes = await fetch("/api/webhook/whatsapp/send", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          to: phone,
+          message: content,
+        }),
+      });
+      
+      if (!waRes.ok) {
+        const error = await waRes.json();
+        throw new Error(error.error || "Failed to send WhatsApp message");
+      }
+      
+      // Also save to local storage for inbox display
       const res = await fetch("/api/messages", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          contactId: selectedContactId,
+          contactId,
           content,
           type: "text",
           direction: "outbound",
           status: "sent",
         }),
       });
-      if (!res.ok) throw new Error("Failed to send message");
-      return res.json();
+      
+      if (!res.ok) {
+        console.error("Failed to save message locally, but WhatsApp sent");
+      }
+      
+      return { waResult: await waRes.json(), contactId };
     },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/messages", selectedContactId] });
+    onSuccess: (data) => {
+      queryClient.invalidateQueries({ queryKey: ["/api/messages", data.contactId] });
       queryClient.invalidateQueries({ queryKey: ["/api/chats/window"] });
       setMessageInput("");
-      toast.success("Message sent successfully");
+      toast.success("Message sent via WhatsApp");
     },
-    onError: () => {
-      toast.error("Failed to send message");
+    onError: (error: Error) => {
+      toast.error(error.message || "Failed to send message");
     },
   });
 
@@ -213,8 +232,13 @@ export default function WindowInbox() {
   }, [messages]);
 
   const handleSendMessage = () => {
-    if (!messageInput.trim()) return;
-    sendMessageMutation.mutate(messageInput);
+    if (!messageInput.trim() || !selectedChat || !selectedContactId) return;
+    const phone = selectedChat.contact.phone.replace(/\D/g, '');
+    sendMessageMutation.mutate({ 
+      content: messageInput, 
+      phone, 
+      contactId: selectedContactId 
+    });
   };
 
   const handleKeyPress = (e: React.KeyboardEvent) => {

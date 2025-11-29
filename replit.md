@@ -152,6 +152,9 @@ Required secrets for full functionality:
 The application runs on port 5000 with `npm run dev`.
 
 ## Recent Changes
+- **Nov 29, 2025**: Fixed WhatsApp button/interactive message parsing - now shows actual button text instead of "[button message]"
+- **Nov 29, 2025**: Fixed Inbox and 24-Hour Window to send messages via WhatsApp API (previously only saved locally)
+- **Nov 29, 2025**: Added complete automation flow: template → button response → AI agent auto-reply → display in inbox
 - **Nov 29, 2025**: Optimized CSV import with bulk MongoDB operations (insertMany) for better performance
 - **Nov 29, 2025**: Added fully functional Add Template page with form validation, live preview, and API integration
 - **Nov 29, 2025**: Added unread message count badge to 24-Hour Window inbox in sidebar navigation

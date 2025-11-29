@@ -52,16 +52,46 @@ export async function handleWebhook(req: Request, res: Response) {
 
     const message = messages[0];
     const from = message.from;
-    const messageText = message.text?.body || '';
     const messageType = message.type;
+    
+    // Extract message content based on type
+    let messageText = '';
+    let buttonPayload = '';
+    
+    if (messageType === 'text') {
+      messageText = message.text?.body || '';
+    } else if (messageType === 'button') {
+      // Quick reply button response
+      messageText = message.button?.text || '';
+      buttonPayload = message.button?.payload || '';
+      console.log(`Button response from ${from}: text="${messageText}", payload="${buttonPayload}"`);
+    } else if (messageType === 'interactive') {
+      // Interactive message response (button_reply or list_reply)
+      const interactive = message.interactive;
+      if (interactive?.type === 'button_reply') {
+        messageText = interactive.button_reply?.title || '';
+        buttonPayload = interactive.button_reply?.id || '';
+        console.log(`Interactive button reply from ${from}: title="${messageText}", id="${buttonPayload}"`);
+      } else if (interactive?.type === 'list_reply') {
+        messageText = interactive.list_reply?.title || '';
+        buttonPayload = interactive.list_reply?.id || '';
+        console.log(`Interactive list reply from ${from}: title="${messageText}", id="${buttonPayload}"`);
+      }
+    }
 
-    console.log(`Received message from ${from}: ${messageText}`);
+    console.log(`Received ${messageType} message from ${from}: ${messageText}`);
 
-    await saveInboundMessage(from, messageText, messageType);
+    // Save the inbound message with actual button text
+    await saveInboundMessage(from, messageText || buttonPayload, messageType, buttonPayload);
 
-    if (messageType !== 'text' || !messageText) {
+    // Process message if we have content (text, button, or interactive)
+    if (!messageText && !buttonPayload) {
+      console.log(`No processable content for message type: ${messageType}`);
       return res.sendStatus(200);
     }
+    
+    // Use messageText or buttonPayload for AI processing
+    const contentForAI = messageText || buttonPayload;
 
     const lead = await findLeadByPhone(from);
     let agentToUse = null;
@@ -86,17 +116,19 @@ export async function handleWebhook(req: Request, res: Response) {
     if (!conversationHistory[from]) {
       conversationHistory[from] = [];
     }
-    conversationHistory[from].push({ role: 'user', content: messageText });
+    conversationHistory[from].push({ role: 'user', content: contentForAI });
 
     const recentHistory = conversationHistory[from].slice(-10);
 
-    const aiResponse = await generateAgentResponse(messageText, agentToUse, recentHistory.slice(0, -1));
+    const aiResponse = await generateAgentResponse(contentForAI, agentToUse, recentHistory.slice(0, -1));
     
     conversationHistory[from].push({ role: 'assistant', content: aiResponse });
 
     await sendWhatsAppMessage(from, aiResponse);
     
     await saveOutboundMessage(from, aiResponse);
+
+    console.log(`AI auto-reply sent to ${from}: ${aiResponse.substring(0, 100)}...`);
 
     return res.sendStatus(200);
   } catch (error) {
@@ -115,7 +147,7 @@ async function findLeadByPhone(phone: string) {
   });
 }
 
-async function saveInboundMessage(from: string, content: string, type: string) {
+async function saveInboundMessage(from: string, content: string, type: string, buttonPayload?: string) {
   try {
     const normalizedPhone = from.replace(/\D/g, '');
     
@@ -136,9 +168,19 @@ async function saveInboundMessage(from: string, content: string, type: string) {
       console.log('Created new contact:', contact.id);
     }
 
+    // Format message content based on type
+    let displayContent = content;
+    if (type === 'button' || type === 'interactive') {
+      // Show button text with payload info for clarity
+      displayContent = content;
+      if (buttonPayload && buttonPayload !== content) {
+        displayContent = `${content} [Button: ${buttonPayload}]`;
+      }
+    }
+
     const message = await storage.createMessage({
       contactId: contact.id,
-      content: content || `[${type} message]`,
+      content: displayContent || `[${type} message]`,
       type: 'text' as const,
       direction: 'inbound',
       status: 'sent' as const,
