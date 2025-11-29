@@ -26,6 +26,7 @@ const AgentSchema = new Schema({
   id: { type: String, required: true, unique: true },
   name: { type: String, required: true },
   description: { type: String, default: '' },
+  systemPrompt: { type: String, default: '' },
   instructions: { type: String, default: '' },
   welcomeMessage: { type: String, default: '' },
   model: { type: String, default: 'gpt-4o' },

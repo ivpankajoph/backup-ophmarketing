@@ -101,6 +101,38 @@ export default function WindowInbox() {
   const [customMessage, setCustomMessage] = useState("");
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const queryClient = useQueryClient();
+  
+  // Notification sound
+  const notificationAudioRef = useRef<HTMLAudioElement | null>(null);
+  const lastUnreadCountRef = useRef<number>(0);
+  const audioUnlockedRef = useRef<boolean>(false);
+  
+  // Initialize notification audio
+  useEffect(() => {
+    // Create audio element with a simple beep sound (base64 encoded short beep)
+    const beepSound = "data:audio/wav;base64,UklGRnoGAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQoGAACBhYqFbF1fdJivrJBhNjVgodDbq2EcBj+a2telehs/hMGyjnYsT2fJ0sJxIBw4d7O5s4VYQXzQ182bhlltndzV0JqJe3aap7KopZmRjI+TmJ6cmZePhoJ+fHx8fH2AgYSGiYyPkZOVlZaWlpWUkpCNioaDgX9+fX19fn+BhIiMkJOXmpyenp6dnJqXlJGOioaDgYB/f4CBg4aJjZCTlpmbnZ2dnJqYlZKPjImGhIKBgICAgIGChYiLjpGUl5manJ2dnJuZl5WSkI2KiIaEg4KCgoKDhIaIi42QkpWXmZqbnJybmpiWlJKQjoqJh4aFhISEhISFhoiKjI6QkpSWmJmam5uamZeWlJKQjoyKiIeGhoWFhYWGh4iKjI6QkpSVl5iZmZmYl5aUkpCOjIqIh4aFhYWFhYaHiImLjI6QkpOVlpeYmJiXlpWUkpCOjIqIh4aFhYWFhYaHiImLjY+QkpOVlpeXl5eWlZSSkI+NjIqIh4aFhYWFhoaHiImLjI6PkZKUlZaWlpaVlJOSkI+NjIqJh4aGhYaGhoaHiImKjI2PkJGTlJWVlZWVlJOSkI+OjIuJiIeGhoaGhoaHiImKi42OkJGSk5SUlJSUk5KRkI+OjIuKiYiHh4aGh4eHiImKi4yNj5CRkpOTk5OTkpGQj46NjIuKiYiHh4eHh4eIiImKi4yNjpCQkZGSEpKSkZCPj46NjIuKiYiIh4eHh4iIiImKi4yNjo+QkZGRkZGRkI+Pjo2MjIuKiYmIiIeIiIiIiYmKi4yNjo+PkJCQkJCQj4+OjY2MjIuKiomIiIiIiIiJiYqKi4yNjY6Pj4+Pj4+Pjo6NjYyMi4uKiomJiIiIiIiJiYqKi4yMjY2Ojo6Ojo6OjY2NjIyMi4uKiomJiYiJiYmJiYqKi4uMjI2NjY2NjY2NjY2MjIyMi4uLioqJiYmJiYmJioqKi4uMjIyMjY2NjY2NjI2MjIyMi4uLioqKiomJiYmJiYqKiouLi4yMjI2NjY2MjIyMjIyMi4yLi4uKioqJiYmJiYqKioqLi4uMjIyMjIyMjIyMjIyMi4uLi4uKi4qKioqKioqKioqLi4uLjIyMjIyMjIyMjIyLi4uLi4uLioqKioqKioqKioqLi4uLi4yMjIyMjIyMjIuLi4uLi4uLioqKioqKioqKioqKi4uLi4yMjIyMjIyLi4uLi4uLi4uKioqKioqKioqKi4uLi4uLi4yMjIyMi4uLi4uLi4uLioqKioqKioqKioqLi4uLi4uMjIyMi4uLi4uLi4uLi4qKioqKioqKioqLi4uLi4uLjIyLi4uLi4uLi4uLi4qKioqKioqKioqLi4uLi4uLi4uLi4uLi4uLi4uLioqKioqKioqKi4uLi4uLi4uLi4uLi4uLi4uLi4qKioqKioqKi4uLi4uLi4uLi4uLi4uLi4uLi4qKioqKioqLi4uLi4uLi4uLi4uLi4uLi4uLioqKioqKi4uLi4uLi4uLi4uLi4uLi4uLi4qKioqKi4uLi4uLi4uLi4uLi4uLi4uLi4uKioqKi4uLi4uLi4uLi4uLi4uLi4uLi4uKioqLi4uLi4uLi4uLi4uLi4uLi4uLi4qKioqLi4uLi4uLi4uLi4uLi4uLi4uLi4qKi4uLi4uLi4uLi4uLi4uLi4uLi4uLioqLi4uLi4uLi4uLi4uLi4uLi4uLi4uKi4uLi4uLi4uLi4uLi4uLi4uLi4uLi4qLi4uLi4uLi4uLi4uLi4uLi4uLi4uLi4uLi4uLi4uLi4uLi4uLi4uLi4uLi4uLi4uLi4uLi4uLi4uLi4uLi4uLi4uLi4uLi4uLi4uLi4uLi4uLi4uLi4uLi4uLi4uLi4uLi4uLi4uLi4uLi4uLi4uLi4uLi4uLi4uLi4uLi4uLi4uLi4uLi4uLi4uLi4uLi4uLi4uLi4uLi4uLi4uLi4uLi4uLi4uLi4uLi4uLi4uLi4uLi4uLi4uLi4uLi4uLi4uLi4uLi4uLi4uLi4uLi4uLi4uLi4uLi4uLi4uLi4uLi4uLi4uLi4uLi4uLi4uLi4uLi4uLi4uLi4uLi4uLi4uLi4uLi4uLi4uLi4uLi4uLi4uLi4uLi4uLi4uLi4uLi4uLi4uLi4uLi4uLi4uLi4uLi4uLi4uLi4uLi4uLi4uLi4uLi4uLi4uLi4uLi4uLi4uLi4uLi4uLi4uLi4uLg==";
+    notificationAudioRef.current = new Audio(beepSound);
+    notificationAudioRef.current.volume = 0.5;
+    
+    // Unlock audio on first user interaction
+    const unlockAudio = () => {
+      if (!audioUnlockedRef.current && notificationAudioRef.current) {
+        notificationAudioRef.current.play().then(() => {
+          notificationAudioRef.current?.pause();
+          notificationAudioRef.current!.currentTime = 0;
+          audioUnlockedRef.current = true;
+        }).catch(() => {});
+      }
+    };
+    
+    document.addEventListener('click', unlockAudio, { once: true });
+    document.addEventListener('keydown', unlockAudio, { once: true });
+    
+    return () => {
+      document.removeEventListener('click', unlockAudio);
+      document.removeEventListener('keydown', unlockAudio);
+    };
+  }, []);
 
   const { data: chats = [], isLoading: chatsLoading } = useQuery<Chat[]>({
     queryKey: ["/api/chats/window"],
@@ -216,6 +248,30 @@ export default function WindowInbox() {
 
   const selectedChat = chats.find(c => c.id === selectedChatId);
   const selectedContactId = selectedChat?.contactId;
+
+  // Play notification sound when new messages arrive
+  const isInitialMount = useRef<boolean>(true);
+  
+  useEffect(() => {
+    const totalUnread = chats.reduce((sum, chat) => sum + (chat.unreadCount || 0), 0);
+    
+    // Skip initial mount to avoid playing sound on page load
+    if (isInitialMount.current) {
+      isInitialMount.current = false;
+      lastUnreadCountRef.current = totalUnread;
+      return;
+    }
+    
+    // Play sound if unread count increased (new message received)
+    if (totalUnread > lastUnreadCountRef.current) {
+      if (notificationAudioRef.current && audioUnlockedRef.current) {
+        notificationAudioRef.current.currentTime = 0;
+        notificationAudioRef.current.play().catch(() => {});
+      }
+    }
+    
+    lastUnreadCountRef.current = totalUnread;
+  }, [chats]);
 
   const { data: messages = [], isLoading: messagesLoading } = useQuery<Message[]>({
     queryKey: ["/api/messages", selectedContactId],

@@ -9,7 +9,8 @@ interface ChatMessage {
 interface Agent {
   id: string;
   name: string;
-  systemPrompt: string;
+  systemPrompt?: string;
+  instructions?: string;
   model?: string;
   temperature?: number;
 }
@@ -25,8 +26,10 @@ export async function sendChatCompletion(
   const model = agent?.model || OPENAI_MODEL;
   const temperature = agent?.temperature ?? 0.7;
 
-  const systemMessages: ChatMessage[] = agent?.systemPrompt
-    ? [{ role: 'system', content: agent.systemPrompt }]
+  // Support both systemPrompt and instructions fields for backward compatibility
+  const systemPromptContent = agent?.systemPrompt || agent?.instructions || '';
+  const systemMessages: ChatMessage[] = systemPromptContent
+    ? [{ role: 'system', content: systemPromptContent }]
     : [];
 
   const allMessages = [...systemMessages, ...messages];

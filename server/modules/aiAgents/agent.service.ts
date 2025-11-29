@@ -5,6 +5,7 @@ export interface Agent {
   name: string;
   description: string;
   systemPrompt: string;
+  instructions?: string;
   model: string;
   temperature: number;
   isActive: boolean;

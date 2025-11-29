@@ -2437,7 +2437,7 @@
       "content": "For a teacher",
       "type": "text",
       "direction": "inbound",
-      "status": "sent",
+      "status": "read",
       "id": "39fa02f6-216f-4300-a109-cd031e238d68",
       "timestamp": "2025-11-29T09:36:40.295Z"
     },
@@ -2449,6 +2449,87 @@
       "status": "sent",
       "id": "9a230c53-7539-4db7-b61e-72c5ccc83002",
       "timestamp": "2025-11-29T09:36:43.737Z"
+    },
+    {
+      "contactId": "4d460e87-b06f-4c96-ab75-3a484e9a18ad",
+      "content": "Hey there! 😊 Just wanted to check in and see how you’re doing. Hope your day is going well! Let’s catch up soon! 🌟",
+      "type": "text",
+      "direction": "outbound",
+      "status": "sent",
+      "id": "4e8cf4ac-b2cc-4c13-8c10-575f271d687e",
+      "timestamp": "2025-11-29T10:00:22.068Z"
+    },
+    {
+      "contactId": "4d460e87-b06f-4c96-ab75-3a484e9a18ad",
+      "content": "Hi",
+      "type": "text",
+      "direction": "inbound",
+      "status": "read",
+      "id": "9216af4a-a0f9-4c6a-8100-1ec4d06e5496",
+      "timestamp": "2025-11-29T10:00:40.621Z"
+    },
+    {
+      "contactId": "4d460e87-b06f-4c96-ab75-3a484e9a18ad",
+      "content": "Hello! How can I assist you today?",
+      "type": "text",
+      "direction": "outbound",
+      "status": "sent",
+      "id": "09223ad7-853a-4ebd-a2ee-9fc0e14ee67c",
+      "timestamp": "2025-11-29T10:00:43.461Z"
+    },
+    {
+      "contactId": "bbb8f087-4634-4176-b646-60427ac55035",
+      "content": "Not Interested",
+      "type": "text",
+      "direction": "inbound",
+      "status": "sent",
+      "id": "adea4976-f659-4b64-b391-b94553617294",
+      "timestamp": "2025-11-29T10:13:19.577Z"
+    },
+    {
+      "contactId": "bbb8f087-4634-4176-b646-60427ac55035",
+      "content": "Thanks for your feedback, we will keep in touch with you soon.",
+      "type": "text",
+      "direction": "outbound",
+      "status": "sent",
+      "id": "6ef6557f-4045-48a0-96bf-0ea8558cbdbe",
+      "timestamp": "2025-11-29T10:13:21.719Z"
+    },
+    {
+      "contactId": "4d460e87-b06f-4c96-ab75-3a484e9a18ad",
+      "content": "hello",
+      "type": "text",
+      "direction": "inbound",
+      "status": "sent",
+      "id": "9f555da1-e145-40a9-9ff9-ede23ca89533",
+      "timestamp": "2025-11-29T10:13:40.611Z"
+    },
+    {
+      "contactId": "4d460e87-b06f-4c96-ab75-3a484e9a18ad",
+      "content": "Hi there! What can I do for you today?",
+      "type": "text",
+      "direction": "outbound",
+      "status": "sent",
+      "id": "b35226b5-124c-458e-81db-3ffe038b24e2",
+      "timestamp": "2025-11-29T10:13:43.396Z"
+    },
+    {
+      "contactId": "4d460e87-b06f-4c96-ab75-3a484e9a18ad",
+      "content": "nothing",
+      "type": "text",
+      "direction": "inbound",
+      "status": "sent",
+      "id": "642fd66d-92e6-40b2-962e-77d71f17330b",
+      "timestamp": "2025-11-29T10:14:11.904Z"
+    },
+    {
+      "contactId": "4d460e87-b06f-4c96-ab75-3a484e9a18ad",
+      "content": "Alright, feel free to reach out if you have any questions or need assistance with anything. Have a great day!",
+      "type": "text",
+      "direction": "outbound",
+      "status": "sent",
+      "id": "8ae4b97d-3604-4f95-9f93-d64e0ac3f4a0",
+      "timestamp": "2025-11-29T10:14:14.852Z"
     }
   ],
   "campaigns": [
@@ -2830,11 +2911,11 @@
         "createdAt": "2025-11-28T06:04:55.063Z",
         "updatedAt": "2025-11-28T06:04:55.063Z"
       },
-      "lastMessage": "Alright! If you have any questions or need assistance, feel free to ask.",
-      "lastMessageTime": "2025-11-29T09:33:26.168Z",
-      "lastInboundMessageTime": "2025-11-29T09:33:22.697Z",
-      "lastInboundMessage": "Nothing",
-      "unreadCount": 0,
+      "lastMessage": "Alright, feel free to reach out if you have any questions or need assistance with anything. Have a great day!",
+      "lastMessageTime": "2025-11-29T10:14:14.852Z",
+      "lastInboundMessageTime": "2025-11-29T10:14:11.904Z",
+      "lastInboundMessage": "nothing",
+      "unreadCount": 2,
       "status": "open",
       "notes": []
     },
@@ -3337,10 +3418,10 @@
         "updatedAt": "2025-11-29T08:02:24.663Z"
       },
       "lastMessage": "Thanks for your feedback, we will keep in touch with you soon.",
-      "lastMessageTime": "2025-11-29T08:02:25.816Z",
-      "lastInboundMessageTime": "2025-11-29T08:02:24.670Z",
-      "lastInboundMessage": "Yes, I am Interested",
-      "unreadCount": 1,
+      "lastMessageTime": "2025-11-29T10:13:21.719Z",
+      "lastInboundMessageTime": "2025-11-29T10:13:19.577Z",
+      "lastInboundMessage": "Not Interested",
+      "unreadCount": 2,
       "status": "open",
       "notes": []
     },
@@ -3685,7 +3766,7 @@
       "lastMessageTime": "2025-11-29T09:36:43.737Z",
       "lastInboundMessageTime": "2025-11-29T09:36:40.295Z",
       "lastInboundMessage": "For a teacher",
-      "unreadCount": 1,
+      "unreadCount": 0,
       "status": "open",
       "notes": []
     },

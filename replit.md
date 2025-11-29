@@ -28,6 +28,8 @@ The system incorporates a modular backend structure, allowing for independent de
 - **Meta Business Suite**: For syncing and approving message templates.
 
 ## Recent Changes (November 29, 2025)
+- **AI Agent Instructions Fix**: Fixed field mismatch between MongoDB schema and application code. MongoDB now stores both `systemPrompt` and `instructions` fields, with the OpenAI service supporting fallback from `systemPrompt` to `instructions` for backward compatibility. Agents now correctly follow their configured instructions.
+- **Notification Sound for Incoming Messages**: Added beep notification sound when new messages are received in the 24-Hour Window Inbox. Sound plays when unread count increases (new inbound messages), with browser autoplay restrictions handled via user interaction unlock.
 - **24-Hour Window Inbox Contact Names**: Fixed contact name enrichment to properly display imported contact names instead of auto-generated "WhatsApp XXX" names. The fix filters out auto-generated names when building the phone-to-name lookup maps, allowing real names from imported contacts to be displayed via last-10-digit phone matching.
 - **AI Agent Reports**: Fixed date formatting to safely handle invalid/undefined timestamps, preventing runtime errors.
 - **Facebook Lead Forms Sync**: Enhanced form lookup to search by both internal ID and Facebook Form ID, resolving "form not found" errors during lead synchronization.
