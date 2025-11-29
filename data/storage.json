@@ -600,6 +600,18 @@
       "id": "3b4e746a-c4f8-484b-818d-06ed849299c7",
       "createdAt": "2025-11-29T10:45:06.286Z",
       "updatedAt": "2025-11-29T10:45:06.286Z"
+    },
+    {
+      "name": "+918757800398",
+      "phone": "918757800398",
+      "email": "",
+      "tags": [
+        "WhatsApp"
+      ],
+      "notes": "Auto-created from WhatsApp message",
+      "id": "115bc8b6-0e97-4c28-94cb-c9640e4b6c21",
+      "createdAt": "2025-11-29T11:08:44.214Z",
+      "updatedAt": "2025-11-29T11:08:44.214Z"
     }
   ],
   "messages": [
@@ -2836,6 +2848,654 @@
       "status": "sent",
       "id": "cdaba0ed-ec86-4f86-9251-7d4517d308be",
       "timestamp": "2025-11-29T10:53:10.141Z"
+    },
+    {
+      "contactId": "4d460e87-b06f-4c96-ab75-3a484e9a18ad",
+      "content": "I specialize in fish and fishing topics! If you want to chat about your latest catch or fishing tips, I'm here for that. Just let me know! 🎣🐟",
+      "type": "text",
+      "direction": "outbound",
+      "status": "sent",
+      "id": "812aa08a-0754-412a-b021-d245e72cbf02",
+      "timestamp": "2025-11-29T10:57:40.666Z"
+    },
+    {
+      "contactId": "4d460e87-b06f-4c96-ab75-3a484e9a18ad",
+      "content": "What you do",
+      "type": "text",
+      "direction": "inbound",
+      "status": "sent",
+      "id": "a882c7f5-2a6e-4418-910f-3a67fe710d31",
+      "timestamp": "2025-11-29T10:58:08.294Z"
+    },
+    {
+      "contactId": "4d460e87-b06f-4c96-ab75-3a484e9a18ad",
+      "content": "I'm here to provide information about fish and fishing! Whether you have questions about different fish species, fishing techniques, or the best gear to use, feel free to ask!",
+      "type": "text",
+      "direction": "outbound",
+      "status": "sent",
+      "id": "17f08ed0-fe95-40a8-9297-29b7714c0936",
+      "timestamp": "2025-11-29T10:58:12.804Z"
+    },
+    {
+      "contactId": "3b4e746a-c4f8-484b-818d-06ed849299c7",
+      "content": "Sir/Mem,\nPrayer for recognition or nomination of Social Reform Activity or Social Award for my best endeavours of social reform activities in our local area for socio-economic development those particulars are enclosed herewith for your kind information and sympathetic consideration as a fee waiver where as I am unemployed still today.\nYours faithfully Madhusudan Pal \nCont.No.09434474732\nGmail:-madhusudanpal26@gmail.com",
+      "type": "text",
+      "direction": "inbound",
+      "status": "read",
+      "id": "29ba3529-d7b9-4b47-b8f7-bd664113c7df",
+      "timestamp": "2025-11-29T11:00:55.301Z"
+    },
+    {
+      "contactId": "3b4e746a-c4f8-484b-818d-06ed849299c7",
+      "content": "Hambly, I want to as a fee waiver otherwise I will be deprive forever due to unemployment I am unable to pay any fees , whereas I have been tried to given my services for socio-economic development to nation than how can pay , I want economic help for implementation of some social reform activities those are still now incomplete.",
+      "type": "text",
+      "direction": "inbound",
+      "status": "read",
+      "id": "0055e730-965c-4958-853a-8a4170903a6b",
+      "timestamp": "2025-11-29T11:00:55.980Z"
+    },
+    {
+      "contactId": "3b4e746a-c4f8-484b-818d-06ed849299c7",
+      "content": "A PROFILE /  BIODATA :-\nName:- MADHUSUDAN PAL,\nFather:-\nMurarimohan Pal,\nAddress:-\nVill-BABLADIHI, PO:-\nTHANGAPARA, DIST:-\nPURBA BARDHAMAN, PIN:-713143,\nPS+BL:-\nMONGALKOTE,\nSD:-KATWA,\nSTATE:-WB, INDIA.\nGender:-Male,\nDOB:-03/06/1966,\nAcad.Qual:-\nB.Sc.(bio)1987,\nTraining:-\nLac(IUL)ILRI, Ranchi,1988,\nExperience:-\nLac cultivation and Industrial uses of Lac,\nHonour:-\nUGC, Award on Lac culture, Delhi,2006,\nCurricular:-\nSocial Reform Activities, (various socio-economic development),\nMoto:-\nAct Locally Think Globally,\nCont.No.9434474732,\nGmail:- madhusudanpal26@gmail.com",
+      "type": "text",
+      "direction": "inbound",
+      "status": "read",
+      "id": "7b667348-3eda-42f4-9d6f-2dfcc4995eb6",
+      "timestamp": "2025-11-29T11:00:57.074Z"
+    },
+    {
+      "contactId": "3b4e746a-c4f8-484b-818d-06ed849299c7",
+      "content": "Grievance Redressal Cell, CMO, GoWB: Sir/Madam, your grievance is acknowledged and taken up with Tourism Department for necessary action.",
+      "type": "text",
+      "direction": "inbound",
+      "status": "read",
+      "id": "ebe8608d-020d-41ed-ae68-882ff4af2d4e",
+      "timestamp": "2025-11-29T11:00:58.267Z"
+    },
+    {
+      "contactId": "3b4e746a-c4f8-484b-818d-06ed849299c7",
+      "content": "Subject: Request for Consideration for Social Reform Activity Recognition\n\nDear Sir/Madam,\n\nI hope this message finds you well. I am writing to humbly request your consideration for recognition or nomination of my social reform activities in our local area, which have been dedicated to the socio-economic development of our community.\n\nEnclosed with this letter, you will find a detailed account of my efforts and initiatives that I have undertaken to contribute positively to our society. Despite being unemployed, I have committed myself to these causes with the hope of making a meaningful impact.\n\nI kindly request your sympathetic consideration for any available awards or recognitions, as this would greatly encourage and support my continued efforts in social reform. Additionally, if there are any fee waivers or support available for individuals in my position, I would be grateful for your assistance.\n\nThank you for taking the time to review my application. I am looking forward to the possibility of contributing further to our community with your support.\n\nYours faithfully,\n\nMadhusudan Pal  \nContact No.: 09434474732  \nEmail: madhusudanpal26@gmail.com  \n\n[Enclosures: Details of Social Reform Activities]",
+      "type": "text",
+      "direction": "outbound",
+      "status": "sent",
+      "id": "b6a11278-3453-41fa-b1ea-3fb8293e862a",
+      "timestamp": "2025-11-29T11:01:00.613Z"
+    },
+    {
+      "contactId": "3b4e746a-c4f8-484b-818d-06ed849299c7",
+      "content": "**Profile/Biodata**\n\n**Name:** Madhusudan Pal  \n**Father's Name:** Murarimohan Pal  \n\n**Address:**  \nVill-Babladihi,  \nPO: Thangapara,  \nDist: Purba Bardhaman,  \nPIN: 713143,  \nPS+BL: Mongalkote,  \nSD: Katwa,  \nState: West Bengal, India  \n\n**Gender:** Male  \n**Date of Birth:** 03/06/1966  \n\n**Academic Qualification:**  \n- B.Sc. (Biology), 1987  \n\n**Training:**  \n- Lac (IUL), ILRI, Ranchi, 1988  \n\n**Experience:**  \n- Expertise in Lac cultivation and its industrial uses  \n\n**Honours:**  \n- UGC Award on Lac Culture, Delhi, 2006  \n\n**Curricular Activities:**  \n- Involved in social reform activities and various socio-economic development initiatives  \n\n**Motto:**  \n- Act Locally, Think Globally  \n\n**Contact Information:**  \n- Phone: 9434474732  \n- Email: madhusudanpal26@gmail.com",
+      "type": "text",
+      "direction": "outbound",
+      "status": "sent",
+      "id": "483e3675-ff98-4ffa-8b63-69fd765afa79",
+      "timestamp": "2025-11-29T11:01:00.744Z"
+    },
+    {
+      "contactId": "3b4e746a-c4f8-484b-818d-06ed849299c7",
+      "content": "It sounds like you're in a challenging situation, and it's understandable to seek assistance during difficult times. If you're looking to request a fee waiver or financial assistance for social reform activities, here are some steps you might consider:\n\n1. **Identify the Organization or Institution**: Determine who you need to request a fee waiver from. This could be an educational institution, a government agency, or a nonprofit organization.\n\n2. **Gather Documentation**: Collect any relevant documents that can support your case, such as proof of unemployment, financial statements, or records of your contributions to socio-economic development.\n\n3. **Draft a Formal Request Letter**: Write a clear and concise letter explaining your situation. Be sure to include:\n   - Your current circumstances and why you're unable to pay the fees.\n   - How you have contributed to socio-economic development.\n   - What specific assistance or waiver you are seeking.\n   - Any social reform activities you are trying to implement and how they benefit the community.\n\n4. **Highlight Your Commitment**: Emphasize your dedication to your cause and how the fee waiver or financial assistance will help you continue your work.\n\n5. **Seek Alternative Sources of Funding**: Look for grants, scholarships, or other funding opportunities from governmental and non-governmental organizations that support social reform initiatives.\n\n6. **Consider Crowdfunding**: Platforms like GoFundMe or Kickstarter might allow you to raise funds for your activities from a broader audience.\n\n7. **Reach Out to Local Community Leaders or Organizations**: They might be able to offer support or direct you to resources that can assist you.\n\n8. **Follow Up**: After sending your request, follow up with the organization or institution to ensure they received your letter and to inquire about the status of your request.\n\nBeing proactive and persistent can sometimes open doors to the resources you need. Good luck with your endeavors, and I hope you're able to secure the support you need.",
+      "type": "text",
+      "direction": "outbound",
+      "status": "sent",
+      "id": "2ae86f64-9816-4491-9093-9373cf0578d9",
+      "timestamp": "2025-11-29T11:01:02.454Z"
+    },
+    {
+      "contactId": "3b4e746a-c4f8-484b-818d-06ed849299c7",
+      "content": "Grievance Redressal Cell, CMO, GoWB: Sir/Madam, Your grievance has been processed and disposed.",
+      "type": "text",
+      "direction": "inbound",
+      "status": "read",
+      "id": "588df60d-0fbe-4dd9-b19f-dfbf1bc5c989",
+      "timestamp": "2025-11-29T11:01:02.906Z"
+    },
+    {
+      "contactId": "3b4e746a-c4f8-484b-818d-06ed849299c7",
+      "content": "It looks like you've received a communication from the Grievance Redressal Cell of the Chief Minister's Office (CMO) in the Government of West Bengal (GoWB). This message indicates that your grievance or complaint has been acknowledged and forwarded to the Tourism Department for further action.\n\nIf you need further assistance or follow-up, you may consider:\n\n1. **Keeping Records**: Maintain a copy of this communication for your records. It may be useful for future reference.\n\n2. **Follow-up**: If you do not receive a response or resolution within a reasonable time frame, consider following up with the Grievance Redressal Cell or the Tourism Department.\n\n3. **Contact Information**: Ensure you have the correct contact information for both the Grievance Redressal Cell and the Tourism Department in case you need to reach out again.\n\n4. **Timelines**: Be aware of any timelines provided for resolution or further communication.\n\nIf you have any specific questions or need further guidance on how to proceed, feel free to ask!",
+      "type": "text",
+      "direction": "outbound",
+      "status": "sent",
+      "id": "eef7dba5-2573-4195-8595-780ffdf3a961",
+      "timestamp": "2025-11-29T11:01:03.662Z"
+    },
+    {
+      "contactId": "8a9e2cfc-5b0b-4473-a1e1-ed26edeaa049",
+      "content": "Hi there! 🌟 Just checking in to see how you're doing. If there's anything you need or want to chat about, I'm here! Have a fantastic day! 😊",
+      "type": "text",
+      "direction": "outbound",
+      "status": "sent",
+      "id": "a7851380-4d69-40b5-9115-a8f7c632489f",
+      "timestamp": "2025-11-29T11:01:07.691Z"
+    },
+    {
+      "contactId": "3b4e746a-c4f8-484b-818d-06ed849299c7",
+      "content": "[image message]",
+      "type": "text",
+      "direction": "inbound",
+      "status": "read",
+      "id": "1408380b-cd9e-47eb-a695-f11f865a91db",
+      "timestamp": "2025-11-29T11:01:07.784Z"
+    },
+    {
+      "contactId": "3b4e746a-c4f8-484b-818d-06ed849299c7",
+      "content": "It seems that the Grievance Redressal Cell of the Chief Minister's Office in the Government of West Bengal has processed and closed your grievance. Here are a few steps you might consider taking next:\n\n1. **Review the Resolution**: If you haven't already received details about how your grievance was addressed, check any communication from the relevant department or the Grievance Redressal Cell for information on the resolution.\n\n2. **Evaluate the Outcome**: Consider whether the resolution meets your expectations or resolves the issue you brought up. \n\n3. **Follow Up**: If you're satisfied with the resolution, no further action may be needed. However, if you believe the issue hasn't been adequately addressed, you might consider reaching out again for clarification or further action.\n\n4. **Document Everything**: Keep all related documents and communications for your records, especially if you plan to pursue the matter further.\n\n5. **Next Steps**: If you're not satisfied with the resolution, you can inquire about further options for appeal or escalation within the governmental system.\n\n6. **Feedback**: If there's an opportunity to provide feedback on the grievance process, consider sharing your experience to help improve the system.\n\nIf you need guidance on what to do next or how to craft further communication, feel free to ask!",
+      "type": "text",
+      "direction": "outbound",
+      "status": "sent",
+      "id": "91d1ae1e-b39b-4e62-bf0c-151713959814",
+      "timestamp": "2025-11-29T11:01:07.793Z"
+    },
+    {
+      "contactId": "3b4e746a-c4f8-484b-818d-06ed849299c7",
+      "content": "[image message]",
+      "type": "text",
+      "direction": "inbound",
+      "status": "read",
+      "id": "7897e818-4936-48f6-92b1-33774624d091",
+      "timestamp": "2025-11-29T11:01:10.399Z"
+    },
+    {
+      "contactId": "8a9e2cfc-5b0b-4473-a1e1-ed26edeaa049",
+      "content": "is this paid ",
+      "type": "text",
+      "direction": "outbound",
+      "status": "sent",
+      "id": "073ed345-5ec3-40b6-ab08-d50900d52ce5",
+      "timestamp": "2025-11-29T11:01:15.771Z"
+    },
+    {
+      "contactId": "3b4e746a-c4f8-484b-818d-06ed849299c7",
+      "content": "[image message]",
+      "type": "text",
+      "direction": "inbound",
+      "status": "read",
+      "id": "c29e1303-19bd-4a4b-b9b3-e592da382bbc",
+      "timestamp": "2025-11-29T11:01:22.732Z"
+    },
+    {
+      "contactId": "3b4e746a-c4f8-484b-818d-06ed849299c7",
+      "content": "[image message]",
+      "type": "text",
+      "direction": "inbound",
+      "status": "read",
+      "id": "7dd5a581-4dcc-42a8-af75-0ef31919647f",
+      "timestamp": "2025-11-29T11:01:28.151Z"
+    },
+    {
+      "contactId": "3b4e746a-c4f8-484b-818d-06ed849299c7",
+      "content": "[image message]",
+      "type": "text",
+      "direction": "inbound",
+      "status": "read",
+      "id": "2461a51a-72ee-4a7e-8565-3c25a7930e46",
+      "timestamp": "2025-11-29T11:01:29.032Z"
+    },
+    {
+      "contactId": "3b4e746a-c4f8-484b-818d-06ed849299c7",
+      "content": "[image message]",
+      "type": "text",
+      "direction": "inbound",
+      "status": "read",
+      "id": "756502b0-a2e1-438f-a6ca-9b4c337dba8d",
+      "timestamp": "2025-11-29T11:01:30.175Z"
+    },
+    {
+      "contactId": "3b4e746a-c4f8-484b-818d-06ed849299c7",
+      "content": "[image message]",
+      "type": "text",
+      "direction": "inbound",
+      "status": "read",
+      "id": "525e2d70-72b4-45de-a040-9388089d45fa",
+      "timestamp": "2025-11-29T11:01:34.132Z"
+    },
+    {
+      "contactId": "3b4e746a-c4f8-484b-818d-06ed849299c7",
+      "content": "[image message]",
+      "type": "text",
+      "direction": "inbound",
+      "status": "read",
+      "id": "5dabbec9-5ab3-4920-a625-03751a5bc06e",
+      "timestamp": "2025-11-29T11:01:35.619Z"
+    },
+    {
+      "contactId": "3b4e746a-c4f8-484b-818d-06ed849299c7",
+      "content": "[image message]",
+      "type": "text",
+      "direction": "inbound",
+      "status": "read",
+      "id": "8fb1c4d1-c487-4ec4-ba3b-11263e29fb6c",
+      "timestamp": "2025-11-29T11:01:36.901Z"
+    },
+    {
+      "contactId": "3b4e746a-c4f8-484b-818d-06ed849299c7",
+      "content": "[image message]",
+      "type": "text",
+      "direction": "inbound",
+      "status": "read",
+      "id": "dd8c1a95-13ea-4472-822b-f60f9181be69",
+      "timestamp": "2025-11-29T11:01:38.101Z"
+    },
+    {
+      "contactId": "3b4e746a-c4f8-484b-818d-06ed849299c7",
+      "content": "[image message]",
+      "type": "text",
+      "direction": "inbound",
+      "status": "read",
+      "id": "3f945c40-3e35-47a9-9cbb-c600d131c909",
+      "timestamp": "2025-11-29T11:01:38.251Z"
+    },
+    {
+      "contactId": "3b4e746a-c4f8-484b-818d-06ed849299c7",
+      "content": "[image message]",
+      "type": "text",
+      "direction": "inbound",
+      "status": "read",
+      "id": "1c4371e7-f8ab-4214-b072-6750321ba4d9",
+      "timestamp": "2025-11-29T11:01:39.385Z"
+    },
+    {
+      "contactId": "3b4e746a-c4f8-484b-818d-06ed849299c7",
+      "content": "[image message]",
+      "type": "text",
+      "direction": "inbound",
+      "status": "read",
+      "id": "33846f28-0b3c-44f2-9e04-dc5e5aba143c",
+      "timestamp": "2025-11-29T11:01:39.528Z"
+    },
+    {
+      "contactId": "8a9e2cfc-5b0b-4473-a1e1-ed26edeaa049",
+      "content": "is this paid ?",
+      "type": "text",
+      "direction": "inbound",
+      "status": "read",
+      "id": "a532aa23-3022-47cd-b787-a675d4de2b94",
+      "timestamp": "2025-11-29T11:01:40.066Z"
+    },
+    {
+      "contactId": "3b4e746a-c4f8-484b-818d-06ed849299c7",
+      "content": "[image message]",
+      "type": "text",
+      "direction": "inbound",
+      "status": "read",
+      "id": "f365f64f-4a3f-4648-a4c0-c6411afbac2d",
+      "timestamp": "2025-11-29T11:01:42.885Z"
+    },
+    {
+      "contactId": "3b4e746a-c4f8-484b-818d-06ed849299c7",
+      "content": "[image message]",
+      "type": "text",
+      "direction": "inbound",
+      "status": "read",
+      "id": "c30d8780-a396-4fe1-ba23-edcb51ca3b34",
+      "timestamp": "2025-11-29T11:01:43.351Z"
+    },
+    {
+      "contactId": "3b4e746a-c4f8-484b-818d-06ed849299c7",
+      "content": "[image message]",
+      "type": "text",
+      "direction": "inbound",
+      "status": "read",
+      "id": "f9e6d4ba-59f6-43f0-883d-3a0d215d83f5",
+      "timestamp": "2025-11-29T11:01:44.064Z"
+    },
+    {
+      "contactId": "3b4e746a-c4f8-484b-818d-06ed849299c7",
+      "content": "[document message]",
+      "type": "text",
+      "direction": "inbound",
+      "status": "read",
+      "id": "ccdd390f-7653-4c97-b807-4905716a7e05",
+      "timestamp": "2025-11-29T11:01:44.515Z"
+    },
+    {
+      "contactId": "3b4e746a-c4f8-484b-818d-06ed849299c7",
+      "content": "[image message]",
+      "type": "text",
+      "direction": "inbound",
+      "status": "read",
+      "id": "7029265e-85ea-4f59-a204-1f1bec461d17",
+      "timestamp": "2025-11-29T11:01:44.555Z"
+    },
+    {
+      "contactId": "8a9e2cfc-5b0b-4473-a1e1-ed26edeaa049",
+      "content": "Yes, there is a fee associated with participating in the Top Life Changers Awards 2026. 🎟️ Awards like ours are an investment in your personal and professional growth, offering incredible benefits like networking opportunities, brand visibility, and more. Did you know even Bollywood awards are paid? That's how valuable these events are! 😊\n\nIf you have any questions or concerns, feel free to ask. I'm here to help! 🌟",
+      "type": "text",
+      "direction": "outbound",
+      "status": "sent",
+      "id": "5131e9e1-59a4-49cb-8f10-f80d598a8075",
+      "timestamp": "2025-11-29T11:01:44.952Z"
+    },
+    {
+      "contactId": "3b4e746a-c4f8-484b-818d-06ed849299c7",
+      "content": "[document message]",
+      "type": "text",
+      "direction": "inbound",
+      "status": "read",
+      "id": "b71a2240-3e94-4372-8f5d-367a50a4c17c",
+      "timestamp": "2025-11-29T11:01:45.521Z"
+    },
+    {
+      "contactId": "3b4e746a-c4f8-484b-818d-06ed849299c7",
+      "content": "[image message]",
+      "type": "text",
+      "direction": "inbound",
+      "status": "read",
+      "id": "70550409-c531-4a46-abc1-925c9e939263",
+      "timestamp": "2025-11-29T11:01:45.820Z"
+    },
+    {
+      "contactId": "3b4e746a-c4f8-484b-818d-06ed849299c7",
+      "content": "[document message]",
+      "type": "text",
+      "direction": "inbound",
+      "status": "read",
+      "id": "28a7e2f7-673f-4a01-8e7b-b90e2fe18d9d",
+      "timestamp": "2025-11-29T11:01:46.550Z"
+    },
+    {
+      "contactId": "3b4e746a-c4f8-484b-818d-06ed849299c7",
+      "content": "[image message]",
+      "type": "text",
+      "direction": "inbound",
+      "status": "read",
+      "id": "cdebf5b8-8230-40ea-9dd1-439a4e94a993",
+      "timestamp": "2025-11-29T11:01:46.800Z"
+    },
+    {
+      "contactId": "3b4e746a-c4f8-484b-818d-06ed849299c7",
+      "content": "[image message]",
+      "type": "text",
+      "direction": "inbound",
+      "status": "read",
+      "id": "5b003601-d81a-498b-b3d3-65127e10ebd3",
+      "timestamp": "2025-11-29T11:01:47.660Z"
+    },
+    {
+      "contactId": "3b4e746a-c4f8-484b-818d-06ed849299c7",
+      "content": "[image message]",
+      "type": "text",
+      "direction": "inbound",
+      "status": "read",
+      "id": "a921d3c7-9a2d-451d-b177-1b8cb0409ac5",
+      "timestamp": "2025-11-29T11:01:47.840Z"
+    },
+    {
+      "contactId": "3b4e746a-c4f8-484b-818d-06ed849299c7",
+      "content": "[document message]",
+      "type": "text",
+      "direction": "inbound",
+      "status": "read",
+      "id": "07dcadb2-ba2f-40d6-8db2-684bd2f39484",
+      "timestamp": "2025-11-29T11:01:49.073Z"
+    },
+    {
+      "contactId": "3b4e746a-c4f8-484b-818d-06ed849299c7",
+      "content": "[image message]",
+      "type": "text",
+      "direction": "inbound",
+      "status": "read",
+      "id": "9ffdc491-d30b-4518-b145-313d07c4484f",
+      "timestamp": "2025-11-29T11:01:50.434Z"
+    },
+    {
+      "contactId": "3b4e746a-c4f8-484b-818d-06ed849299c7",
+      "content": "[image message]",
+      "type": "text",
+      "direction": "inbound",
+      "status": "read",
+      "id": "1a54056e-4569-4c25-a7f4-67f6ce069e6b",
+      "timestamp": "2025-11-29T11:01:50.579Z"
+    },
+    {
+      "contactId": "3b4e746a-c4f8-484b-818d-06ed849299c7",
+      "content": "[document message]",
+      "type": "text",
+      "direction": "inbound",
+      "status": "read",
+      "id": "26443741-b337-479f-894b-1dab4bf89051",
+      "timestamp": "2025-11-29T11:01:51.631Z"
+    },
+    {
+      "contactId": "3b4e746a-c4f8-484b-818d-06ed849299c7",
+      "content": "[image message]",
+      "type": "text",
+      "direction": "inbound",
+      "status": "read",
+      "id": "234accd2-e851-4938-966f-ff712f1078e5",
+      "timestamp": "2025-11-29T11:01:52.626Z"
+    },
+    {
+      "contactId": "3b4e746a-c4f8-484b-818d-06ed849299c7",
+      "content": "[document message]",
+      "type": "text",
+      "direction": "inbound",
+      "status": "read",
+      "id": "e45bbf4e-88de-4f7d-af2f-001ce7edbb53",
+      "timestamp": "2025-11-29T11:01:56.407Z"
+    },
+    {
+      "contactId": "3b4e746a-c4f8-484b-818d-06ed849299c7",
+      "content": "[document message]",
+      "type": "text",
+      "direction": "inbound",
+      "status": "read",
+      "id": "bee4ba5d-32f6-4c4a-b36b-ea10c43a9c2d",
+      "timestamp": "2025-11-29T11:01:57.166Z"
+    },
+    {
+      "contactId": "3b4e746a-c4f8-484b-818d-06ed849299c7",
+      "content": "[document message]",
+      "type": "text",
+      "direction": "inbound",
+      "status": "read",
+      "id": "8b0455b7-b2ff-4fb2-b528-714426322bb2",
+      "timestamp": "2025-11-29T11:01:57.769Z"
+    },
+    {
+      "contactId": "3b4e746a-c4f8-484b-818d-06ed849299c7",
+      "content": "[document message]",
+      "type": "text",
+      "direction": "inbound",
+      "status": "read",
+      "id": "4c1884e2-3707-4b23-a2cb-922afe621e80",
+      "timestamp": "2025-11-29T11:01:58.005Z"
+    },
+    {
+      "contactId": "3b4e746a-c4f8-484b-818d-06ed849299c7",
+      "content": "[document message]",
+      "type": "text",
+      "direction": "inbound",
+      "status": "read",
+      "id": "d2c7b22b-5477-45f0-b867-3145691f911a",
+      "timestamp": "2025-11-29T11:01:58.391Z"
+    },
+    {
+      "contactId": "3b4e746a-c4f8-484b-818d-06ed849299c7",
+      "content": "[document message]",
+      "type": "text",
+      "direction": "inbound",
+      "status": "read",
+      "id": "df254e09-acc4-4be7-8cec-0cfeaec42d21",
+      "timestamp": "2025-11-29T11:01:58.772Z"
+    },
+    {
+      "contactId": "3b4e746a-c4f8-484b-818d-06ed849299c7",
+      "content": "[image message]",
+      "type": "text",
+      "direction": "inbound",
+      "status": "read",
+      "id": "5e770974-8b45-45b6-955c-78f2102fbc6b",
+      "timestamp": "2025-11-29T11:01:59.532Z"
+    },
+    {
+      "contactId": "3b4e746a-c4f8-484b-818d-06ed849299c7",
+      "content": "[document message]",
+      "type": "text",
+      "direction": "inbound",
+      "status": "read",
+      "id": "961f085c-22b4-4905-87d4-3a25b979aaf3",
+      "timestamp": "2025-11-29T11:02:01.539Z"
+    },
+    {
+      "contactId": "3b4e746a-c4f8-484b-818d-06ed849299c7",
+      "content": "[document message]",
+      "type": "text",
+      "direction": "inbound",
+      "status": "read",
+      "id": "4ca077fc-953f-4feb-93d7-f1663e7c514a",
+      "timestamp": "2025-11-29T11:02:02.462Z"
+    },
+    {
+      "contactId": "8a9e2cfc-5b0b-4473-a1e1-ed26edeaa049",
+      "content": "how much is the fees",
+      "type": "text",
+      "direction": "inbound",
+      "status": "read",
+      "id": "437927f9-ef9c-4d26-8feb-27afe9962a27",
+      "timestamp": "2025-11-29T11:03:13.188Z"
+    },
+    {
+      "contactId": "8a9e2cfc-5b0b-4473-a1e1-ed26edeaa049",
+      "content": "The fee depends on the award category and the benefits you are interested in. 😊 To provide you with the most accurate information, could you please share your details in the following format?\n\nName:  \nAward Category / Interest:  \nIndustry / Field:  \nYears of Experience:  \nAny Previous Awards (mention award name or 'None'):\n\nThis will help me suggest the best option and its associated fee for you. 🌟",
+      "type": "text",
+      "direction": "outbound",
+      "status": "sent",
+      "id": "63e158bb-58b9-4be7-9227-b07d1e2d8e0e",
+      "timestamp": "2025-11-29T11:03:17.279Z"
+    },
+    {
+      "contactId": "8a9e2cfc-5b0b-4473-a1e1-ed26edeaa049",
+      "content": "Hi there! 🌟 Hope you're doing great. Just wanted to share something exciting with you. Let me know if you're interested in knowing more! 😊",
+      "type": "text",
+      "direction": "outbound",
+      "status": "sent",
+      "id": "e0af9359-cb2d-47db-ad8f-4b2a61d23837",
+      "timestamp": "2025-11-29T11:07:21.246Z"
+    },
+    {
+      "contactId": "8a9e2cfc-5b0b-4473-a1e1-ed26edeaa049",
+      "content": "Yes , tell me",
+      "type": "text",
+      "direction": "inbound",
+      "status": "read",
+      "id": "d16228d7-5c4f-47a5-8ea4-647c7c6b66dd",
+      "timestamp": "2025-11-29T11:07:42.789Z"
+    },
+    {
+      "contactId": "8a9e2cfc-5b0b-4473-a1e1-ed26edeaa049",
+      "content": "Hi! I’m Aarohi from Top Life Changers Awards 2026 😊  \nLet’s get started so I can suggest the perfect award category for you 🏆✨  \n\nPlease provide your details in the following format:\n\nName:  \nAward Category / Interest:  \nIndustry / Field:  \nYears of Experience:  \nAny Previous Awards (mention award name or 'None'):",
+      "type": "text",
+      "direction": "outbound",
+      "status": "sent",
+      "id": "7afe3db8-c3ac-438a-9b87-795e6af5d496",
+      "timestamp": "2025-11-29T11:07:47.122Z"
+    },
+    {
+      "contactId": "8a9e2cfc-5b0b-4473-a1e1-ed26edeaa049",
+      "content": "is this paid awrds",
+      "type": "text",
+      "direction": "inbound",
+      "status": "read",
+      "id": "8a9a893e-6926-42da-b2c1-e28463fb2681",
+      "timestamp": "2025-11-29T11:08:01.075Z"
+    },
+    {
+      "contactId": "8a9e2cfc-5b0b-4473-a1e1-ed26edeaa049",
+      "content": "Yes, participating in the Top Life Changers Awards 2026 does involve a fee. 🎟️ This is because the awards provide substantial value, including networking opportunities, brand visibility, and professional growth. Even prestigious Bollywood awards are paid, which underscores the significance and value of such events. 😊\n\nIf you have any questions or need more information, feel free to ask! 🌟",
+      "type": "text",
+      "direction": "outbound",
+      "status": "sent",
+      "id": "cc4f5fe1-9468-4121-ad88-2f67fd49ee52",
+      "timestamp": "2025-11-29T11:08:05.307Z"
+    },
+    {
+      "contactId": "8a9e2cfc-5b0b-4473-a1e1-ed26edeaa049",
+      "content": "i am not intersted",
+      "type": "text",
+      "direction": "inbound",
+      "status": "read",
+      "id": "cce40b50-e8f3-4b24-a2d3-a0ced47926b5",
+      "timestamp": "2025-11-29T11:08:29.289Z"
+    },
+    {
+      "contactId": "8a9e2cfc-5b0b-4473-a1e1-ed26edeaa049",
+      "content": "I understand! 😊 If it's okay, I'd love to know if there's a specific reason—like timing, budget, or clarity—so I can assist you better. \n\nRemember, participating could mean your award is presented by top celebrities, and there are flexible payment options like No-Cost EMI and a 30% advance. If you ever change your mind or have questions, I'm here to help! 🌟 Have a wonderful day! 🌻",
+      "type": "text",
+      "direction": "outbound",
+      "status": "sent",
+      "id": "ea1db307-7ce4-4019-80bf-6c5fcaa208b2",
+      "timestamp": "2025-11-29T11:08:33.454Z"
+    },
+    {
+      "contactId": "115bc8b6-0e97-4c28-94cb-c9640e4b6c21",
+      "content": "Yes, I am Interested",
+      "type": "text",
+      "direction": "inbound",
+      "status": "sent",
+      "id": "989ee872-e6c0-4f7e-bfd2-cbc74372002e",
+      "timestamp": "2025-11-29T11:08:44.218Z"
+    },
+    {
+      "contactId": "115bc8b6-0e97-4c28-94cb-c9640e4b6c21",
+      "content": "Thanks for your feedback, we will keep in touch with you soon.",
+      "type": "text",
+      "direction": "outbound",
+      "status": "sent",
+      "id": "19aa05fb-dbc2-48ef-bd66-8ed9af5ff5fb",
+      "timestamp": "2025-11-29T11:08:45.772Z"
+    },
+    {
+      "contactId": "8a9e2cfc-5b0b-4473-a1e1-ed26edeaa049",
+      "content": "budget",
+      "type": "text",
+      "direction": "inbound",
+      "status": "read",
+      "id": "d71119fc-6a20-4aaa-a8a0-95ed95f097bc",
+      "timestamp": "2025-11-29T11:08:54.013Z"
+    },
+    {
+      "contactId": "8a9e2cfc-5b0b-4473-a1e1-ed26edeaa049",
+      "content": "I completely understand how important budget considerations are. 😊 We offer flexible payment options, including No-Cost EMI and a 30% advance, to make it easier for you to participate. \n\nThe fee varies depending on the award category and benefits you choose. If you share your details, I can suggest the best option for you and its associated fee. 🌟\n\nFeel free to let me know if you'd like to explore this further! 🏆✨",
+      "type": "text",
+      "direction": "outbound",
+      "status": "sent",
+      "id": "01a41d08-c9f7-4852-8e8a-2f4643fb2334",
+      "timestamp": "2025-11-29T11:08:58.834Z"
+    },
+    {
+      "contactId": "8a9e2cfc-5b0b-4473-a1e1-ed26edeaa049",
+      "content": "but not intertes",
+      "type": "text",
+      "direction": "inbound",
+      "status": "sent",
+      "id": "51301708-d784-499a-a4bf-cc0ed90d2400",
+      "timestamp": "2025-11-29T11:10:55.873Z"
+    },
+    {
+      "contactId": "8a9e2cfc-5b0b-4473-a1e1-ed26edeaa049",
+      "content": "No worries at all! 😊 If you ever have any questions or if there's anything else you'd like to know, feel free to reach out. I'm here to help whenever you need! Have a fantastic day! 🌟",
+      "type": "text",
+      "direction": "outbound",
+      "status": "sent",
+      "id": "387151f6-89fc-41be-83b2-89b11d668ad5",
+      "timestamp": "2025-11-29T11:10:59.600Z"
+    },
+    {
+      "contactId": "8a9e2cfc-5b0b-4473-a1e1-ed26edeaa049",
+      "content": "what is the charges ?",
+      "type": "text",
+      "direction": "inbound",
+      "status": "sent",
+      "id": "40854233-5821-457b-858f-0efaf4c5beff",
+      "timestamp": "2025-11-29T11:11:31.356Z"
+    },
+    {
+      "contactId": "8a9e2cfc-5b0b-4473-a1e1-ed26edeaa049",
+      "content": "The charges for participating in the Top Life Changers Awards 2026 can vary based on the award category and the benefits package you choose. 😊\n\nTo give you the best suggestion and its fee, could you please share your details in this format?\n\nName:  \nAward Category / Interest:  \nIndustry / Field:  \nYears of Experience:  \nAny Previous Awards (mention award name or 'None'):\n\nThis will help me tailor the information specifically for you! 🌟🏆",
+      "type": "text",
+      "direction": "outbound",
+      "status": "sent",
+      "id": "028f198c-9e69-40f1-8625-1140f56cfdbc",
+      "timestamp": "2025-11-29T11:11:35.779Z"
     }
   ],
   "campaigns": [
@@ -3171,11 +3831,11 @@
         "createdAt": "2025-11-27T22:31:14.359Z",
         "updatedAt": "2025-11-27T22:31:14.359Z"
       },
-      "lastMessage": "Could you please provide more details about the specific awards you're referring to? There are many types of awards across various industries and fields, and the fee structure can vary widely depending on the organization and the nature of the award. Some awards may have an entry or nomination fee, while others might be free to enter.",
-      "lastMessageTime": "2025-11-29T10:30:54.427Z",
-      "lastInboundMessageTime": "2025-11-29T10:30:51.401Z",
-      "lastInboundMessage": "is this paid awards ?",
-      "unreadCount": 0,
+      "lastMessage": "The charges for participating in the Top Life Changers Awards 2026 can vary based on the award category and the benefits package you choose. 😊\n\nTo give you the best suggestion and its fee, could you please share your details in this format?\n\nName:  \nAward Category / Interest:  \nIndustry / Field:  \nYears of Experience:  \nAny Previous Awards (mention award name or 'None'):\n\nThis will help me tailor the information specifically for you! 🌟🏆",
+      "lastMessageTime": "2025-11-29T11:11:35.779Z",
+      "lastInboundMessageTime": "2025-11-29T11:11:31.356Z",
+      "lastInboundMessage": "what is the charges ?",
+      "unreadCount": 2,
       "status": "open",
       "notes": []
     },
@@ -3217,11 +3877,11 @@
         "createdAt": "2025-11-28T06:04:55.063Z",
         "updatedAt": "2025-11-28T06:04:55.063Z"
       },
-      "lastMessage": "Thank you for asking! I don't have feelings or emotions, but I'm here and ready to help you. How can I assist you today?",
-      "lastMessageTime": "2025-11-29T10:26:07.269Z",
-      "lastInboundMessageTime": "2025-11-29T10:26:04.246Z",
-      "lastInboundMessage": "How are you",
-      "unreadCount": 0,
+      "lastMessage": "I'm here to provide information about fish and fishing! Whether you have questions about different fish species, fishing techniques, or the best gear to use, feel free to ask!",
+      "lastMessageTime": "2025-11-29T10:58:12.804Z",
+      "lastInboundMessageTime": "2025-11-29T10:58:08.294Z",
+      "lastInboundMessage": "What you do",
+      "unreadCount": 1,
       "status": "open",
       "notes": []
     },
@@ -4160,11 +4820,34 @@
         "createdAt": "2025-11-29T10:45:06.286Z",
         "updatedAt": "2025-11-29T10:45:06.286Z"
       },
-      "lastMessage": "Hi! I’m Aarohi from Top Life Changers Awards 2026 😊 Let’s get started so I can suggest the perfect award category for you 🏆✨  Please provide your details in the following format:  Name: Award Category / Interest : Industry / Field: Years of Experience:",
-      "lastMessageTime": "2025-11-29T10:53:10.141Z",
-      "lastInboundMessageTime": "2025-11-29T10:51:41.687Z",
-      "lastInboundMessage": "[unsupported message]",
+      "lastMessage": "[document message]",
+      "lastMessageTime": "2025-11-29T11:02:02.462Z",
+      "lastInboundMessageTime": "2025-11-29T11:02:02.462Z",
+      "lastInboundMessage": "[document message]",
       "unreadCount": 0,
+      "status": "open",
+      "notes": []
+    },
+    {
+      "id": "chat-115bc8b6-0e97-4c28-94cb-c9640e4b6c21",
+      "contactId": "115bc8b6-0e97-4c28-94cb-c9640e4b6c21",
+      "contact": {
+        "name": "+918757800398",
+        "phone": "918757800398",
+        "email": "",
+        "tags": [
+          "WhatsApp"
+        ],
+        "notes": "Auto-created from WhatsApp message",
+        "id": "115bc8b6-0e97-4c28-94cb-c9640e4b6c21",
+        "createdAt": "2025-11-29T11:08:44.214Z",
+        "updatedAt": "2025-11-29T11:08:44.214Z"
+      },
+      "lastMessage": "Thanks for your feedback, we will keep in touch with you soon.",
+      "lastMessageTime": "2025-11-29T11:08:45.772Z",
+      "lastInboundMessageTime": "2025-11-29T11:08:44.218Z",
+      "lastInboundMessage": "Yes, I am Interested",
+      "unreadCount": 1,
       "status": "open",
       "notes": []
     }

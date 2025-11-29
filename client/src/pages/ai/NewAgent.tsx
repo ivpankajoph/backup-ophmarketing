@@ -168,7 +168,7 @@ export default function NewAgent() {
                 />
               </div>
               <div className="grid gap-2">
-                <Label>Model</Label>
+                <Label>AI Model</Label>
                 <Select
                   value={formData.model}
                   onValueChange={(value) => setFormData(prev => ({ ...prev, model: value }))}
@@ -178,11 +178,15 @@ export default function NewAgent() {
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="gpt-4o">GPT-4o</SelectItem>
-                    <SelectItem value="gpt-4o-mini">GPT-4o Mini</SelectItem>
-                    <SelectItem value="gpt-3.5-turbo">GPT-3.5 Turbo</SelectItem>
+                    <SelectItem value="gpt-4o">Bot 1 (Most Intelligent)</SelectItem>
+                    <SelectItem value="gpt-4o-mini">Bot 2 (Smart & Fast)</SelectItem>
+                    <SelectItem value="gpt-4-turbo">Bot 3 (Premium)</SelectItem>
+                    <SelectItem value="gpt-3.5-turbo">Bot 4 (Economy)</SelectItem>
                   </SelectContent>
                 </Select>
+                <p className="text-xs text-muted-foreground">
+                  Bot 1: Latest & Most Capable | Bot 4: Fast & Affordable
+                </p>
               </div>
               <div className="grid gap-2">
                 <Label>Temperature: {formData.temperature}</Label>

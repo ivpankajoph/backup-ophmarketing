@@ -28,6 +28,8 @@ The system incorporates a modular backend structure, allowing for independent de
 - **Meta Business Suite**: For syncing and approving message templates.
 
 ## Recent Changes (November 29, 2025)
+- **Auto-Reply Control**: After sending a "Thanks for your feedback" auto-reply to button responses, the AI will not automatically respond to subsequent messages. Users must manually select an agent in the 24-Hour Window Inbox to re-enable AI responses for that contact. This prevents unwanted automated follow-ups.
+- **AI Model Options**: Added more OpenAI model options with friendly display names (Bot 1 through Bot 4). Bot 1 is gpt-4o (Most Intelligent), Bot 2 is gpt-4o-mini (Smart & Fast), Bot 3 is gpt-4-turbo (Premium), Bot 4 is gpt-3.5-turbo (Economy). Default model is Bot 1.
 - **AI Agent Persistence Per Contact**: Implemented contact-to-agent assignment system. When an AI agent is selected to respond in the 24-Hour Window Inbox, that agent is now permanently assigned to the contact. All subsequent webhook responses use the assigned agent with full conversation history. Uses MongoDB `contact_agents` collection to persist assignments.
 - **Conversation History for AI Agents**: AI agents now receive past conversation history when generating responses. The system stores up to 20 messages per contact-agent assignment in MongoDB, ensuring context-aware responses. Webhook handler checks for assigned agents first, then falls back to lead-form mapping.
 - **Notification Sound Fix**: Improved audio unlock logic to mark audio as unlocked immediately after user interaction (click/keydown/touchstart), regardless of whether the initial play() succeeds. This ensures notification beeps work even on browsers with strict autoplay restrictions.

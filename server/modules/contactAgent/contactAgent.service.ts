@@ -14,6 +14,7 @@ interface ContactAgent {
   agentName?: string;
   conversationHistory: ConversationMessage[];
   isActive: boolean;
+  autoReplyDisabled: boolean;
   createdAt: string;
   updatedAt: string;
 }
@@ -57,6 +58,7 @@ export async function assignAgentToContact(
     agentName,
     conversationHistory: [],
     isActive: true,
+    autoReplyDisabled: false,
     createdAt: now,
     updatedAt: now,
   };
@@ -153,4 +155,70 @@ export async function removeAgentFromContact(phone: string): Promise<boolean> {
 
 export async function getAllContactAgents(): Promise<ContactAgent[]> {
   return mongodb.readCollection<ContactAgent>('contact_agents');
+}
+
+export async function disableAutoReply(phone: string): Promise<boolean> {
+  const normalizedPhone = normalizePhone(phone);
+  const now = new Date().toISOString();
+  
+  const existing = await mongodb.findOne<ContactAgent>('contact_agents', { 
+    $or: [
+      { phone: normalizedPhone },
+      { phone: { $regex: normalizedPhone.slice(-10) + '$' } }
+    ]
+  });
+  
+  if (existing) {
+    await mongodb.updateOne<ContactAgent>('contact_agents', 
+      { id: existing.id },
+      { autoReplyDisabled: true, updatedAt: now }
+    );
+    console.log(`[ContactAgent] Disabled auto-reply for ${phone}`);
+    return true;
+  }
+  
+  const newRecord: ContactAgent = {
+    id: `ca-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
+    contactId: '',
+    phone: normalizedPhone,
+    agentId: '',
+    agentName: undefined,
+    conversationHistory: [],
+    isActive: false,
+    autoReplyDisabled: true,
+    createdAt: now,
+    updatedAt: now,
+  };
+  
+  await mongodb.insertOne<ContactAgent>('contact_agents', newRecord);
+  console.log(`[ContactAgent] Created record with auto-reply disabled for ${phone}`);
+  return true;
+}
+
+export async function isAutoReplyDisabled(phone: string): Promise<boolean> {
+  const normalizedPhone = normalizePhone(phone);
+  
+  const record = await mongodb.findOne<ContactAgent>('contact_agents', { 
+    $or: [
+      { phone: normalizedPhone },
+      { phone: { $regex: normalizedPhone.slice(-10) + '$' } }
+    ]
+  });
+  
+  return record?.autoReplyDisabled === true;
+}
+
+export async function enableAutoReply(phone: string): Promise<boolean> {
+  const normalizedPhone = normalizePhone(phone);
+  
+  const result = await mongodb.updateOne<ContactAgent>('contact_agents', 
+    { $or: [
+      { phone: normalizedPhone },
+      { phone: { $regex: normalizedPhone.slice(-10) + '$' } }
+    ]},
+    { autoReplyDisabled: false, updatedAt: new Date().toISOString() }
+  );
+  
+  console.log(`[ContactAgent] Enabled auto-reply for ${phone}`);
+  return result !== null;
 }

@@ -61,6 +61,16 @@ export default function AgentsPage() {
     isActive: true,
   });
 
+  const getModelDisplayName = (model: string): string => {
+    const modelNames: { [key: string]: string } = {
+      "gpt-4o": "Bot 1",
+      "gpt-4o-mini": "Bot 2",
+      "gpt-4-turbo": "Bot 3",
+      "gpt-3.5-turbo": "Bot 4",
+    };
+    return modelNames[model] || model;
+  };
+
   const fetchAgents = async () => {
     setLoading(true);
     try {
@@ -233,7 +243,7 @@ export default function AgentsPage() {
                     />
                   </div>
                   <div className="grid gap-2">
-                    <Label>Model</Label>
+                    <Label>AI Model</Label>
                     <Select
                       value={formData.model}
                       onValueChange={(value) => setFormData((prev) => ({ ...prev, model: value }))}
@@ -242,9 +252,10 @@ export default function AgentsPage() {
                         <SelectValue />
                       </SelectTrigger>
                       <SelectContent>
-                        <SelectItem value="gpt-4o">GPT-4o</SelectItem>
-                        <SelectItem value="gpt-4o-mini">GPT-4o Mini</SelectItem>
-                        <SelectItem value="gpt-3.5-turbo">GPT-3.5 Turbo</SelectItem>
+                        <SelectItem value="gpt-4o">Bot 1 (Most Intelligent)</SelectItem>
+                        <SelectItem value="gpt-4o-mini">Bot 2 (Smart & Fast)</SelectItem>
+                        <SelectItem value="gpt-4-turbo">Bot 3 (Premium)</SelectItem>
+                        <SelectItem value="gpt-3.5-turbo">Bot 4 (Economy)</SelectItem>
                       </SelectContent>
                     </Select>
                   </div>
@@ -332,7 +343,7 @@ export default function AgentsPage() {
                           {agent.name}
                         </div>
                       </TableCell>
-                      <TableCell>{agent.model}</TableCell>
+                      <TableCell>{getModelDisplayName(agent.model)}</TableCell>
                       <TableCell className="max-w-[200px] truncate">
                         {agent.description || "-"}
                       </TableCell>

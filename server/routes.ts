@@ -257,9 +257,10 @@ export async function registerRoutes(
           
           console.log(`[InboxSend] Generating AI response with agent: ${agent.name}`);
           
-          // Assign this agent to the contact for future messages
+          // Assign this agent to the contact for future messages and enable auto-reply
           await contactAgentService.assignAgentToContact(contactId, phone, agentId, agent.name);
-          console.log(`[InboxSend] Assigned agent ${agent.name} to contact ${phone}`);
+          await contactAgentService.enableAutoReply(phone);
+          console.log(`[InboxSend] Assigned agent ${agent.name} to contact ${phone} (auto-reply enabled)`);
           
           // Get conversation history from MongoDB (stored per contact-agent assignment)
           let conversationHistory = await contactAgentService.getConversationHistory(phone);

@@ -105,24 +105,33 @@ export async function handleWebhook(req: Request, res: Response) {
       await sendWhatsAppMessage(from, thankYouMessage);
       await saveOutboundMessage(from, thankYouMessage);
       
-      console.log(`Button response auto-reply sent to ${from}: ${thankYouMessage}`);
+      // Disable auto-reply for this contact - they will only get AI responses when manually selected
+      await contactAgentService.disableAutoReply(from);
+      
+      console.log(`Button response auto-reply sent to ${from}: ${thankYouMessage} (auto-reply disabled)`);
       return res.sendStatus(200);
     }
 
-    // For regular text messages, use AI agent
-    // First check if there's an assigned agent for this contact (from 24-hour window inbox)
+    // For regular text messages, check if this contact has a manually assigned agent
     const contactAgentAssignment = await contactAgentService.getAgentForContact(from);
     let agentToUse = null;
     let useStoredHistory = false;
     
+    // Only use manually assigned agent - no fallback to lead-form or random agents
     if (contactAgentAssignment) {
       console.log(`[Webhook] Found assigned agent for ${from}: ${contactAgentAssignment.agentName} (${contactAgentAssignment.agentId})`);
       agentToUse = await getAgentById(contactAgentAssignment.agentId);
       useStoredHistory = true;
-    }
-    
-    // Fall back to lead-form mapping if no assigned agent
-    if (!agentToUse) {
+    } else {
+      // Check if auto-reply is disabled for this contact (e.g., after "Thanks" message)
+      const autoReplyDisabled = await contactAgentService.isAutoReplyDisabled(from);
+      
+      if (autoReplyDisabled) {
+        console.log(`[Webhook] Auto-reply disabled for ${from} - waiting for manual agent selection`);
+        return res.sendStatus(200);
+      }
+      
+      // Fall back to lead-form mapping only if auto-reply is not disabled
       const lead = await findLeadByPhone(from);
       if (lead) {
         const mapping = await getMappingByFormId(lead.formId);
@@ -130,12 +139,12 @@ export async function handleWebhook(req: Request, res: Response) {
           agentToUse = await getAgentById(mapping.agentId);
         }
       }
-    }
 
-    // Fall back to any active agent
-    if (!agentToUse) {
-      const agents = await getAllAgents();
-      agentToUse = agents.find((a: any) => a.isActive);
+      // Fall back to any active agent only if auto-reply is not disabled
+      if (!agentToUse) {
+        const agents = await getAllAgents();
+        agentToUse = agents.find((a: any) => a.isActive);
+      }
     }
 
     if (!agentToUse) {
