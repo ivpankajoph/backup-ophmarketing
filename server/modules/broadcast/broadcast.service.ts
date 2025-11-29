@@ -574,16 +574,24 @@ export async function saveImportedContacts(contacts: BroadcastContact[], source:
   let duplicates = 0;
   const now = new Date().toISOString();
 
-  for (const contact of contacts) {
-    try {
-      const existingContact = await mongodb.findOne<ImportedContact>('imported_contacts', { phone: contact.phone });
+  try {
+    const existingContacts = await mongodb.readCollection<ImportedContact>('imported_contacts');
+    const existingPhones = new Set(existingContacts.map(c => c.phone.replace(/\D/g, '')));
+    
+    const uniqueContacts: ImportedContact[] = [];
+    const seenPhones = new Set<string>();
+    
+    for (const contact of contacts) {
+      const normalizedPhone = contact.phone.replace(/\D/g, '');
       
-      if (existingContact) {
+      if (existingPhones.has(normalizedPhone) || seenPhones.has(normalizedPhone)) {
         duplicates++;
         continue;
       }
-
-      const newContact: ImportedContact = {
+      
+      seenPhones.add(normalizedPhone);
+      
+      uniqueContacts.push({
         id: `contact-${Date.now()}-${Math.random().toString(36).substring(7)}`,
         name: contact.name,
         phone: contact.phone,
@@ -592,16 +600,24 @@ export async function saveImportedContacts(contacts: BroadcastContact[], source:
         source,
         createdAt: now,
         updatedAt: now,
-      };
-
-      await mongodb.insertOne('imported_contacts', newContact);
-      saved++;
-    } catch (error) {
-      errors.push(`Failed to save contact ${contact.phone}: ${error}`);
+      });
     }
+    
+    if (uniqueContacts.length > 0) {
+      const BATCH_SIZE = 100;
+      for (let i = 0; i < uniqueContacts.length; i += BATCH_SIZE) {
+        const batch = uniqueContacts.slice(i, i + BATCH_SIZE);
+        await mongodb.insertMany('imported_contacts', batch);
+        saved += batch.length;
+      }
+    }
+    
+    console.log(`[ImportContacts] Saved ${saved} new contacts, ${duplicates} duplicates skipped (batch mode)`);
+  } catch (error) {
+    console.error('[ImportContacts] Bulk import failed:', error);
+    errors.push(`Bulk import failed: ${error}`);
   }
 
-  console.log(`[ImportContacts] Saved ${saved} new contacts, ${duplicates} duplicates skipped`);
   return { saved, duplicates, errors };
 }
 

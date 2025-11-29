@@ -691,6 +691,42 @@
       "status": "sent",
       "id": "de2bd541-6806-47a2-bcbc-f7020fb86ec4",
       "timestamp": "2025-11-28T09:08:18.120Z"
+    },
+    {
+      "contactId": "4d460e87-b06f-4c96-ab75-3a484e9a18ad",
+      "content": "[button message]",
+      "type": "text",
+      "direction": "inbound",
+      "status": "sent",
+      "id": "8a60aa66-9325-4d26-83ca-87bde9a145f7",
+      "timestamp": "2025-11-29T04:56:01.368Z"
+    },
+    {
+      "contactId": "4d460e87-b06f-4c96-ab75-3a484e9a18ad",
+      "content": "thanks",
+      "type": "text",
+      "direction": "outbound",
+      "status": "sent",
+      "id": "a057cfc5-c239-499e-b16d-02070a47adef",
+      "timestamp": "2025-11-29T04:56:22.194Z"
+    },
+    {
+      "contactId": "4d460e87-b06f-4c96-ab75-3a484e9a18ad",
+      "content": "Hey",
+      "type": "text",
+      "direction": "inbound",
+      "status": "sent",
+      "id": "88416264-4374-485b-b77c-83307c7fd2ba",
+      "timestamp": "2025-11-29T05:35:39.651Z"
+    },
+    {
+      "contactId": "4d460e87-b06f-4c96-ab75-3a484e9a18ad",
+      "content": "Hello! How can I assist you today?",
+      "type": "text",
+      "direction": "outbound",
+      "status": "sent",
+      "id": "2817c11d-53e1-4df5-a6b9-bd38dcd0abff",
+      "timestamp": "2025-11-29T05:35:42.798Z"
     }
   ],
   "campaigns": [
@@ -1073,10 +1109,10 @@
         "updatedAt": "2025-11-28T06:04:55.063Z"
       },
       "lastMessage": "Hello! How can I assist you today?",
-      "lastMessageTime": "2025-11-28T09:08:18.120Z",
-      "lastInboundMessageTime": "2025-11-28T09:08:15.006Z",
+      "lastMessageTime": "2025-11-29T05:35:42.798Z",
+      "lastInboundMessageTime": "2025-11-29T05:35:39.651Z",
       "lastInboundMessage": "Hey",
-      "unreadCount": 7,
+      "unreadCount": 9,
       "status": "open",
       "notes": []
     },

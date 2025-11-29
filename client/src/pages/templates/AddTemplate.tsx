@@ -1,73 +1,256 @@
+import { useState } from "react";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { useLocation } from "wouter";
 import DashboardLayout from "@/components/layout/DashboardLayout";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import { Loader2, Info, CheckCircle2 } from "lucide-react";
+import { toast } from "sonner";
 
 export default function AddTemplate() {
+  const [, setLocation] = useLocation();
+  const queryClient = useQueryClient();
+  
+  const [name, setName] = useState("");
+  const [category, setCategory] = useState("");
+  const [language, setLanguage] = useState("en_US");
+  const [headerType, setHeaderType] = useState("none");
+  const [headerText, setHeaderText] = useState("");
+  const [body, setBody] = useState("");
+  const [footer, setFooter] = useState("");
+
+  const createTemplateMutation = useMutation({
+    mutationFn: async (data: any) => {
+      const res = await fetch("/api/templates", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(data),
+      });
+      if (!res.ok) {
+        const error = await res.json();
+        throw new Error(error.error || "Failed to create template");
+      }
+      return res.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/templates"] });
+      toast.success("Template created successfully!");
+      setLocation("/templates/manage");
+    },
+    onError: (error: Error) => {
+      toast.error(error.message);
+    },
+  });
+
+  const handleSubmit = () => {
+    if (!name.trim()) {
+      toast.error("Please enter a template name");
+      return;
+    }
+    if (!category) {
+      toast.error("Please select a category");
+      return;
+    }
+    if (!body.trim()) {
+      toast.error("Please enter body text");
+      return;
+    }
+
+    const templateName = name.toLowerCase().replace(/[^a-z0-9_]/g, "_");
+    
+    createTemplateMutation.mutate({
+      name: templateName,
+      category,
+      language,
+      headerType: headerType === "none" ? null : headerType,
+      headerText: headerType === "text" ? headerText : null,
+      content: body,
+      footer: footer || null,
+      status: "pending",
+    });
+  };
+
   return (
     <DashboardLayout>
       <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
-        <h2 className="text-3xl font-bold tracking-tight">Add New Template</h2>
-        <Card className="max-w-2xl">
-          <CardHeader>
-            <CardTitle>Template Details</CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <div className="grid gap-2">
-              <Label>Template Name</Label>
-              <Input placeholder="e.g., welcome_message_v2" />
-            </div>
-            <div className="grid gap-2">
-              <Label>Category</Label>
-              <Select>
-                <SelectTrigger>
-                  <SelectValue placeholder="Select category" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="marketing">Marketing</SelectItem>
-                  <SelectItem value="utility">Utility</SelectItem>
-                  <SelectItem value="auth">Authentication</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-            <div className="grid gap-2">
-              <Label>Language</Label>
-              <Select>
-                <SelectTrigger>
-                  <SelectValue placeholder="Select language" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="en_US">English (US)</SelectItem>
-                  <SelectItem value="es_ES">Spanish</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-            <div className="grid gap-2">
-              <Label>Header (Optional)</Label>
-              <Select>
-                <SelectTrigger>
-                  <SelectValue placeholder="None" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="none">None</SelectItem>
-                  <SelectItem value="text">Text</SelectItem>
-                  <SelectItem value="image">Image</SelectItem>
-                  <SelectItem value="video">Video</SelectItem>
-                  <SelectItem value="document">Document</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-            <div className="grid gap-2">
-              <Label>Body Text</Label>
-              <Textarea placeholder="Enter your message here. Use {{1}}, {{2}} for variables." className="min-h-[100px]" />
-              <p className="text-xs text-muted-foreground">Example: Hello {'{{1}}'}, thanks for your order!</p>
-            </div>
-            <Button className="w-full">Submit for Approval</Button>
-          </CardContent>
-        </Card>
+        <div>
+          <h2 className="text-3xl font-bold tracking-tight">Add New Template</h2>
+          <p className="text-muted-foreground">Create a WhatsApp message template for approval</p>
+        </div>
+
+        <div className="grid gap-6 lg:grid-cols-3">
+          <div className="lg:col-span-2">
+            <Card>
+              <CardHeader>
+                <CardTitle>Template Details</CardTitle>
+                <CardDescription>Fill in the details for your new template</CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="grid gap-2">
+                  <Label htmlFor="name">Template Name *</Label>
+                  <Input 
+                    id="name"
+                    placeholder="e.g., welcome_message_v2" 
+                    value={name}
+                    onChange={(e) => setName(e.target.value)}
+                  />
+                  <p className="text-xs text-muted-foreground">
+                    Use lowercase letters, numbers, and underscores only
+                  </p>
+                </div>
+
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="grid gap-2">
+                    <Label>Category *</Label>
+                    <Select value={category} onValueChange={setCategory}>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Select category" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="marketing">Marketing</SelectItem>
+                        <SelectItem value="utility">Utility</SelectItem>
+                        <SelectItem value="authentication">Authentication</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <div className="grid gap-2">
+                    <Label>Language</Label>
+                    <Select value={language} onValueChange={setLanguage}>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Select language" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="en_US">English (US)</SelectItem>
+                        <SelectItem value="en_GB">English (UK)</SelectItem>
+                        <SelectItem value="es_ES">Spanish</SelectItem>
+                        <SelectItem value="hi">Hindi</SelectItem>
+                        <SelectItem value="pt_BR">Portuguese (Brazil)</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                </div>
+
+                <div className="grid gap-2">
+                  <Label>Header (Optional)</Label>
+                  <Select value={headerType} onValueChange={setHeaderType}>
+                    <SelectTrigger>
+                      <SelectValue placeholder="None" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="none">None</SelectItem>
+                      <SelectItem value="text">Text</SelectItem>
+                      <SelectItem value="image">Image</SelectItem>
+                      <SelectItem value="video">Video</SelectItem>
+                      <SelectItem value="document">Document</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                {headerType === "text" && (
+                  <div className="grid gap-2">
+                    <Label>Header Text</Label>
+                    <Input 
+                      placeholder="Enter header text"
+                      value={headerText}
+                      onChange={(e) => setHeaderText(e.target.value)}
+                    />
+                  </div>
+                )}
+
+                <div className="grid gap-2">
+                  <Label htmlFor="body">Body Text *</Label>
+                  <Textarea 
+                    id="body"
+                    placeholder="Enter your message here. Use {{1}}, {{2}} for variables." 
+                    className="min-h-[120px]"
+                    value={body}
+                    onChange={(e) => setBody(e.target.value)}
+                  />
+                  <p className="text-xs text-muted-foreground">
+                    Use {"{{1}}"}, {"{{2}}"} etc. for dynamic variables
+                  </p>
+                </div>
+
+                <div className="grid gap-2">
+                  <Label>Footer (Optional)</Label>
+                  <Input 
+                    placeholder="e.g., Reply STOP to unsubscribe"
+                    value={footer}
+                    onChange={(e) => setFooter(e.target.value)}
+                  />
+                </div>
+
+                <Button 
+                  className="w-full" 
+                  onClick={handleSubmit}
+                  disabled={createTemplateMutation.isPending}
+                >
+                  {createTemplateMutation.isPending ? (
+                    <>
+                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                      Creating Template...
+                    </>
+                  ) : (
+                    "Create Template"
+                  )}
+                </Button>
+              </CardContent>
+            </Card>
+          </div>
+
+          <div className="space-y-4">
+            <Card>
+              <CardHeader>
+                <CardTitle className="text-base flex items-center gap-2">
+                  <Info className="h-4 w-4" />
+                  Template Guidelines
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="text-sm space-y-3 text-muted-foreground">
+                <div className="flex items-start gap-2">
+                  <CheckCircle2 className="h-4 w-4 mt-0.5 text-green-500 shrink-0" />
+                  <span>Template names must be lowercase with underscores</span>
+                </div>
+                <div className="flex items-start gap-2">
+                  <CheckCircle2 className="h-4 w-4 mt-0.5 text-green-500 shrink-0" />
+                  <span>Marketing templates need clear opt-out option</span>
+                </div>
+                <div className="flex items-start gap-2">
+                  <CheckCircle2 className="h-4 w-4 mt-0.5 text-green-500 shrink-0" />
+                  <span>Avoid promotional language in Utility templates</span>
+                </div>
+                <div className="flex items-start gap-2">
+                  <CheckCircle2 className="h-4 w-4 mt-0.5 text-green-500 shrink-0" />
+                  <span>Use variables for personalization</span>
+                </div>
+              </CardContent>
+            </Card>
+
+            {body && (
+              <Card>
+                <CardHeader>
+                  <CardTitle className="text-base">Preview</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="bg-green-50 rounded-lg p-3 text-sm border border-green-200">
+                    {headerType === "text" && headerText && (
+                      <p className="font-semibold mb-2">{headerText}</p>
+                    )}
+                    <p className="whitespace-pre-wrap">{body}</p>
+                    {footer && (
+                      <p className="text-xs text-muted-foreground mt-2 pt-2 border-t">{footer}</p>
+                    )}
+                  </div>
+                </CardContent>
+              </Card>
+            )}
+          </div>
+        </div>
       </div>
     </DashboardLayout>
   );

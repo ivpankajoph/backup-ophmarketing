@@ -295,3 +295,19 @@ export async function countDocuments(collectionName: string, query: Record<strin
     return 0;
   }
 }
+
+export async function insertMany<T extends Record<string, any>>(collectionName: string, data: T[]): Promise<T[]> {
+  await connectToMongoDB();
+  const model = modelMap[collectionName];
+  if (!model) {
+    console.error(`[MongoDB] Unknown collection: ${collectionName}`);
+    return [];
+  }
+  try {
+    const docs = await model.insertMany(data, { ordered: false });
+    return docs.map(doc => doc.toObject()) as T[];
+  } catch (error) {
+    console.error(`[MongoDB] Error bulk inserting into ${collectionName}:`, error);
+    return [];
+  }
+}

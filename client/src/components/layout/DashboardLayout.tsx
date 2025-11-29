@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { Link, useLocation } from "wouter";
+import { useQuery } from "@tanstack/react-query";
 import { 
   LayoutDashboard, 
   MessageSquare, 
@@ -22,6 +23,7 @@ import {
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Badge } from "@/components/ui/badge";
 import { 
   DropdownMenu, 
   DropdownMenuContent, 
@@ -34,11 +36,44 @@ import { Input } from "@/components/ui/input";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 
+interface Chat {
+  id: string;
+  lastInboundMessageTime?: string;
+  unreadCount: number;
+}
+
 export default function DashboardLayout({ children }: { children: React.ReactNode }) {
   const [location] = useLocation();
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
-  // Define navigation structure
+  const { data: windowUnreadCount = 0 } = useQuery<number>({
+    queryKey: ["/api/chats", "window-unread"],
+    queryFn: async () => {
+      const res = await fetch("/api/chats/window");
+      if (!res.ok) return 0;
+      const windowChats: Chat[] = await res.json();
+      const now = new Date();
+      let totalUnread = 0;
+      for (const chat of windowChats) {
+        const windowExpiresAt = (chat as any).windowExpiresAt;
+        if (windowExpiresAt) {
+          const expires = new Date(windowExpiresAt);
+          if (expires.getTime() > now.getTime() && chat.unreadCount > 0) {
+            totalUnread += chat.unreadCount;
+          }
+        } else if (chat.lastInboundMessageTime && chat.unreadCount > 0) {
+          const lastInbound = new Date(chat.lastInboundMessageTime);
+          const hoursDiff = (now.getTime() - lastInbound.getTime()) / (1000 * 60 * 60);
+          if (hoursDiff <= 24) {
+            totalUnread += chat.unreadCount;
+          }
+        }
+      }
+      return totalUnread;
+    },
+    refetchInterval: 5000,
+  });
+
   const navStructure = [
     {
       icon: LayoutDashboard,
@@ -49,6 +84,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
       icon: Clock,
       label: "24-Hour Window",
       href: "/inbox/window",
+      badge: windowUnreadCount > 0 ? windowUnreadCount : undefined,
     },
     {
       icon: MessageSquare,
@@ -198,15 +234,22 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
       <Link href={item.href}>
         <div 
           className={`
-            flex items-center gap-3 px-3 py-2.5 rounded-md text-sm font-medium transition-colors cursor-pointer
+            flex items-center justify-between px-3 py-2.5 rounded-md text-sm font-medium transition-colors cursor-pointer
             ${isActive 
               ? "bg-sidebar-accent text-sidebar-accent-foreground" 
               : "text-sidebar-foreground/70 hover:bg-sidebar-accent/50 hover:text-sidebar-foreground"
             }
           `}
         >
-          <item.icon className="h-4 w-4" />
-          {item.label}
+          <div className="flex items-center gap-3">
+            <item.icon className="h-4 w-4" />
+            {item.label}
+          </div>
+          {item.badge && (
+            <Badge className="bg-red-500 hover:bg-red-600 text-white text-xs px-1.5 py-0.5 min-w-[20px] text-center">
+              {item.badge > 99 ? "99+" : item.badge}
+            </Badge>
+          )}
         </div>
       </Link>
     );
