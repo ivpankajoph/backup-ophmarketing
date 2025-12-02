@@ -28,6 +28,8 @@ The system incorporates a modular backend structure, allowing for independent de
 - **Meta Business Suite**: For syncing and approving message templates.
 
 ## Recent Changes (December 2, 2025)
+- **Real-Time Reports System**: All report pages now display real calculated data from actual system usage - no static/mock data. Campaign reports show performance by campaign with sent/delivered/read/replied metrics. Delivery reports provide daily/hourly breakdowns with delivery rates and failure tracking.
+- **Report API Endpoints**: Added `/api/reports/campaigns` and `/api/reports/delivery` endpoints that calculate metrics from messages, campaigns, and broadcast_logs collections with configurable date ranges.
 - **WhatsApp Leads Page**: New inbox page for managing messages from unknown contacts (not in contact list). Unlike the 24-Hour Window, there's no expiration constraint. Supports the same features as other inbox pages including bulk messaging, AI agent assignment, and conversation management.
 - **Pre-filled Text Mappings**: New feature to automatically assign AI agents based on what unknown users first text. When a new contact sends a message matching a pre-filled text pattern, the assigned AI agent will automatically respond and handle the conversation.
 - **Backend Pre-filled Text API**: MongoDB collection `prefilled_text_mappings` stores text-to-agent mappings. Webhook checks for matches before falling back to lead-form or active agents.
