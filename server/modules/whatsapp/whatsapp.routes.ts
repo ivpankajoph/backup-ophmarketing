@@ -9,5 +9,6 @@ router.post('/send', controller.sendMessage);
 router.post('/send-template', controller.sendTemplateMessageEndpoint);
 router.get('/conversations', controller.getConversations);
 router.get('/conversations/:phone', controller.getConversation);
+router.get('/media/:mediaId', controller.getMediaUrl);
 
 export default router;

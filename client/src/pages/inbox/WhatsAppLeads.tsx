@@ -53,6 +53,7 @@ interface Message {
   timestamp: string;
   replyToMessageId?: string;
   replyToContent?: string;
+  mediaUrl?: string;
 }
 
 interface Chat {
@@ -213,6 +214,116 @@ export default function WhatsAppLeads() {
     } catch {
       return "";
     }
+  };
+
+  const renderMessageContent = (msg: Message) => {
+    const content = msg.content;
+    const mediaUrl = msg.mediaUrl;
+    
+    if (msg.type === 'image' || content.startsWith('[Image')) {
+      if (mediaUrl) {
+        const caption = content.replace(/^\[Image\]\s*/, '').replace(/^\[Image message\]$/, '');
+        return (
+          <div className="space-y-2">
+            <img 
+              src={`/api/webhook/whatsapp/media/${mediaUrl}`} 
+              alt="Shared image" 
+              className="max-w-[280px] max-h-[300px] rounded-lg object-cover cursor-pointer hover:opacity-90 transition-opacity"
+              onClick={() => window.open(`/api/webhook/whatsapp/media/${mediaUrl}`, '_blank')}
+              onError={(e) => {
+                (e.target as HTMLImageElement).style.display = 'none';
+                (e.target as HTMLImageElement).nextElementSibling?.classList.remove('hidden');
+              }}
+            />
+            <span className="hidden text-muted-foreground italic text-sm">Image expired or unavailable</span>
+            {caption && <p className="text-sm">{caption}</p>}
+          </div>
+        );
+      }
+      return <span className="flex items-center gap-1 text-muted-foreground italic">📷 {content}</span>;
+    } else if (msg.type === 'video' || content.startsWith('[Video')) {
+      if (mediaUrl) {
+        const caption = content.replace(/^\[Video\]\s*/, '').replace(/^\[Video message\]$/, '');
+        return (
+          <div className="space-y-2">
+            <video 
+              src={`/api/webhook/whatsapp/media/${mediaUrl}`} 
+              controls
+              className="max-w-[280px] max-h-[300px] rounded-lg"
+              onError={(e) => {
+                (e.target as HTMLVideoElement).style.display = 'none';
+                (e.target as HTMLVideoElement).nextElementSibling?.classList.remove('hidden');
+              }}
+            />
+            <span className="hidden text-muted-foreground italic text-sm">Video expired or unavailable</span>
+            {caption && <p className="text-sm">{caption}</p>}
+          </div>
+        );
+      }
+      return <span className="flex items-center gap-1 text-muted-foreground italic">🎥 {content}</span>;
+    } else if (msg.type === 'audio' || content.startsWith('[Audio')) {
+      if (mediaUrl) {
+        return (
+          <div className="space-y-2">
+            <audio 
+              src={`/api/webhook/whatsapp/media/${mediaUrl}`} 
+              controls
+              className="max-w-[280px]"
+              onError={(e) => {
+                (e.target as HTMLAudioElement).style.display = 'none';
+                (e.target as HTMLAudioElement).nextElementSibling?.classList.remove('hidden');
+              }}
+            />
+            <span className="hidden text-muted-foreground italic text-sm">Audio expired or unavailable</span>
+          </div>
+        );
+      }
+      return <span className="flex items-center gap-1 text-muted-foreground italic">🎵 {content}</span>;
+    } else if (msg.type === 'sticker' || content.startsWith('[Sticker')) {
+      if (mediaUrl) {
+        return (
+          <div>
+            <img 
+              src={`/api/webhook/whatsapp/media/${mediaUrl}`} 
+              alt="Sticker" 
+              className="max-w-[150px] max-h-[150px]"
+              onError={(e) => {
+                (e.target as HTMLImageElement).style.display = 'none';
+                (e.target as HTMLImageElement).nextElementSibling?.classList.remove('hidden');
+              }}
+            />
+            <span className="hidden text-muted-foreground italic text-sm">Sticker expired or unavailable</span>
+          </div>
+        );
+      }
+      return <span className="flex items-center gap-1 text-muted-foreground italic">🎨 {content}</span>;
+    } else if (msg.type === 'document' || content.startsWith('[Document')) {
+      if (mediaUrl) {
+        const filename = content.match(/\[Document: ([^\]]+)\]/)?.[1] || 'document';
+        return (
+          <a 
+            href={`/api/webhook/whatsapp/media/${mediaUrl}`} 
+            target="_blank"
+            rel="noopener noreferrer"
+            className="flex items-center gap-2 p-2 bg-muted rounded-lg hover:bg-muted/80 transition-colors"
+          >
+            <span className="text-lg">📄</span>
+            <span className="text-sm underline">{filename}</span>
+          </a>
+        );
+      }
+      return <span className="flex items-center gap-1 text-muted-foreground italic">📄 {content}</span>;
+    } else if (content.startsWith('[Location')) {
+      return <span className="flex items-center gap-1 text-muted-foreground italic">📍 {content}</span>;
+    } else if (content.startsWith('[Contact')) {
+      return <span className="flex items-center gap-1 text-muted-foreground italic">👤 {content}</span>;
+    } else if (content.startsWith('[Reaction')) {
+      return <span className="flex items-center gap-1">{content}</span>;
+    } else if (content.startsWith('[Unsupported')) {
+      return <span className="flex items-center gap-1 text-muted-foreground italic">⚠️ {content}</span>;
+    }
+    
+    return <span>{content}</span>;
   };
 
   const sendMessageMutation = useMutation({
@@ -667,7 +778,7 @@ export default function WhatsAppLeads() {
                                 {msg.replyToContent.length > 60 && '...'}
                               </div>
                             )}
-                            <p className="text-sm leading-relaxed">{msg.content}</p>
+                            <div className="text-sm leading-relaxed">{renderMessageContent(msg)}</div>
                             <span className="text-[10px] text-muted-foreground/80 block text-right mt-1">
                               {formatTime(msg.timestamp)}
                               {msg.direction === 'outbound' && (

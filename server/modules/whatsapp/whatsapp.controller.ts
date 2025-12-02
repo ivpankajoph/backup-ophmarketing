@@ -331,14 +331,18 @@ async function saveInboundMessage(from: string, content: string, type: string, b
       }
     }
 
+    const validTypes = ['text', 'image', 'video', 'document', 'audio', 'sticker', 'location', 'contacts'] as const;
+    const messageType = validTypes.includes(type as any) ? type as typeof validTypes[number] : 'text';
+    
     const message = await storage.createMessage({
       contactId: contact.id,
       content: displayContent || `[${type} message]`,
-      type: 'text' as const,
+      type: messageType,
       direction: 'inbound',
-      status: 'sent' as const,
+      status: 'read' as const,
+      mediaUrl: mediaUrl || undefined,
     });
-    console.log('Saved inbound message:', message.id);
+    console.log('Saved inbound message:', message.id, 'type:', messageType, 'mediaUrl:', mediaUrl || 'none');
 
     await storage.updateChatInboundTime(contact.id);
     console.log('Updated chat inbound time for contact:', contact.id);
@@ -465,6 +469,60 @@ export async function sendMessage(req: Request, res: Response) {
   } catch (error: any) {
     console.error('Error sending message:', error);
     res.status(500).json({ error: error.message || 'Failed to send message' });
+  }
+}
+
+export async function getMediaUrl(req: Request, res: Response) {
+  try {
+    const { mediaId } = req.params;
+    
+    if (!mediaId) {
+      return res.status(400).json({ error: 'Media ID is required' });
+    }
+    
+    if (!WHATSAPP_TOKEN) {
+      return res.status(500).json({ error: 'WhatsApp credentials not configured' });
+    }
+
+    const mediaInfoUrl = `https://graph.facebook.com/v18.0/${mediaId}`;
+    const mediaInfoResponse = await fetch(mediaInfoUrl, {
+      headers: {
+        'Authorization': `Bearer ${WHATSAPP_TOKEN}`,
+      },
+    });
+
+    if (!mediaInfoResponse.ok) {
+      const error = await mediaInfoResponse.text();
+      console.error('WhatsApp media info error:', error);
+      return res.status(404).json({ error: 'Media not found or expired' });
+    }
+
+    const mediaInfo = await mediaInfoResponse.json();
+    const downloadUrl = mediaInfo.url;
+    const mimeType = mediaInfo.mime_type;
+    
+    console.log('[Media] Fetched media info:', { mediaId, mimeType, hasUrl: !!downloadUrl });
+
+    const mediaResponse = await fetch(downloadUrl, {
+      headers: {
+        'Authorization': `Bearer ${WHATSAPP_TOKEN}`,
+      },
+    });
+
+    if (!mediaResponse.ok) {
+      const error = await mediaResponse.text();
+      console.error('WhatsApp media download error:', error);
+      return res.status(500).json({ error: 'Failed to download media' });
+    }
+
+    const buffer = await mediaResponse.arrayBuffer();
+    
+    res.set('Content-Type', mimeType || 'application/octet-stream');
+    res.set('Cache-Control', 'public, max-age=86400');
+    res.send(Buffer.from(buffer));
+  } catch (error: any) {
+    console.error('Error fetching media:', error);
+    res.status(500).json({ error: error.message || 'Failed to fetch media' });
   }
 }
 
