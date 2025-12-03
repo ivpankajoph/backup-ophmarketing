@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { Link, useLocation } from "wouter";
 import { useQuery } from "@tanstack/react-query";
+import { useAuth } from "@/contexts/AuthContext";
 import { 
   LayoutDashboard, 
   MessageSquare, 
@@ -44,8 +45,14 @@ interface Chat {
 }
 
 export default function DashboardLayout({ children }: { children: React.ReactNode }) {
-  const [location] = useLocation();
+  const [location, setLocation] = useLocation();
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+  const { user, logout } = useAuth();
+
+  const handleLogout = () => {
+    logout();
+    setLocation("/login");
+  };
 
   const { data: windowUnreadCount = 0 } = useQuery<number>({
     queryKey: ["/api/chats", "window-unread-count"],
@@ -335,9 +342,9 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
               <DropdownMenuContent className="w-56" align="end" forceMount>
                 <DropdownMenuLabel className="font-normal">
                   <div className="flex flex-col space-y-1">
-                    <p className="text-sm font-medium leading-none">Acme Inc</p>
+                    <p className="text-sm font-medium leading-none">WhatsApp Admin</p>
                     <p className="text-xs leading-none text-muted-foreground">
-                      admin@acme.com
+                      {user?.email || "admin@whatsapp.com"}
                     </p>
                   </div>
                 </DropdownMenuLabel>
@@ -351,7 +358,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
                   <span>Settings</span>
                 </DropdownMenuItem>
                 <DropdownMenuSeparator />
-                <DropdownMenuItem className="text-destructive focus:text-destructive">
+                <DropdownMenuItem onClick={handleLogout} className="text-destructive focus:text-destructive cursor-pointer">
                   <LogOut className="mr-2 h-4 w-4" />
                   <span>Log out</span>
                 </DropdownMenuItem>

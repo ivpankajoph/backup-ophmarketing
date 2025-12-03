@@ -1,9 +1,11 @@
-import { Switch, Route } from "wouter";
+import { Switch, Route, useLocation, Redirect } from "wouter";
 import { queryClient } from "./lib/queryClient";
 import { QueryClientProvider } from "@tanstack/react-query";
 import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
+import { AuthProvider, useAuth } from "@/contexts/AuthContext";
 import NotFound from "@/pages/not-found";
+import Login from "@/pages/Login";
 import Dashboard from "@/pages/dashboard";
 import Inbox from "@/pages/inbox";
 import WindowInbox from "@/pages/inbox/WindowInbox";
@@ -59,71 +61,84 @@ import Credits from "@/pages/reports/Credits";
 import UserEngagement from "@/pages/reports/UserEngagement";
 import BroadcastReports from "@/pages/reports/BroadcastReports";
 
+function ProtectedRoute({ component: Component }: { component: React.ComponentType }) {
+  const { isAuthenticated } = useAuth();
+  if (!isAuthenticated) {
+    return <Redirect to="/login" />;
+  }
+  return <Component />;
+}
+
 function Router() {
+  const { isAuthenticated } = useAuth();
+  
   return (
     <Switch>
-      <Route path="/" component={Dashboard} />
-      <Route path="/inbox/window" component={WindowInbox} />
-      <Route path="/inbox/leads" component={WhatsAppLeads} />
-      <Route path="/inbox" component={Inbox} />
+      <Route path="/login">
+        {isAuthenticated ? <Redirect to="/" /> : <Login />}
+      </Route>
+      <Route path="/">{() => <ProtectedRoute component={Dashboard} />}</Route>
+      <Route path="/inbox/window">{() => <ProtectedRoute component={WindowInbox} />}</Route>
+      <Route path="/inbox/leads">{() => <ProtectedRoute component={WhatsAppLeads} />}</Route>
+      <Route path="/inbox">{() => <ProtectedRoute component={Inbox} />}</Route>
       
       {/* Campaigns */}
-      <Route path="/campaigns" component={Campaigns} />
-      <Route path="/campaigns/broadcast" component={Broadcast} />
-      <Route path="/campaigns/selected-contacts" component={SelectedContacts} />
-      <Route path="/campaigns/schedule" component={Schedule} />
-      <Route path="/campaigns/single" component={Single} />
-      <Route path="/campaigns/report" component={Report} />
+      <Route path="/campaigns">{() => <ProtectedRoute component={Campaigns} />}</Route>
+      <Route path="/campaigns/broadcast">{() => <ProtectedRoute component={Broadcast} />}</Route>
+      <Route path="/campaigns/selected-contacts">{() => <ProtectedRoute component={SelectedContacts} />}</Route>
+      <Route path="/campaigns/schedule">{() => <ProtectedRoute component={Schedule} />}</Route>
+      <Route path="/campaigns/single">{() => <ProtectedRoute component={Single} />}</Route>
+      <Route path="/campaigns/report">{() => <ProtectedRoute component={Report} />}</Route>
 
       {/* Automation */}
-      <Route path="/automation" component={Automation} />
-      <Route path="/automation/leads" component={AutoLeads} />
-      <Route path="/automation/keywords" component={Keywords} />
-      <Route path="/automation/follow-up" component={FollowUp} />
-      <Route path="/automation/drip" component={Drip} />
-      <Route path="/automation/new-leads" component={NewLeads} />
+      <Route path="/automation">{() => <ProtectedRoute component={Automation} />}</Route>
+      <Route path="/automation/leads">{() => <ProtectedRoute component={AutoLeads} />}</Route>
+      <Route path="/automation/keywords">{() => <ProtectedRoute component={Keywords} />}</Route>
+      <Route path="/automation/follow-up">{() => <ProtectedRoute component={FollowUp} />}</Route>
+      <Route path="/automation/drip">{() => <ProtectedRoute component={Drip} />}</Route>
+      <Route path="/automation/new-leads">{() => <ProtectedRoute component={NewLeads} />}</Route>
 
       {/* Apps */}
-      <Route path="/apps/connect" component={ConnectApps} />
+      <Route path="/apps/connect">{() => <ProtectedRoute component={ConnectApps} />}</Route>
 
       {/* Templates */}
-      <Route path="/templates" component={Templates} />
-      <Route path="/templates/add" component={AddTemplate} />
-      <Route path="/templates/status" component={TemplateStatus} />
-      <Route path="/templates/manage" component={ManageTemplates} />
+      <Route path="/templates">{() => <ProtectedRoute component={Templates} />}</Route>
+      <Route path="/templates/add">{() => <ProtectedRoute component={AddTemplate} />}</Route>
+      <Route path="/templates/status">{() => <ProtectedRoute component={TemplateStatus} />}</Route>
+      <Route path="/templates/manage">{() => <ProtectedRoute component={ManageTemplates} />}</Route>
 
       {/* AI */}
-      <Route path="/ai" component={AgentsPage} />
-      <Route path="/ai/new" component={NewAgent} />
-      <Route path="/ai/manage" component={AgentsPage} />
-      <Route path="/ai/agents" component={AgentsPage} />
-      <Route path="/ai/map" component={MapAgent} />
-      <Route path="/ai/prefilled" component={PrefilledTextMappings} />
-      <Route path="/ai/reports" component={AgentReports} />
+      <Route path="/ai">{() => <ProtectedRoute component={AgentsPage} />}</Route>
+      <Route path="/ai/new">{() => <ProtectedRoute component={NewAgent} />}</Route>
+      <Route path="/ai/manage">{() => <ProtectedRoute component={AgentsPage} />}</Route>
+      <Route path="/ai/agents">{() => <ProtectedRoute component={AgentsPage} />}</Route>
+      <Route path="/ai/map">{() => <ProtectedRoute component={MapAgent} />}</Route>
+      <Route path="/ai/prefilled">{() => <ProtectedRoute component={PrefilledTextMappings} />}</Route>
+      <Route path="/ai/reports">{() => <ProtectedRoute component={AgentReports} />}</Route>
 
       {/* Facebook */}
-      <Route path="/facebook/forms" component={LeadForms} />
-      <Route path="/facebook/leads" component={Leads} />
+      <Route path="/facebook/forms">{() => <ProtectedRoute component={LeadForms} />}</Route>
+      <Route path="/facebook/leads">{() => <ProtectedRoute component={Leads} />}</Route>
 
       {/* Reports */}
-      <Route path="/reports" component={DeliveryReport} />
-      <Route path="/reports/delivery" component={DeliveryReport} />
-      <Route path="/reports/campaigns" component={CampaignPerformance} />
-      <Route path="/reports/replies" component={CustomerReplies} />
-      <Route path="/reports/agents" component={AgentPerformance} />
-      <Route path="/reports/spending" component={Spending} />
-      <Route path="/reports/credits" component={Credits} />
-      <Route path="/reports/user-engagement" component={UserEngagement} />
-      <Route path="/reports/broadcast" component={BroadcastReports} />
+      <Route path="/reports">{() => <ProtectedRoute component={DeliveryReport} />}</Route>
+      <Route path="/reports/delivery">{() => <ProtectedRoute component={DeliveryReport} />}</Route>
+      <Route path="/reports/campaigns">{() => <ProtectedRoute component={CampaignPerformance} />}</Route>
+      <Route path="/reports/replies">{() => <ProtectedRoute component={CustomerReplies} />}</Route>
+      <Route path="/reports/agents">{() => <ProtectedRoute component={AgentPerformance} />}</Route>
+      <Route path="/reports/spending">{() => <ProtectedRoute component={Spending} />}</Route>
+      <Route path="/reports/credits">{() => <ProtectedRoute component={Credits} />}</Route>
+      <Route path="/reports/user-engagement">{() => <ProtectedRoute component={UserEngagement} />}</Route>
+      <Route path="/reports/broadcast">{() => <ProtectedRoute component={BroadcastReports} />}</Route>
 
-      <Route path="/contacts" component={Contacts} />
-      <Route path="/settings" component={Settings} />
-      <Route path="/settings/team" component={TeamMembers} />
-      <Route path="/settings/permissions" component={Permissions} />
-      <Route path="/settings/whatsapp" component={WhatsAppNumber} />
-      <Route path="/settings/profile" component={ProfileDetails} />
-      <Route path="/settings/api" component={WebhookAPI} />
-      <Route path="/settings/billing" component={Billing} />
+      <Route path="/contacts">{() => <ProtectedRoute component={Contacts} />}</Route>
+      <Route path="/settings">{() => <ProtectedRoute component={Settings} />}</Route>
+      <Route path="/settings/team">{() => <ProtectedRoute component={TeamMembers} />}</Route>
+      <Route path="/settings/permissions">{() => <ProtectedRoute component={Permissions} />}</Route>
+      <Route path="/settings/whatsapp">{() => <ProtectedRoute component={WhatsAppNumber} />}</Route>
+      <Route path="/settings/profile">{() => <ProtectedRoute component={ProfileDetails} />}</Route>
+      <Route path="/settings/api">{() => <ProtectedRoute component={WebhookAPI} />}</Route>
+      <Route path="/settings/billing">{() => <ProtectedRoute component={Billing} />}</Route>
       
       <Route component={NotFound} />
     </Switch>
@@ -133,10 +148,12 @@ function Router() {
 function App() {
   return (
     <QueryClientProvider client={queryClient}>
-      <TooltipProvider>
-        <Toaster />
-        <Router />
-      </TooltipProvider>
+      <AuthProvider>
+        <TooltipProvider>
+          <Toaster />
+          <Router />
+        </TooltipProvider>
+      </AuthProvider>
     </QueryClientProvider>
   );
 }

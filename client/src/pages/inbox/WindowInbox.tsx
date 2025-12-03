@@ -7,30 +7,47 @@ import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Badge } from "@/components/ui/badge";
-import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import {
+  Dialog,
+  DialogContent,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
-import { 
-  Search, 
-  Paperclip, 
-  Send, 
-  Smile, 
-  MoreVertical, 
-  Phone, 
-  Video, 
-  Loader2, 
-  Download, 
-  Clock, 
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import {
+  Search,
+  Paperclip,
+  Send,
+  Smile,
+  MoreVertical,
+  Phone,
+  Video,
+  Loader2,
+  Download,
+  Clock,
   CheckSquare,
   Bot,
   FileText,
   MessageSquare,
   Reply,
   X,
-  MailOpen
+  MailOpen,
 } from "lucide-react";
 import { toast } from "sonner";
 
@@ -93,7 +110,7 @@ interface ImportedContact {
 
 // Normalize phone number for comparison (strip all non-digits)
 function normalizePhone(phone: string): string {
-  return phone.replace(/\D/g, '');
+  return phone.replace(/\D/g, "");
 }
 
 export default function WindowInbox() {
@@ -102,34 +119,38 @@ export default function WindowInbox() {
   const [messageInput, setMessageInput] = useState("");
   const [selectedContacts, setSelectedContacts] = useState<string[]>([]);
   const [isBulkSendOpen, setIsBulkSendOpen] = useState(false);
-  const [messageType, setMessageType] = useState<"template" | "custom" | "ai">("custom");
+  const [messageType, setMessageType] = useState<"template" | "custom" | "ai">(
+    "custom",
+  );
   const [selectedTemplate, setSelectedTemplate] = useState("");
   const [selectedAgent, setSelectedAgent] = useState("");
   const [customMessage, setCustomMessage] = useState("");
   const [replyingTo, setReplyingTo] = useState<Message | null>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const queryClient = useQueryClient();
-  
+
   // Notification sound
   const notificationAudioRef = useRef<HTMLAudioElement | null>(null);
   const lastUnreadCountRef = useRef<number>(0);
   const audioUnlockedRef = useRef<boolean>(false);
-  
+
   // Initialize notification audio
   useEffect(() => {
     // Create audio element with a simple beep sound (base64 encoded short beep)
-    const beepSound = "data:audio/wav;base64,UklGRnoGAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQoGAACBhYqFbF1fdJivrJBhNjVgodDbq2EcBj+a2telehs/hMGyjnYsT2fJ0sJxIBw4d7O5s4VYQXzQ182bhlltndzV0JqJe3aap7KopZmRjI+TmJ6cmZePhoJ+fHx8fH2AgYSGiYyPkZOVlZaWlpWUkpCNioaDgX9+fX19fn+BhIiMkJOXmpyenp6dnJqXlJGOioaDgYB/f4CBg4aJjZCTlpmbnZ2dnJqYlZKPjImGhIKBgICAgIGChYiLjpGUl5manJ2dnJuZl5WSkI2KiIaEg4KCgoKDhIaIi42QkpWXmZqbnJybmpiWlJKQjoqJh4aFhISEhISFhoiKjI6QkpSWmJmam5uamZeWlJKQjoyKiIeGhoWFhYWGh4iKjI6QkpSVl5iZmZmYl5aUkpCOjIqIh4aFhYWFhYaHiImLjI6QkpOVlpeYmJiXlpWUkpCOjIqIh4aFhYWFhYaHiImLjY+QkpOVlpeXl5eWlZSSkI+NjIqIh4aFhYWFhoaHiImLjI6PkZKUlZaWlpaVlJOSkI+NjIqJh4aGhYaGhoaHiImKjI2PkJGTlJWVlZWVlJOSkI+OjIuJiIeGhoaGhoaHiImKi42OkJGSk5SUlJSUk5KRkI+OjIuKiYiHh4aGh4eHiImKi4yNj5CRkpOTk5OTkpGQj46NjIuKiYiHh4eHh4eIiImKi4yNjpCQkZGSEpKSkZCPj46NjIuKiYiIh4eHh4iIiImKi4yNjo+QkZGRkZGRkI+Pjo2MjIuKiYmIiIeIiIiIiYmKi4yNjo+PkJCQkJCQj4+OjY2MjIuKiomIiIiIiIiJiYqKi4yNjY6Pj4+Pj4+Pjo6NjYyMi4uKiomJiIiIiIiJiYqKi4yMjY2Ojo6Ojo6OjY2NjIyMi4uKiomJiYiJiYmJiYqKi4uMjI2NjY2NjY2NjY2MjIyMi4uLioqJiYmJiYmJioqKi4uMjIyMjY2NjY2NjI2MjIyMi4uLioqKiomJiYmJiYqKiouLi4yMjI2NjY2MjIyMjIyMi4yLi4uKioqJiYmJiYqKioqLi4uMjIyMjIyMjIyMjIyMi4uLi4uKi4qKioqKioqKioqLi4uLjIyMjIyMjIyMjIyLi4uLi4uLioqKioqKioqKioqLi4uLi4yMjIyMjIyMjIuLi4uLi4uLioqKioqKioqKioqKi4uLi4yMjIyMjIyLi4uLi4uLi4uKioqKioqKioqKi4uLi4uLi4yMjIyMi4uLi4uLi4uLioqKioqKioqKioqLi4uLi4uMjIyMi4uLi4uLi4uLi4qKioqKioqKioqLi4uLi4uLjIyLi4uLi4uLi4uLi4qKioqKioqKioqLi4uLi4uLi4uLi4uLi4uLi4uLioqKioqKioqKi4uLi4uLi4uLi4uLi4uLi4uLi4qKioqKioqKi4uLi4uLi4uLi4uLi4uLi4uLi4qKioqKioqLi4uLi4uLi4uLi4uLi4uLi4uLioqKioqKi4uLi4uLi4uLi4uLi4uLi4uLi4qKioqKi4uLi4uLi4uLi4uLi4uLi4uLi4uKioqKi4uLi4uLi4uLi4uLi4uLi4uLi4uKioqLi4uLi4uLi4uLi4uLi4uLi4uLi4qKioqLi4uLi4uLi4uLi4uLi4uLi4uLi4qKi4uLi4uLi4uLi4uLi4uLi4uLi4uLioqLi4uLi4uLi4uLi4uLi4uLi4uLi4uKi4uLi4uLi4uLi4uLi4uLi4uLi4uLi4qLi4uLi4uLi4uLi4uLi4uLi4uLi4uLi4uLi4uLi4uLi4uLi4uLi4uLi4uLi4uLi4uLi4uLi4uLi4uLi4uLi4uLi4uLi4uLi4uLi4uLi4uLi4uLi4uLi4uLi4uLi4uLi4uLi4uLi4uLi4uLi4uLi4uLi4uLi4uLi4uLi4uLi4uLi4uLi4uLi4uLi4uLi4uLi4uLi4uLi4uLi4uLi4uLi4uLi4uLi4uLi4uLi4uLi4uLi4uLi4uLi4uLi4uLi4uLi4uLi4uLi4uLi4uLi4uLi4uLi4uLi4uLi4uLi4uLi4uLi4uLi4uLi4uLi4uLi4uLi4uLi4uLi4uLi4uLi4uLi4uLi4uLi4uLi4uLi4uLi4uLi4uLi4uLi4uLi4uLi4uLi4uLi4uLi4uLi4uLi4uLi4uLi4uLi4uLi4uLi4uLi4uLi4uLi4uLi4uLi4uLi4uLi4uLi4uLi4uLi4uLi4uLg==";
+    const beepSound =
+      "data:audio/wav;base64,UklGRnoGAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQoGAACBhYqFbF1fdJivrJBhNjVgodDbq2EcBj+a2telehs/hMGyjnYsT2fJ0sJxIBw4d7O5s4VYQXzQ182bhlltndzV0JqJe3aap7KopZmRjI+TmJ6cmZePhoJ+fHx8fH2AgYSGiYyPkZOVlZaWlpWUkpCNioaDgX9+fX19fn+BhIiMkJOXmpyenp6dnJqXlJGOioaDgYB/f4CBg4aJjZCTlpmbnZ2dnJqYlZKPjImGhIKBgICAgIGChYiLjpGUl5manJ2dnJuZl5WSkI2KiIaEg4KCgoKDhIaIi42QkpWXmZqbnJybmpiWlJKQjoqJh4aFhISEhISFhoiKjI6QkpSWmJmam5uamZeWlJKQjoyKiIeGhoWFhYWGh4iKjI6QkpSVl5iZmZmYl5aUkpCOjIqIh4aFhYWFhYaHiImLjI6QkpOVlpeYmJiXlpWUkpCOjIqIh4aFhYWFhYaHiImLjY+QkpOVlpeXl5eWlZSSkI+NjIqIh4aFhYWFhoaHiImLjI6PkZKUlZaWlpaVlJOSkI+NjIqJh4aGhYaGhoaHiImKjI2PkJGTlJWVlZWVlJOSkI+OjIuJiIeGhoaGhoaHiImKi42OkJGSk5SUlJSUk5KRkI+OjIuKiYiHh4aGh4eHiImKi4yNj5CRkpOTk5OTkpGQj46NjIuKiYiHh4eHh4eIiImKi4yNjpCQkZGSEpKSkZCPj46NjIuKiYiIh4eHh4iIiImKi4yNjo+QkZGRkZGRkI+Pjo2MjIuKiYmIiIeIiIiIiYmKi4yNjo+PkJCQkJCQj4+OjY2MjIuKiomIiIiIiIiJiYqKi4yNjY6Pj4+Pj4+Pjo6NjYyMi4uKiomJiIiIiIiJiYqKi4yMjY2Ojo6Ojo6OjY2NjIyMi4uKiomJiYiJiYmJiYqKi4uMjI2NjY2NjY2NjY2MjIyMi4uLioqJiYmJiYmJioqKi4uMjIyMjY2NjY2NjI2MjIyMi4uLioqKiomJiYmJiYqKiouLi4yMjI2NjY2MjIyMjIyMi4yLi4uKioqJiYmJiYqKioqLi4uMjIyMjIyMjIyMjIyMi4uLi4uKi4qKioqKioqKioqLi4uLjIyMjIyMjIyMjIyLi4uLi4uLioqKioqKioqKioqLi4uLi4yMjIyMjIyMjIuLi4uLi4uLioqKioqKioqKioqKi4uLi4yMjIyMjIyLi4uLi4uLi4uKioqKioqKioqKi4uLi4uLi4yMjIyMi4uLi4uLi4uLioqKioqKioqKioqLi4uLi4uMjIyMi4uLi4uLi4uLi4qKioqKioqKioqLi4uLi4uLjIyLi4uLi4uLi4uLi4qKioqKioqKioqLi4uLi4uLi4uLi4uLi4uLi4uLioqKioqKioqKi4uLi4uLi4uLi4uLi4uLi4uLi4qKioqKioqKi4uLi4uLi4uLi4uLi4uLi4uLi4qKioqKioqLi4uLi4uLi4uLi4uLi4uLi4uLioqKioqKi4uLi4uLi4uLi4uLi4uLi4uLi4qKioqKi4uLi4uLi4uLi4uLi4uLi4uLi4uKioqKi4uLi4uLi4uLi4uLi4uLi4uLi4uKioqLi4uLi4uLi4uLi4uLi4uLi4uLi4qKioqLi4uLi4uLi4uLi4uLi4uLi4uLi4qKi4uLi4uLi4uLi4uLi4uLi4uLi4uLioqLi4uLi4uLi4uLi4uLi4uLi4uLi4uKi4uLi4uLi4uLi4uLi4uLi4uLi4uLi4qLi4uLi4uLi4uLi4uLi4uLi4uLi4uLi4uLi4uLi4uLi4uLi4uLi4uLi4uLi4uLi4uLi4uLi4uLi4uLi4uLi4uLi4uLi4uLi4uLi4uLi4uLi4uLi4uLi4uLi4uLi4uLi4uLi4uLi4uLi4uLi4uLi4uLi4uLi4uLi4uLi4uLi4uLi4uLi4uLi4uLi4uLi4uLi4uLi4uLi4uLi4uLi4uLi4uLi4uLi4uLi4uLi4uLi4uLi4uLi4uLi4uLi4uLi4uLi4uLi4uLi4uLi4uLi4uLi4uLi4uLi4uLi4uLi4uLi4uLi4uLi4uLi4uLi4uLi4uLi4uLi4uLi4uLi4uLi4uLi4uLi4uLi4uLi4uLi4uLi4uLi4uLi4uLi4uLi4uLi4uLi4uLi4uLi4uLi4uLi4uLi4uLi4uLi4uLi4uLi4uLi4uLi4uLi4uLi4uLi4uLi4uLi4uLi4uLi4uLi4uLi4uLg==";
     notificationAudioRef.current = new Audio(beepSound);
     notificationAudioRef.current.volume = 0.5;
-    
+
     // Unlock audio on user interaction - mark as unlocked immediately
     const unlockAudio = () => {
       // Mark as unlocked after first user interaction
       audioUnlockedRef.current = true;
-      
+
       if (notificationAudioRef.current) {
         // Try to play silently to fully unlock autoplay restrictions
-        notificationAudioRef.current.play()
+        notificationAudioRef.current
+          .play()
           .then(() => {
             notificationAudioRef.current?.pause();
             notificationAudioRef.current!.currentTime = 0;
@@ -139,15 +160,15 @@ export default function WindowInbox() {
           });
       }
     };
-    
+
     // Add listeners for common user interactions
-    const events = ['click', 'keydown', 'touchstart'];
-    events.forEach(event => {
+    const events = ["click", "keydown", "touchstart"];
+    events.forEach((event) => {
       document.addEventListener(event, unlockAudio, { once: true });
     });
-    
+
     return () => {
-      events.forEach(event => {
+      events.forEach((event) => {
         document.removeEventListener(event, unlockAudio);
       });
     };
@@ -160,19 +181,25 @@ export default function WindowInbox() {
       if (!res.ok) throw new Error("Failed to fetch chats");
       const allChats = await res.json();
       const now = new Date();
-      return allChats.filter((chat: Chat) => {
-        if (chat.lastInboundMessageTime) {
-          const lastInbound = new Date(chat.lastInboundMessageTime);
-          const hoursDiff = (now.getTime() - lastInbound.getTime()) / (1000 * 60 * 60);
-          return hoursDiff <= 24;
-        }
-        return false;
-      }).map((chat: Chat) => ({
-        ...chat,
-        windowExpiresAt: chat.lastInboundMessageTime 
-          ? new Date(new Date(chat.lastInboundMessageTime).getTime() + 24 * 60 * 60 * 1000).toISOString()
-          : undefined
-      }));
+      return allChats
+        .filter((chat: Chat) => {
+          if (chat.lastInboundMessageTime) {
+            const lastInbound = new Date(chat.lastInboundMessageTime);
+            const hoursDiff =
+              (now.getTime() - lastInbound.getTime()) / (1000 * 60 * 60);
+            return hoursDiff <= 24;
+          }
+          return false;
+        })
+        .map((chat: Chat) => ({
+          ...chat,
+          windowExpiresAt: chat.lastInboundMessageTime
+            ? new Date(
+                new Date(chat.lastInboundMessageTime).getTime() +
+                  24 * 60 * 60 * 1000,
+              ).toISOString()
+            : undefined,
+        }));
     },
     refetchInterval: 3000, // Auto-refresh every 3 seconds
   });
@@ -210,18 +237,18 @@ export default function WindowInbox() {
   const { phoneToNameMap, last10ToNameMap } = useMemo(() => {
     const phoneMap = new Map<string, string>();
     const last10Map = new Map<string, string>();
-    
+
     // Helper to check if name is a real name (not auto-generated)
     const isRealName = (name: string): boolean => {
       if (!name || !name.trim()) return false;
-      if (name.startsWith('WhatsApp')) return false;
-      if (name.startsWith('+')) return false;
+      if (name.startsWith("WhatsApp")) return false;
+      if (name.startsWith("+")) return false;
       // Check if it's just digits (possibly with spaces)
       if (/^\d[\d\s]*$/.test(name)) return false;
       return true;
     };
-    
-    importedContacts.forEach(contact => {
+
+    importedContacts.forEach((contact) => {
       const normalizedPhone = normalizePhone(contact.phone);
       if (isRealName(contact.name)) {
         // Store with full number
@@ -232,7 +259,7 @@ export default function WindowInbox() {
         }
       }
     });
-    
+
     return { phoneToNameMap: phoneMap, last10ToNameMap: last10Map };
   }, [importedContacts]);
 
@@ -240,118 +267,161 @@ export default function WindowInbox() {
   const getContactName = useMemo(() => {
     return (chatContact: Contact): string => {
       const normalizedPhone = normalizePhone(chatContact.phone);
-      
+
       // First check if the chat contact already has a real name (not phone-based)
-      if (chatContact.name && 
-          !chatContact.name.startsWith('WhatsApp') && 
-          !chatContact.name.startsWith('+') &&
-          !/^\d+$/.test(chatContact.name.replace(/\s/g, ''))) {
+      if (
+        chatContact.name &&
+        !chatContact.name.startsWith("WhatsApp") &&
+        !chatContact.name.startsWith("+") &&
+        !/^\d+$/.test(chatContact.name.replace(/\s/g, ""))
+      ) {
         return chatContact.name;
       }
-      
+
       // Look up name from imported contacts - try exact match first
       let name = phoneToNameMap.get(normalizedPhone);
       if (name) return name;
-      
+
       // Try matching with last 10 digits (handles country code differences)
       if (normalizedPhone.length >= 10) {
         const last10 = normalizedPhone.slice(-10);
         name = last10ToNameMap.get(last10);
         if (name) return name;
       }
-      
+
       // Fallback to formatted phone number
-      return chatContact.phone.startsWith('+') ? chatContact.phone : `+${chatContact.phone}`;
+      return chatContact.phone.startsWith("+")
+        ? chatContact.phone
+        : `+${chatContact.phone}`;
     };
   }, [phoneToNameMap, last10ToNameMap]);
 
   const renderMessageContent = (msg: Message) => {
     const content = msg.content;
     const mediaUrl = msg.mediaUrl;
-    
-    if (msg.type === 'image' || content.startsWith('[Image')) {
+
+    if (msg.type === "image" || content.startsWith("[Image")) {
       if (mediaUrl) {
-        const caption = content.replace(/^\[Image\]\s*/, '').replace(/^\[Image message\]$/, '');
+        const caption = content
+          .replace(/^\[Image\]\s*/, "")
+          .replace(/^\[Image message\]$/, "");
         return (
           <div className="space-y-2">
-            <img 
-              src={`/api/webhook/whatsapp/media/${mediaUrl}`} 
-              alt="Shared image" 
+            <img
+              src={`/api/webhook/whatsapp/media/${mediaUrl}`}
+              alt="Shared image"
               className="max-w-[280px] max-h-[300px] rounded-lg object-cover cursor-pointer hover:opacity-90 transition-opacity"
-              onClick={() => window.open(`/api/webhook/whatsapp/media/${mediaUrl}`, '_blank')}
+              onClick={() =>
+                window.open(`/api/webhook/whatsapp/media/${mediaUrl}`, "_blank")
+              }
               onError={(e) => {
-                (e.target as HTMLImageElement).style.display = 'none';
-                (e.target as HTMLImageElement).nextElementSibling?.classList.remove('hidden');
+                (e.target as HTMLImageElement).style.display = "none";
+                (
+                  e.target as HTMLImageElement
+                ).nextElementSibling?.classList.remove("hidden");
               }}
             />
-            <span className="hidden text-muted-foreground italic text-sm">Image expired or unavailable</span>
+            <span className="hidden text-muted-foreground italic text-sm">
+              Image expired or unavailable
+            </span>
             {caption && <p className="text-sm">{caption}</p>}
           </div>
         );
       }
-      return <span className="flex items-center gap-1 text-muted-foreground italic">📷 {content}</span>;
-    } else if (msg.type === 'video' || content.startsWith('[Video')) {
+      return (
+        <span className="flex items-center gap-1 text-muted-foreground italic">
+          📷 {content}
+        </span>
+      );
+    } else if (msg.type === "video" || content.startsWith("[Video")) {
       if (mediaUrl) {
-        const caption = content.replace(/^\[Video\]\s*/, '').replace(/^\[Video message\]$/, '');
+        const caption = content
+          .replace(/^\[Video\]\s*/, "")
+          .replace(/^\[Video message\]$/, "");
         return (
           <div className="space-y-2">
-            <video 
-              src={`/api/webhook/whatsapp/media/${mediaUrl}`} 
+            <video
+              src={`/api/webhook/whatsapp/media/${mediaUrl}`}
               controls
               className="max-w-[280px] max-h-[300px] rounded-lg"
               onError={(e) => {
-                (e.target as HTMLVideoElement).style.display = 'none';
-                (e.target as HTMLVideoElement).nextElementSibling?.classList.remove('hidden');
+                (e.target as HTMLVideoElement).style.display = "none";
+                (
+                  e.target as HTMLVideoElement
+                ).nextElementSibling?.classList.remove("hidden");
               }}
             />
-            <span className="hidden text-muted-foreground italic text-sm">Video expired or unavailable</span>
+            <span className="hidden text-muted-foreground italic text-sm">
+              Video expired or unavailable
+            </span>
             {caption && <p className="text-sm">{caption}</p>}
           </div>
         );
       }
-      return <span className="flex items-center gap-1 text-muted-foreground italic">🎥 {content}</span>;
-    } else if (msg.type === 'audio' || content.startsWith('[Audio')) {
+      return (
+        <span className="flex items-center gap-1 text-muted-foreground italic">
+          🎥 {content}
+        </span>
+      );
+    } else if (msg.type === "audio" || content.startsWith("[Audio")) {
       if (mediaUrl) {
         return (
           <div className="space-y-2">
-            <audio 
-              src={`/api/webhook/whatsapp/media/${mediaUrl}`} 
+            <audio
+              src={`/api/webhook/whatsapp/media/${mediaUrl}`}
               controls
               className="max-w-[280px]"
               onError={(e) => {
-                (e.target as HTMLAudioElement).style.display = 'none';
-                (e.target as HTMLAudioElement).nextElementSibling?.classList.remove('hidden');
+                (e.target as HTMLAudioElement).style.display = "none";
+                (
+                  e.target as HTMLAudioElement
+                ).nextElementSibling?.classList.remove("hidden");
               }}
             />
-            <span className="hidden text-muted-foreground italic text-sm">Audio expired or unavailable</span>
+            <span className="hidden text-muted-foreground italic text-sm">
+              Audio expired or unavailable
+            </span>
           </div>
         );
       }
-      return <span className="flex items-center gap-1 text-muted-foreground italic">🎵 {content}</span>;
-    } else if (msg.type === 'sticker' || content.startsWith('[Sticker')) {
+      return (
+        <span className="flex items-center gap-1 text-muted-foreground italic">
+          🎵 {content}
+        </span>
+      );
+    } else if (msg.type === "sticker" || content.startsWith("[Sticker")) {
       if (mediaUrl) {
         return (
           <div>
-            <img 
-              src={`/api/webhook/whatsapp/media/${mediaUrl}`} 
-              alt="Sticker" 
+            <img
+              src={`/api/webhook/whatsapp/media/${mediaUrl}`}
+              alt="Sticker"
               className="max-w-[150px] max-h-[150px]"
               onError={(e) => {
-                (e.target as HTMLImageElement).style.display = 'none';
-                (e.target as HTMLImageElement).nextElementSibling?.classList.remove('hidden');
+                (e.target as HTMLImageElement).style.display = "none";
+                (
+                  e.target as HTMLImageElement
+                ).nextElementSibling?.classList.remove("hidden");
               }}
             />
-            <span className="hidden text-muted-foreground italic text-sm">Sticker expired or unavailable</span>
+            <span className="hidden text-muted-foreground italic text-sm">
+              Sticker expired or unavailable
+            </span>
           </div>
         );
       }
-      return <span className="flex items-center gap-1 text-muted-foreground italic">🎨 {content}</span>;
-    } else if (msg.type === 'document' || content.startsWith('[Document')) {
+      return (
+        <span className="flex items-center gap-1 text-muted-foreground italic">
+          🎨 {content}
+        </span>
+      );
+    } else if (msg.type === "document" || content.startsWith("[Document")) {
       if (mediaUrl) {
-        const filename = content.match(/\[Document: ([^\]]+)\]/)?.[1] || 'document';
+        const filename =
+          content.match(/\[Document: ([^\]]+)\]/)?.[1] || "document";
         return (
-          <a 
-            href={`/api/webhook/whatsapp/media/${mediaUrl}`} 
+          <a
+            href={`/api/webhook/whatsapp/media/${mediaUrl}`}
             target="_blank"
             rel="noopener noreferrer"
             className="flex items-center gap-2 p-2 bg-muted rounded-lg hover:bg-muted/80 transition-colors"
@@ -361,36 +431,55 @@ export default function WindowInbox() {
           </a>
         );
       }
-      return <span className="flex items-center gap-1 text-muted-foreground italic">📄 {content}</span>;
-    } else if (content.startsWith('[Location')) {
-      return <span className="flex items-center gap-1 text-muted-foreground italic">📍 {content}</span>;
-    } else if (content.startsWith('[Contact')) {
-      return <span className="flex items-center gap-1 text-muted-foreground italic">👤 {content}</span>;
-    } else if (content.startsWith('[Reaction')) {
+      return (
+        <span className="flex items-center gap-1 text-muted-foreground italic">
+          📄 {content}
+        </span>
+      );
+    } else if (content.startsWith("[Location")) {
+      return (
+        <span className="flex items-center gap-1 text-muted-foreground italic">
+          📍 {content}
+        </span>
+      );
+    } else if (content.startsWith("[Contact")) {
+      return (
+        <span className="flex items-center gap-1 text-muted-foreground italic">
+          👤 {content}
+        </span>
+      );
+    } else if (content.startsWith("[Reaction")) {
       return <span className="flex items-center gap-1">{content}</span>;
-    } else if (content.startsWith('[Unsupported')) {
-      return <span className="flex items-center gap-1 text-muted-foreground italic">⚠️ {content}</span>;
+    } else if (content.startsWith("[Unsupported")) {
+      return (
+        <span className="flex items-center gap-1 text-muted-foreground italic">
+          ⚠️ {content}
+        </span>
+      );
     }
-    
+
     return <span>{content}</span>;
   };
 
-  const selectedChat = chats.find(c => c.id === selectedChatId);
+  const selectedChat = chats.find((c) => c.id === selectedChatId);
   const selectedContactId = selectedChat?.contactId;
 
   // Play notification sound when new messages arrive
   const isInitialMount = useRef<boolean>(true);
-  
+
   useEffect(() => {
-    const totalUnread = chats.reduce((sum, chat) => sum + (chat.unreadCount || 0), 0);
-    
+    const totalUnread = chats.reduce(
+      (sum, chat) => sum + (chat.unreadCount || 0),
+      0,
+    );
+
     // Skip initial mount to avoid playing sound on page load
     if (isInitialMount.current) {
       isInitialMount.current = false;
       lastUnreadCountRef.current = totalUnread;
       return;
     }
-    
+
     // Play sound if unread count increased (new message received)
     if (totalUnread > lastUnreadCountRef.current) {
       if (notificationAudioRef.current && audioUnlockedRef.current) {
@@ -398,11 +487,13 @@ export default function WindowInbox() {
         notificationAudioRef.current.play().catch(() => {});
       }
     }
-    
+
     lastUnreadCountRef.current = totalUnread;
   }, [chats]);
 
-  const { data: messages = [], isLoading: messagesLoading } = useQuery<Message[]>({
+  const { data: messages = [], isLoading: messagesLoading } = useQuery<
+    Message[]
+  >({
     queryKey: ["/api/messages", selectedContactId],
     queryFn: async () => {
       if (!selectedContactId) return [];
@@ -415,9 +506,15 @@ export default function WindowInbox() {
   });
 
   const sendMessageMutation = useMutation({
-    mutationFn: async ({ content, phone, contactId, replyToMessageId, replyToContent }: { 
-      content: string; 
-      phone: string; 
+    mutationFn: async ({
+      content,
+      phone,
+      contactId,
+      replyToMessageId,
+      replyToContent,
+    }: {
+      content: string;
+      phone: string;
       contactId: string;
       replyToMessageId?: string;
       replyToContent?: string;
@@ -431,12 +528,12 @@ export default function WindowInbox() {
           message: content,
         }),
       });
-      
+
       if (!waRes.ok) {
         const error = await waRes.json();
         throw new Error(error.error || "Failed to send WhatsApp message");
       }
-      
+
       // Also save to local storage for inbox display
       const res = await fetch("/api/messages", {
         method: "POST",
@@ -451,15 +548,17 @@ export default function WindowInbox() {
           replyToContent,
         }),
       });
-      
+
       if (!res.ok) {
         console.error("Failed to save message locally, but WhatsApp sent");
       }
-      
+
       return { waResult: await waRes.json(), contactId };
     },
     onSuccess: (data) => {
-      queryClient.invalidateQueries({ queryKey: ["/api/messages", data.contactId] });
+      queryClient.invalidateQueries({
+        queryKey: ["/api/messages", data.contactId],
+      });
       queryClient.invalidateQueries({ queryKey: ["/api/chats/window"] });
       setMessageInput("");
       setReplyingTo(null);
@@ -471,17 +570,24 @@ export default function WindowInbox() {
   });
 
   const sendBulkMessageMutation = useMutation({
-    mutationFn: async (data: { contacts: string[], messageType: string, content: string }) => {
-      const results: { success: number; failed: number } = { success: 0, failed: 0 };
-      
+    mutationFn: async (data: {
+      contacts: string[];
+      messageType: string;
+      content: string;
+    }) => {
+      const results: { success: number; failed: number } = {
+        success: 0,
+        failed: 0,
+      };
+
       for (const contactId of data.contacts) {
-        const chat = chats.find(c => c.contactId === contactId);
+        const chat = chats.find((c) => c.contactId === contactId);
         if (!chat) continue;
-        
-        const phone = chat.contact.phone.replace(/\D/g, '');
+
+        const phone = chat.contact.phone.replace(/\D/g, "");
         const name = chat.contact.name;
-        const templateObj = templates.find(t => t.id === selectedTemplate);
-        
+        const templateObj = templates.find((t) => t.id === selectedTemplate);
+
         try {
           const res = await fetch("/api/inbox/send", {
             method: "POST",
@@ -492,11 +598,12 @@ export default function WindowInbox() {
               name,
               messageType: data.messageType,
               templateName: templateObj?.name,
-              customMessage: data.messageType === "custom" ? data.content : undefined,
+              customMessage:
+                data.messageType === "custom" ? data.content : undefined,
               agentId: data.messageType === "ai" ? selectedAgent : undefined,
             }),
           });
-          
+
           if (res.ok) {
             results.success++;
           } else {
@@ -506,7 +613,7 @@ export default function WindowInbox() {
           results.failed++;
         }
       }
-      
+
       return results;
     },
     onSuccess: (data) => {
@@ -518,9 +625,13 @@ export default function WindowInbox() {
       setSelectedTemplate("");
       setSelectedAgent("");
       if (data.failed > 0) {
-        toast.success(`Sent to ${data.success} contacts, ${data.failed} failed`);
+        toast.success(
+          `Sent to ${data.success} contacts, ${data.failed} failed`,
+        );
       } else {
-        toast.success(`Message sent to ${data.success} contact${data.success > 1 ? 's' : ''}`);
+        toast.success(
+          `Message sent to ${data.success} contact${data.success > 1 ? "s" : ""}`,
+        );
       }
     },
     onError: () => {
@@ -566,7 +677,7 @@ export default function WindowInbox() {
 
   const handleSelectChat = (chatId: string) => {
     setSelectedChatId(chatId);
-    const chat = chats.find(c => c.id === chatId);
+    const chat = chats.find((c) => c.id === chatId);
     if (chat && chat.unreadCount > 0) {
       markAsReadMutation.mutate(chat.contactId);
     }
@@ -578,11 +689,11 @@ export default function WindowInbox() {
 
   const handleSendMessage = () => {
     if (!messageInput.trim() || !selectedChat || !selectedContactId) return;
-    const phone = selectedChat.contact.phone.replace(/\D/g, '');
-    
-    sendMessageMutation.mutate({ 
-      content: messageInput, 
-      phone, 
+    const phone = selectedChat.contact.phone.replace(/\D/g, "");
+
+    sendMessageMutation.mutate({
+      content: messageInput,
+      phone,
       contactId: selectedContactId,
       replyToMessageId: replyingTo?.id,
       replyToContent: replyingTo?.content,
@@ -600,15 +711,15 @@ export default function WindowInbox() {
     if (selectedContacts.length === chats.length) {
       setSelectedContacts([]);
     } else {
-      setSelectedContacts(chats.map(c => c.contactId));
+      setSelectedContacts(chats.map((c) => c.contactId));
     }
   };
 
   const handleSelectContact = (contactId: string) => {
-    setSelectedContacts(prev => 
-      prev.includes(contactId) 
-        ? prev.filter(id => id !== contactId) 
-        : [...prev, contactId]
+    setSelectedContacts((prev) =>
+      prev.includes(contactId)
+        ? prev.filter((id) => id !== contactId)
+        : [...prev, contactId],
     );
   };
 
@@ -620,12 +731,12 @@ export default function WindowInbox() {
 
     let content = "";
     if (messageType === "template") {
-      const template = templates.find(t => t.id === selectedTemplate);
+      const template = templates.find((t) => t.id === selectedTemplate);
       content = template?.content || "";
     } else if (messageType === "custom") {
       content = customMessage;
     } else if (messageType === "ai") {
-      content = `[AI Agent: ${agents.find(a => a.id === selectedAgent)?.name || 'Unknown'}]`;
+      content = `[AI Agent: ${agents.find((a) => a.id === selectedAgent)?.name || "Unknown"}]`;
     }
 
     if (!content && messageType !== "ai") {
@@ -641,7 +752,7 @@ export default function WindowInbox() {
   };
 
   const handleDownload = () => {
-    const data = chats.map(chat => ({
+    const data = chats.map((chat) => ({
       name: chat.contact.name,
       phone: chat.contact.phone,
       email: chat.contact.email || "",
@@ -649,12 +760,24 @@ export default function WindowInbox() {
       windowExpires: chat.windowExpiresAt || "",
     }));
 
-    const headers = ["Name", "Phone", "Email", "Last Message", "Window Expires"];
+    const headers = [
+      "Name",
+      "Phone",
+      "Email",
+      "Last Message",
+      "Window Expires",
+    ];
     const csv = [
       headers.join(","),
-      ...data.map(row => 
-        [row.name, row.phone, row.email, `"${row.lastMessage}"`, row.windowExpires].join(",")
-      )
+      ...data.map((row) =>
+        [
+          row.name,
+          row.phone,
+          row.email,
+          `"${row.lastMessage}"`,
+          row.windowExpires,
+        ].join(","),
+      ),
     ].join("\n");
 
     const blob = new Blob([csv], { type: "text/csv" });
@@ -673,18 +796,18 @@ export default function WindowInbox() {
     const diff = now.getTime() - date.getTime();
     const hours = Math.floor(diff / (1000 * 60 * 60));
     const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
-    
+
     if (hours === 0) {
       return `${minutes} min ago`;
     } else if (hours < 24) {
       return `${hours} hr ${minutes} min ago`;
     } else {
-      return date.toLocaleDateString("en-US", { 
-        month: "short", 
+      return date.toLocaleDateString("en-US", {
+        month: "short",
         day: "numeric",
-        hour: "numeric", 
-        minute: "2-digit", 
-        hour12: true 
+        hour: "numeric",
+        minute: "2-digit",
+        hour12: true,
       });
     }
   };
@@ -702,28 +825,42 @@ export default function WindowInbox() {
 
   const getInitials = (contact: Contact) => {
     const displayName = getContactName(contact);
-    if (displayName.startsWith('+')) {
+    if (displayName.startsWith("+")) {
       return displayName.slice(-2);
     }
-    return displayName.split(' ').map(n => n[0]).join('').slice(0, 2).toUpperCase();
+    return displayName
+      .split(" ")
+      .map((n) => n[0])
+      .join("")
+      .slice(0, 2)
+      .toUpperCase();
   };
 
   const filteredChats = chats
-    .filter(chat => 
-      chat.contact.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      chat.contact.phone.includes(searchQuery)
+    .filter(
+      (chat) =>
+        chat.contact.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        chat.contact.phone.includes(searchQuery),
     )
     .sort((a, b) => {
-      const aTime = a.lastMessageTime || a.lastInboundMessageTime || a.windowExpiresAt || '';
-      const bTime = b.lastMessageTime || b.lastInboundMessageTime || b.windowExpiresAt || '';
+      const aTime =
+        a.lastMessageTime ||
+        a.lastInboundMessageTime ||
+        a.windowExpiresAt ||
+        "";
+      const bTime =
+        b.lastMessageTime ||
+        b.lastInboundMessageTime ||
+        b.windowExpiresAt ||
+        "";
       return new Date(bTime).getTime() - new Date(aTime).getTime();
     });
 
-  const approvedTemplates = templates.filter(t => t.status === "approved");
+  const approvedTemplates = templates.filter((t) => t.status === "approved");
 
   return (
     <DashboardLayout>
-      <div className="h-full flex flex-col gap-4 animate-in fade-in slide-in-from-bottom-4 duration-500">
+      <div className="h-screen flex flex-col gap-4 animate-in fade-in slide-in-from-bottom-4 duration-500">
         <div className="flex items-center justify-between flex-shrink-0">
           <div>
             <h2 className="text-2xl font-bold tracking-tight flex items-center gap-2">
@@ -731,7 +868,8 @@ export default function WindowInbox() {
               24-Hour Window Inbox
             </h2>
             <p className="text-sm text-muted-foreground">
-              Customers who messaged in the last 24 hours. Send free-form messages without templates.
+              Customers who messaged in the last 24 hours. Send free-form
+              messages without templates.
             </p>
           </div>
           <div className="flex items-center gap-2">
@@ -749,13 +887,19 @@ export default function WindowInbox() {
         </div>
 
         <div className="flex items-center gap-4 p-3 bg-muted/50 rounded-lg flex-shrink-0">
-          <Checkbox 
-            checked={selectedContacts.length === chats.length && chats.length > 0}
+          <Checkbox
+            checked={
+              selectedContacts.length === chats.length && chats.length > 0
+            }
             onCheckedChange={handleSelectAll}
           />
-          <span className="text-sm font-medium">Select All ({chats.length} contacts in window)</span>
+          <span className="text-sm font-medium">
+            Select All ({chats.length} contacts in window)
+          </span>
           {selectedContacts.length > 0 && (
-            <Badge variant="secondary">{selectedContacts.length} selected</Badge>
+            <Badge variant="secondary">
+              {selectedContacts.length} selected
+            </Badge>
           )}
         </div>
 
@@ -764,15 +908,15 @@ export default function WindowInbox() {
             <div className="p-4 border-b border-border">
               <div className="relative">
                 <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
-                <Input 
-                  placeholder="Search contacts..." 
+                <Input
+                  placeholder="Search contacts..."
                   className="pl-9 bg-secondary/50"
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
                 />
               </div>
             </div>
-            
+
             <ScrollArea className="flex-1">
               {chatsLoading ? (
                 <div className="flex items-center justify-center py-8">
@@ -782,22 +926,26 @@ export default function WindowInbox() {
                 <div className="flex flex-col items-center justify-center py-8 text-muted-foreground text-center px-4">
                   <Clock className="h-12 w-12 mb-4 opacity-50" />
                   <p>No contacts in 24-hour window</p>
-                  <p className="text-xs mt-1">Contacts appear here when they message you</p>
+                  <p className="text-xs mt-1">
+                    Contacts appear here when they message you
+                  </p>
                 </div>
               ) : (
                 <div className="divide-y divide-border">
                   {filteredChats.map((chat) => (
-                    <div 
-                      key={chat.id} 
-                      className={`p-3 flex items-start gap-2 hover:bg-muted/50 cursor-pointer transition-colors ${chat.id === selectedChatId ? 'bg-muted/50' : ''}`}
+                    <div
+                      key={chat.id}
+                      className={`p-3 flex items-start gap-2 hover:bg-muted/50 cursor-pointer transition-colors ${chat.id === selectedChatId ? "bg-muted/50" : ""}`}
                     >
-                      <Checkbox 
+                      <Checkbox
                         checked={selectedContacts.includes(chat.contactId)}
-                        onCheckedChange={() => handleSelectContact(chat.contactId)}
+                        onCheckedChange={() =>
+                          handleSelectContact(chat.contactId)
+                        }
                         onClick={(e) => e.stopPropagation()}
                         className="mt-1"
                       />
-                      <div 
+                      <div
                         className="flex-1 flex items-start gap-2"
                         onClick={() => handleSelectChat(chat.id)}
                       >
@@ -809,7 +957,9 @@ export default function WindowInbox() {
                         <div className="flex-1 min-w-0">
                           <div className="flex items-center justify-between">
                             <div className="flex items-center gap-1.5">
-                              <span className={`text-sm font-medium truncate ${chat.unreadCount > 0 ? 'font-bold' : ''}`}>
+                              <span
+                                className={`text-sm font-medium truncate ${chat.unreadCount > 0 ? "font-bold" : ""}`}
+                              >
                                 {getContactName(chat.contact)}
                               </span>
                               {chat.unreadCount > 0 && (
@@ -819,13 +969,18 @@ export default function WindowInbox() {
                               )}
                             </div>
                             <span className="text-[11px] text-muted-foreground whitespace-nowrap">
-                              {chat.lastInboundMessageTime ? formatTime(chat.lastInboundMessageTime) : ""}
+                              {chat.lastInboundMessageTime
+                                ? formatTime(chat.lastInboundMessageTime)
+                                : ""}
                             </span>
                           </div>
                           <p className="text-xs text-muted-foreground truncate mt-0.5">
                             {chat.lastInboundMessage || "No customer message"}
                           </p>
-                          <Badge variant="outline" className="text-[10px] bg-green-50 text-green-700 border-green-200 mt-1 py-0">
+                          <Badge
+                            variant="outline"
+                            className="text-[10px] bg-green-50 text-green-700 border-green-200 mt-1 py-0"
+                          >
                             <Clock className="h-2.5 w-2.5 mr-0.5" />
                             {getTimeRemaining(chat.windowExpiresAt)}
                           </Badge>
@@ -849,25 +1004,43 @@ export default function WindowInbox() {
                       </AvatarFallback>
                     </Avatar>
                     <div>
-                      <h3 className="font-medium">{getContactName(selectedChat.contact)}</h3>
+                      <h3 className="font-medium">
+                        {getContactName(selectedChat.contact)}
+                      </h3>
                       <div className="flex items-center gap-2">
-                        <span className="text-xs text-muted-foreground">{selectedChat.contact.phone}</span>
-                        <Badge variant="outline" className="text-xs bg-green-50 text-green-700 border-green-200">
+                        <span className="text-xs text-muted-foreground">
+                          {selectedChat.contact.phone}
+                        </span>
+                        <Badge
+                          variant="outline"
+                          className="text-xs bg-green-50 text-green-700 border-green-200"
+                        >
                           <Clock className="h-3 w-3 mr-1" />
-                          Window: {getTimeRemaining(selectedChat.windowExpiresAt)}
+                          Window:{" "}
+                          {getTimeRemaining(selectedChat.windowExpiresAt)}
                         </Badge>
                       </div>
                     </div>
                   </div>
                   <div className="flex items-center gap-2">
-                    <Button variant="ghost" size="icon"><Phone className="h-5 w-5 text-muted-foreground" /></Button>
-                    <Button variant="ghost" size="icon"><Video className="h-5 w-5 text-muted-foreground" /></Button>
+                    <Button variant="ghost" size="icon">
+                      <Phone className="h-5 w-5 text-muted-foreground" />
+                    </Button>
+                    <Button variant="ghost" size="icon">
+                      <Video className="h-5 w-5 text-muted-foreground" />
+                    </Button>
                     <DropdownMenu>
                       <DropdownMenuTrigger asChild>
-                        <Button variant="ghost" size="icon"><MoreVertical className="h-5 w-5 text-muted-foreground" /></Button>
+                        <Button variant="ghost" size="icon">
+                          <MoreVertical className="h-5 w-5 text-muted-foreground" />
+                        </Button>
                       </DropdownMenuTrigger>
                       <DropdownMenuContent align="end">
-                        <DropdownMenuItem onClick={() => markAsUnreadMutation.mutate(selectedChat.contactId)}>
+                        <DropdownMenuItem
+                          onClick={() =>
+                            markAsUnreadMutation.mutate(selectedChat.contactId)
+                          }
+                        >
                           <MailOpen className="mr-2 h-4 w-4" />
                           Mark as Unread
                         </DropdownMenuItem>
@@ -888,27 +1061,30 @@ export default function WindowInbox() {
                   ) : (
                     <div className="space-y-4">
                       {messages.map((msg) => (
-                        <div 
-                          key={msg.id} 
-                          className={`flex ${msg.direction === 'inbound' ? 'justify-start' : 'justify-end'} group`}
+                        <div
+                          key={msg.id}
+                          className={`flex ${msg.direction === "inbound" ? "justify-start" : "justify-end"} group`}
                         >
-                          <div className={`flex items-start gap-1 ${msg.direction === 'inbound' ? 'flex-row' : 'flex-row-reverse'}`}>
-                            {msg.direction === 'inbound' && (
-                              <Button 
-                                variant="ghost" 
-                                size="icon" 
+                          <div
+                            className={`flex items-start gap-1 ${msg.direction === "inbound" ? "flex-row" : "flex-row-reverse"}`}
+                          >
+                            {msg.direction === "inbound" && (
+                              <Button
+                                variant="ghost"
+                                size="icon"
                                 className="h-6 w-6 opacity-0 group-hover:opacity-100 transition-opacity"
                                 onClick={() => setReplyingTo(msg)}
                               >
                                 <Reply className="h-3 w-3" />
                               </Button>
                             )}
-                            <div 
+                            <div
                               className={`
                                 max-w-[70%] rounded-lg px-4 py-2 shadow-sm relative
-                                ${msg.direction === 'inbound' 
-                                  ? 'bg-white dark:bg-card text-card-foreground rounded-tl-none' 
-                                  : 'bg-[#d9fdd3] dark:bg-primary/20 text-foreground rounded-tr-none'
+                                ${
+                                  msg.direction === "inbound"
+                                    ? "bg-white dark:bg-card text-card-foreground rounded-tl-none"
+                                    : "bg-[#d9fdd3] dark:bg-primary/20 text-foreground rounded-tr-none"
                                 }
                               `}
                             >
@@ -916,15 +1092,25 @@ export default function WindowInbox() {
                                 <div className="mb-2 p-2 bg-black/5 dark:bg-white/10 rounded border-l-2 border-primary/50 text-xs text-muted-foreground">
                                   <Reply className="h-3 w-3 inline mr-1" />
                                   {msg.replyToContent.substring(0, 60)}
-                                  {msg.replyToContent.length > 60 && '...'}
+                                  {msg.replyToContent.length > 60 && "..."}
                                 </div>
                               )}
-                              <div className="text-sm leading-relaxed">{renderMessageContent(msg)}</div>
+                              <div className="text-sm leading-relaxed">
+                                {renderMessageContent(msg)}
+                              </div>
                               <span className="text-[10px] text-muted-foreground/80 block text-right mt-1">
                                 {formatTime(msg.timestamp)}
-                                {msg.direction === 'outbound' && (
-                                  <span className={`ml-1 ${msg.status === 'read' ? 'text-blue-500' : msg.status === 'failed' ? 'text-red-500' : ''}`}>
-                                    {msg.status === 'read' ? '✓✓' : msg.status === 'delivered' ? '✓✓' : msg.status === 'failed' ? '✗' : '✓'}
+                                {msg.direction === "outbound" && (
+                                  <span
+                                    className={`ml-1 ${msg.status === "read" ? "text-blue-500" : msg.status === "failed" ? "text-red-500" : ""}`}
+                                  >
+                                    {msg.status === "read"
+                                      ? "✓✓"
+                                      : msg.status === "delivered"
+                                        ? "✓✓"
+                                        : msg.status === "failed"
+                                          ? "✗"
+                                          : "✓"}
                                   </span>
                                 )}
                               </span>
@@ -942,33 +1128,52 @@ export default function WindowInbox() {
                     <div className="mb-2 p-2 bg-muted rounded-lg flex items-center justify-between">
                       <div className="flex items-center gap-2 text-sm">
                         <Reply className="h-4 w-4 text-muted-foreground" />
-                        <span className="text-muted-foreground">Replying to:</span>
-                        <span className="truncate max-w-[300px]">{replyingTo.content}</span>
+                        <span className="text-muted-foreground">
+                          Replying to:
+                        </span>
+                        <span className="truncate max-w-[300px]">
+                          {replyingTo.content}
+                        </span>
                       </div>
-                      <Button variant="ghost" size="icon" className="h-6 w-6" onClick={() => setReplyingTo(null)}>
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="h-6 w-6"
+                        onClick={() => setReplyingTo(null)}
+                      >
                         <X className="h-4 w-4" />
                       </Button>
                     </div>
                   )}
                   <div className="flex items-center gap-2">
-                    <Button variant="ghost" size="icon" className="text-muted-foreground hover:text-foreground">
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      className="text-muted-foreground hover:text-foreground"
+                    >
                       <Smile className="h-6 w-6" />
                     </Button>
-                    <Button variant="ghost" size="icon" className="text-muted-foreground hover:text-foreground">
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      className="text-muted-foreground hover:text-foreground"
+                    >
                       <Paperclip className="h-6 w-6" />
                     </Button>
-                    <Input 
-                      placeholder="Type a message (within 24-hour window)" 
+                    <Input
+                      placeholder="Type a message (within 24-hour window)"
                       className="flex-1 bg-secondary/50 border-none focus-visible:ring-1"
                       value={messageInput}
                       onChange={(e) => setMessageInput(e.target.value)}
                       onKeyPress={handleKeyPress}
                     />
-                    <Button 
-                      size="icon" 
+                    <Button
+                      size="icon"
                       className="rounded-full h-10 w-10"
                       onClick={handleSendMessage}
-                      disabled={!messageInput.trim() || sendMessageMutation.isPending}
+                      disabled={
+                        !messageInput.trim() || sendMessageMutation.isPending
+                      }
                     >
                       {sendMessageMutation.isPending ? (
                         <Loader2 className="h-5 w-5 animate-spin" />
@@ -983,7 +1188,9 @@ export default function WindowInbox() {
               <div className="flex-1 flex flex-col items-center justify-center text-muted-foreground">
                 <Clock className="h-16 w-16 mb-4 opacity-50" />
                 <p className="text-lg font-medium">Select a contact to chat</p>
-                <p className="text-sm">Send messages without templates within the 24-hour window</p>
+                <p className="text-sm">
+                  Send messages without templates within the 24-hour window
+                </p>
               </div>
             )}
           </div>
@@ -1001,12 +1208,19 @@ export default function WindowInbox() {
           <div className="space-y-4 py-4">
             <div className="p-3 bg-green-50 dark:bg-green-950/30 rounded-lg text-sm text-green-700 dark:text-green-400">
               <Clock className="h-4 w-4 inline mr-2" />
-              All selected contacts are within the 24-hour window. You can send custom messages without templates.
+              All selected contacts are within the 24-hour window. You can send
+              custom messages without templates.
             </div>
 
-            <Tabs value={messageType} onValueChange={(v) => setMessageType(v as any)}>
+            <Tabs
+              value={messageType}
+              onValueChange={(v) => setMessageType(v as any)}
+            >
               <TabsList className="grid w-full grid-cols-3">
-                <TabsTrigger value="template" className="flex items-center gap-2">
+                <TabsTrigger
+                  value="template"
+                  className="flex items-center gap-2"
+                >
                   <FileText className="h-4 w-4" />
                   Template
                 </TabsTrigger>
@@ -1023,12 +1237,15 @@ export default function WindowInbox() {
               <TabsContent value="template" className="space-y-4 pt-4">
                 <div className="space-y-2">
                   <Label>Select Template</Label>
-                  <Select value={selectedTemplate} onValueChange={setSelectedTemplate}>
+                  <Select
+                    value={selectedTemplate}
+                    onValueChange={setSelectedTemplate}
+                  >
                     <SelectTrigger>
                       <SelectValue placeholder="Choose a template" />
                     </SelectTrigger>
                     <SelectContent>
-                      {approvedTemplates.map(template => (
+                      {approvedTemplates.map((template) => (
                         <SelectItem key={template.id} value={template.id}>
                           {template.name}
                         </SelectItem>
@@ -1039,7 +1256,10 @@ export default function WindowInbox() {
                 {selectedTemplate && (
                   <div className="p-3 bg-muted rounded-lg">
                     <p className="text-sm">
-                      {templates.find(t => t.id === selectedTemplate)?.content}
+                      {
+                        templates.find((t) => t.id === selectedTemplate)
+                          ?.content
+                      }
                     </p>
                   </div>
                 )}
@@ -1048,14 +1268,15 @@ export default function WindowInbox() {
               <TabsContent value="custom" className="space-y-4 pt-4">
                 <div className="space-y-2">
                   <Label>Custom Message</Label>
-                  <Textarea 
+                  <Textarea
                     placeholder="Type your message here..."
                     value={customMessage}
                     onChange={(e) => setCustomMessage(e.target.value)}
                     rows={5}
                   />
                   <p className="text-xs text-muted-foreground">
-                    Custom messages work only within the 24-hour window after customer contact.
+                    Custom messages work only within the 24-hour window after
+                    customer contact.
                   </p>
                 </div>
               </TabsContent>
@@ -1063,23 +1284,30 @@ export default function WindowInbox() {
               <TabsContent value="ai" className="space-y-4 pt-4">
                 <div className="space-y-2">
                   <Label>Select AI Agent</Label>
-                  <Select value={selectedAgent} onValueChange={setSelectedAgent}>
+                  <Select
+                    value={selectedAgent}
+                    onValueChange={setSelectedAgent}
+                  >
                     <SelectTrigger>
                       <SelectValue placeholder="Choose an AI Agent" />
                     </SelectTrigger>
                     <SelectContent>
-                      {agents.filter(a => a.isActive).map(agent => (
-                        <SelectItem key={agent.id} value={agent.id}>
-                          {agent.name}
-                        </SelectItem>
-                      ))}
+                      {agents
+                        .filter((a) => a.isActive)
+                        .map((agent) => (
+                          <SelectItem key={agent.id} value={agent.id}>
+                            {agent.name}
+                          </SelectItem>
+                        ))}
                     </SelectContent>
                   </Select>
                 </div>
                 {selectedAgent && (
                   <div className="p-3 bg-muted rounded-lg">
                     <p className="text-sm">
-                      {agents.find(a => a.id === selectedAgent)?.description || "AI Agent will generate personalized responses."}
+                      {agents.find((a) => a.id === selectedAgent)
+                        ?.description ||
+                        "AI Agent will generate personalized responses."}
                     </p>
                   </div>
                 )}
@@ -1087,10 +1315,18 @@ export default function WindowInbox() {
             </Tabs>
           </div>
           <DialogFooter>
-            <Button variant="outline" onClick={() => setIsBulkSendOpen(false)}>Cancel</Button>
-            <Button onClick={handleBulkSend} disabled={sendBulkMessageMutation.isPending}>
-              {sendBulkMessageMutation.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-              Send to {selectedContacts.length} Contact{selectedContacts.length > 1 ? 's' : ''}
+            <Button variant="outline" onClick={() => setIsBulkSendOpen(false)}>
+              Cancel
+            </Button>
+            <Button
+              onClick={handleBulkSend}
+              disabled={sendBulkMessageMutation.isPending}
+            >
+              {sendBulkMessageMutation.isPending && (
+                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+              )}
+              Send to {selectedContacts.length} Contact
+              {selectedContacts.length > 1 ? "s" : ""}
             </Button>
           </DialogFooter>
         </DialogContent>
