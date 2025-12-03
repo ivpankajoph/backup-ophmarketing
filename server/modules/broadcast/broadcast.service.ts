@@ -398,6 +398,7 @@ export async function sendBroadcast(
   if (options.isScheduled && options.scheduledTime) {
     const scheduledDate = new Date(options.scheduledTime);
     console.log(`[Broadcast] Scheduling broadcast for ${scheduledDate.toISOString()}`);
+    console.log(`[Broadcast] Contacts: ${contacts.length}, MessageType: ${messageType}, CampaignName: ${campaignName}`);
     
     // Store the scheduled broadcast
     const scheduleData: ScheduledBroadcast = {
@@ -413,8 +414,9 @@ export async function sendBroadcast(
       createdAt: new Date().toISOString(),
     };
     
+    console.log(`[Broadcast] Saving scheduled broadcast:`, JSON.stringify(scheduleData, null, 2));
     await mongodb.insertOne('scheduled_broadcasts', scheduleData);
-    console.log(`[Broadcast] Scheduled broadcast saved with ID: ${scheduleData.id}`);
+    console.log(`[Broadcast] Scheduled broadcast saved successfully with ID: ${scheduleData.id}`);
     
     return {
       total: contacts.length,

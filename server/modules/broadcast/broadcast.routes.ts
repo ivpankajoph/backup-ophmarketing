@@ -365,8 +365,10 @@ router.post('/send-to-list/:listId', async (req: Request, res: Response) => {
 router.get('/scheduled-broadcasts', async (req: Request, res: Response) => {
   try {
     const broadcasts = await broadcastService.getScheduledBroadcasts();
+    console.log(`[ScheduledBroadcasts API] Fetched ${broadcasts.length} scheduled broadcasts`);
     res.json(broadcasts);
   } catch (error) {
+    console.error('[ScheduledBroadcasts API] Error:', error);
     res.status(500).json({ error: 'Failed to get scheduled broadcasts' });
   }
 });
