@@ -72,7 +72,7 @@ export async function getWhatsAppCredentialsStrict(userId: string): Promise<What
     return userCreds;
   }
   
-  return null;
+  return getSystemWhatsAppCredentials();
 }
 
 export async function sendTextMessage(
