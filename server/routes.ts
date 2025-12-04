@@ -253,6 +253,9 @@ export async function registerRoutes(
     }
   });
 
+  // Mount contacts module routes FIRST (includes /block, /unblock, /blocked)
+  app.use("/api/contacts", contactsRoutes);
+
   app.get("/api/contacts", async (req, res) => {
     try {
       // Get contacts from both in-memory storage and MongoDB imported_contacts
@@ -1300,7 +1303,6 @@ export async function registerRoutes(
   app.use("/api/broadcast", broadcastRoutes);
   app.use("/api/ai-analytics", aiAnalyticsRoutes);
   app.use("/api/prefilled-text", prefilledTextRoutes);
-  app.use("/api/contacts", contactsRoutes);
 
   app.get("/api/chats/whatsapp-leads", async (req, res) => {
     try {
