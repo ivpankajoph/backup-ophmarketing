@@ -915,9 +915,19 @@ export async function registerRoutes(
   // Submit template for Meta approval
   app.post("/api/templates/:id/submit-approval", async (req, res) => {
     try {
-      const template = await storage.getTemplate(req.params.id);
+      const template = await storage.getTemplate(req.params.id) as any;
       if (!template) {
         return res.status(404).json({ message: "Template not found" });
+      }
+
+      if (template.metaStatus === 'APPROVED' || template.metaStatus === 'approved') {
+        return res.status(400).json({ message: "Template is already approved by Meta" });
+      }
+      if (template.metaStatus === 'REJECTED' || template.metaStatus === 'rejected') {
+        return res.status(400).json({ message: "Template was rejected by Meta. Please edit and resubmit." });
+      }
+      if (template.metaTemplateId) {
+        return res.status(400).json({ message: "Template has already been submitted to Meta. Please sync to check status." });
       }
 
       const { credentialsService } = await import('./modules/credentials/credentials.service');

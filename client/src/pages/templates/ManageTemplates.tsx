@@ -373,7 +373,7 @@ export default function ManageTemplates() {
                       </TableCell>
                       <TableCell className="text-right">
                         <div className="flex items-center justify-end gap-2">
-                          {template.status === "pending" && (
+                          {(template.metaStatus?.toLowerCase() || template.status) === "pending" && !template.metaTemplateId && (
                             <Button 
                               size="sm" 
                               variant="outline"
