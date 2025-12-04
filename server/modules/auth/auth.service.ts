@@ -1,6 +1,5 @@
 import crypto from 'crypto';
 import { User, UserCredentials } from '../storage/mongodb.adapter';
-import { encrypt } from '../encryption/encryption.service';
 
 export interface AuthUser {
   id: string;
@@ -146,15 +145,15 @@ async function seedAdminCredentials(adminUserId: string): Promise<void> {
     await UserCredentials.create({
       id: crypto.randomUUID(),
       userId: adminUserId,
-      whatsappToken: whatsappToken ? encrypt(whatsappToken) : '',
-      phoneNumberId: phoneNumberId ? encrypt(phoneNumberId) : '',
-      businessAccountId: businessAccountId ? encrypt(businessAccountId) : '',
-      webhookVerifyToken: webhookVerifyToken ? encrypt(webhookVerifyToken) : '',
-      openaiApiKey: openaiApiKey ? encrypt(openaiApiKey) : '',
-      facebookAccessToken: facebookAccessToken ? encrypt(facebookAccessToken) : '',
-      facebookPageId: facebookPageId ? encrypt(facebookPageId) : '',
-      appId: appId ? encrypt(appId) : '',
-      appSecret: appSecret ? encrypt(appSecret) : '',
+      whatsappToken: whatsappToken || '',
+      phoneNumberId: phoneNumberId || '',
+      businessAccountId: businessAccountId || '',
+      webhookVerifyToken: webhookVerifyToken || '',
+      openaiApiKey: openaiApiKey || '',
+      facebookAccessToken: facebookAccessToken || '',
+      facebookPageId: facebookPageId || '',
+      appId: appId || '',
+      appSecret: appSecret || '',
       isVerified: true,
       createdAt: now,
       updatedAt: now,
