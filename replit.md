@@ -28,6 +28,12 @@ The system incorporates a modular backend structure, allowing for independent de
 - **Meta Business Suite**: For syncing and approving message templates.
 
 ## Recent Changes (December 4, 2025)
+- **Contact Blocking System**: Full contact blocking functionality with multi-tenant isolation.
+  - **Blocked Contacts Schema**: MongoDB `blocked_contacts` collection with userId, phone, name, reason, blockedAt, isActive fields. Unique index on (userId, phone) for tenant isolation.
+  - **Block/Delete UI**: Inbox dropdown menu with "Block Contact" and "Delete Contact" options. Confirmation dialogs prevent accidental actions.
+  - **Webhook Filtering**: Blocked contacts are filtered at the webhook level using user-scoped checks. Messages from blocked contacts are silently ignored.
+  - **Blocked Contacts Report**: New report page at `/reports/blocked` showing all blocked contacts with search, stats, and unblock functionality.
+  - **API Endpoints**: POST `/api/contacts/block`, POST `/api/contacts/unblock`, DELETE `/api/contacts/:contactId`, GET `/api/contacts/blocked`.
 - **Multi-Tenant SaaS Implementation**: Complete multi-tenant architecture with secure credential isolation per user.
   - **Authentication System**: Session-based authentication with bcrypt password hashing. Default admin user (admin@whatsapp.com/admin123) created on startup.
   - **AES-256-GCM Encryption**: User-specific API keys (WhatsApp, Facebook, OpenAI) are encrypted at rest using AES-256-GCM with unique IVs.
@@ -37,10 +43,12 @@ The system incorporates a modular backend structure, allowing for independent de
   - **OpenAI Service**: Updated to support per-user API keys for AI agents.
   - **Settings UI**: API Credentials page allows users to configure their own WhatsApp, Facebook, and OpenAI API keys securely.
 - **Key Files**: 
+  - `server/modules/contacts/contacts.routes.ts` - Contact blocking/unblocking APIs
   - `server/modules/encryption/encryption.service.ts` - AES-256-GCM encryption utilities
   - `server/modules/credentials/` - Credential storage and retrieval
   - `server/modules/whatsapp/whatsapp.service.ts` - Centralized WhatsApp service with tenant support
   - `server/modules/auth/` - Authentication with session management
+  - `client/src/pages/reports/BlockedContacts.tsx` - Blocked contacts report page
 
 ## Previous Changes (December 3, 2025)
 - **Broadcast Scheduling Fix**: Fixed scheduled broadcasts not sending at the scheduled time. The `scheduled_broadcasts` MongoDB collection was missing from the model registry. Added proper schema with fields for campaignName, contacts, message type, scheduledAt, status (scheduled/sending/sent/failed/cancelled), and counts.
