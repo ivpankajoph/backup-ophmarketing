@@ -31,6 +31,16 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
+import {
   Search,
   Paperclip,
   Send,
@@ -48,6 +58,7 @@ import {
   Reply,
   X,
   MailOpen,
+  Ban,
 } from "lucide-react";
 import { toast } from "sonner";
 
@@ -675,6 +686,32 @@ export default function WindowInbox() {
     },
   });
 
+  const [blockDialogOpen, setBlockDialogOpen] = useState(false);
+  const [contactToBlock, setContactToBlock] = useState<{ phone: string; name: string } | null>(null);
+
+  const blockContactMutation = useMutation({
+    mutationFn: async ({ phone, name }: { phone: string; name: string }) => {
+      const res = await fetch("/api/contacts/block", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ phone, name, reason: "Blocked from 24-hour window" }),
+      });
+      if (!res.ok) throw new Error("Failed to block contact");
+      return res.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/chats/window"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/chats"] });
+      setBlockDialogOpen(false);
+      setContactToBlock(null);
+      setSelectedChatId(null);
+      toast.success("Contact blocked successfully");
+    },
+    onError: () => {
+      toast.error("Failed to block contact");
+    },
+  });
+
   const handleSelectChat = (chatId: string) => {
     setSelectedChatId(chatId);
     const chat = chats.find((c) => c.id === chatId);
@@ -1044,6 +1081,19 @@ export default function WindowInbox() {
                           <MailOpen className="mr-2 h-4 w-4" />
                           Mark as Unread
                         </DropdownMenuItem>
+                        <DropdownMenuItem
+                          className="text-destructive"
+                          onClick={() => {
+                            setContactToBlock({
+                              phone: selectedChat.contact.phone,
+                              name: selectedChat.contact.name,
+                            });
+                            setBlockDialogOpen(true);
+                          }}
+                        >
+                          <Ban className="mr-2 h-4 w-4" />
+                          Block Contact
+                        </DropdownMenuItem>
                       </DropdownMenuContent>
                     </DropdownMenu>
                   </div>
@@ -1331,6 +1381,27 @@ export default function WindowInbox() {
           </DialogFooter>
         </DialogContent>
       </Dialog>
+
+      <AlertDialog open={blockDialogOpen} onOpenChange={setBlockDialogOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Block Contact</AlertDialogTitle>
+            <AlertDialogDescription>
+              Are you sure you want to block {contactToBlock?.name || contactToBlock?.phone}? 
+              They will no longer be able to send you messages.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+              onClick={() => contactToBlock && blockContactMutation.mutate(contactToBlock)}
+            >
+              Block
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </DashboardLayout>
   );
 }
