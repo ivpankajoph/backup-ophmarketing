@@ -79,11 +79,19 @@ export async function handleWebhook(req: Request, res: Response) {
     const from = message.from;
     const messageType = message.type;
     
+    // Check if contact is blocked - works with or without resolved userId
+    const { isContactBlocked, isPhoneBlocked } = await import('../contacts/contacts.routes');
     if (resolvedUserId) {
-      const { isContactBlocked } = await import('../contacts/contacts.routes');
       const isBlocked = await isContactBlocked(resolvedUserId, from);
       if (isBlocked) {
         console.log(`[Webhook] Message from blocked contact ${from} for user ${resolvedUserId}, ignoring`);
+        return res.sendStatus(200);
+      }
+    } else {
+      // Check if phone is blocked by any user
+      const blockResult = await isPhoneBlocked(from);
+      if (blockResult.blocked) {
+        console.log(`[Webhook] Message from blocked contact ${from} (blocked by user ${blockResult.userId}), ignoring`);
         return res.sendStatus(200);
       }
     }
