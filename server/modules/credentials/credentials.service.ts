@@ -217,3 +217,36 @@ export async function getCredentialStatus(userId: string): Promise<{
     return { hasWhatsApp: false, hasOpenAI: false, hasFacebook: false, isVerified: false };
   }
 }
+
+export async function findUserByPhoneNumberId(phoneNumberId: string): Promise<string | null> {
+  try {
+    const allCreds = await UserCredentials.find({});
+    
+    for (const cred of allCreds) {
+      if (cred.phoneNumberId) {
+        const decryptedPhoneId = decrypt(cred.phoneNumberId);
+        if (decryptedPhoneId === phoneNumberId) {
+          return cred.userId;
+        }
+      }
+    }
+    
+    return null;
+  } catch (error) {
+    console.error('[Credentials] Error finding user by phone ID:', error);
+    return null;
+  }
+}
+
+export const credentialsService = {
+  getCredentialsByUserId,
+  getDecryptedCredentials,
+  getMaskedCredentialsForUser,
+  saveCredentials,
+  updateVerificationStatus,
+  deleteCredentials,
+  getCredentialsByPhoneNumberId,
+  hasCredentials,
+  getCredentialStatus,
+  findUserByPhoneNumberId,
+};
