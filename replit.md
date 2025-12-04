@@ -27,7 +27,22 @@ The system incorporates a modular backend structure, allowing for independent de
 - **WhatsApp Business API**: For sending and receiving WhatsApp messages.
 - **Meta Business Suite**: For syncing and approving message templates.
 
-## Recent Changes (December 3, 2025)
+## Recent Changes (December 4, 2025)
+- **Multi-Tenant SaaS Implementation**: Complete multi-tenant architecture with secure credential isolation per user.
+  - **Authentication System**: Session-based authentication with bcrypt password hashing. Default admin user (admin@whatsapp.com/admin123) created on startup.
+  - **AES-256-GCM Encryption**: User-specific API keys (WhatsApp, Facebook, OpenAI) are encrypted at rest using AES-256-GCM with unique IVs.
+  - **Credentials Service**: New MongoDB collection `user_credentials` stores encrypted API keys per user. API endpoints for save/retrieve credentials.
+  - **Strict Tenant Isolation**: User-facing endpoints (/send, /send-template, /media) require authentication AND user-scoped credentials. Returns 403 if credentials not configured.
+  - **Webhook Multi-Tenancy**: Inbound webhooks resolve tenant by phone_number_id lookup, then use that tenant's credentials for AI responses.
+  - **OpenAI Service**: Updated to support per-user API keys for AI agents.
+  - **Settings UI**: API Credentials page allows users to configure their own WhatsApp, Facebook, and OpenAI API keys securely.
+- **Key Files**: 
+  - `server/modules/encryption/encryption.service.ts` - AES-256-GCM encryption utilities
+  - `server/modules/credentials/` - Credential storage and retrieval
+  - `server/modules/whatsapp/whatsapp.service.ts` - Centralized WhatsApp service with tenant support
+  - `server/modules/auth/` - Authentication with session management
+
+## Previous Changes (December 3, 2025)
 - **Broadcast Scheduling Fix**: Fixed scheduled broadcasts not sending at the scheduled time. The `scheduled_broadcasts` MongoDB collection was missing from the model registry. Added proper schema with fields for campaignName, contacts, message type, scheduledAt, status (scheduled/sending/sent/failed/cancelled), and counts.
 - **Scheduled Broadcasts UI**: Added new section in Broadcast page to view and manage all scheduled broadcasts. Users can see status, scheduled time, recipient count, and cancel or delete scheduled broadcasts.
 - **Scheduler Implementation**: Server-side scheduler runs every 30 seconds checking for due broadcasts. When a broadcast's scheduled time arrives, it automatically processes all recipients and sends messages.
