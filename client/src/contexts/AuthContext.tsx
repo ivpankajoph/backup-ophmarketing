@@ -1,46 +1,118 @@
 import { createContext, useContext, useState, useEffect, ReactNode } from "react";
 
+interface User {
+  id: string;
+  username: string;
+  name: string;
+  email?: string;
+  role: string;
+}
+
 interface AuthContextType {
   isAuthenticated: boolean;
-  user: { email: string } | null;
-  login: (email: string, password: string) => boolean;
-  logout: () => void;
+  isLoading: boolean;
+  user: User | null;
+  login: (username: string, password: string) => Promise<boolean>;
+  register: (username: string, password: string, name: string, email?: string) => Promise<{ success: boolean; error?: string }>;
+  logout: () => Promise<void>;
+  checkAuth: () => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
-  const [user, setUser] = useState<{ email: string } | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
+  const [user, setUser] = useState<User | null>(null);
 
-  useEffect(() => {
-    const stored = localStorage.getItem("auth");
-    if (stored) {
-      const parsed = JSON.parse(stored);
-      setIsAuthenticated(true);
-      setUser(parsed.user);
+  const checkAuth = async () => {
+    try {
+      const res = await fetch("/api/auth/check");
+      const data = await res.json();
+      if (data.authenticated && data.user) {
+        setIsAuthenticated(true);
+        setUser(data.user);
+      } else {
+        setIsAuthenticated(false);
+        setUser(null);
+      }
+    } catch (error) {
+      console.error("Auth check failed:", error);
+      setIsAuthenticated(false);
+      setUser(null);
+    } finally {
+      setIsLoading(false);
     }
-  }, []);
-
-  const login = (email: string, password: string): boolean => {
-    if (email === "admin@whatsapp.com" && password === "admin123") {
-      const userData = { email };
-      setIsAuthenticated(true);
-      setUser(userData);
-      localStorage.setItem("auth", JSON.stringify({ user: userData }));
-      return true;
-    }
-    return false;
   };
 
-  const logout = () => {
-    setIsAuthenticated(false);
-    setUser(null);
-    localStorage.removeItem("auth");
+  useEffect(() => {
+    checkAuth();
+  }, []);
+
+  const login = async (username: string, password: string): Promise<boolean> => {
+    try {
+      const res = await fetch("/api/auth/login", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ username, password }),
+      });
+
+      const data = await res.json();
+      
+      if (res.ok && data.success) {
+        setIsAuthenticated(true);
+        setUser(data.user);
+        return true;
+      }
+      
+      return false;
+    } catch (error) {
+      console.error("Login failed:", error);
+      return false;
+    }
+  };
+
+  const register = async (
+    username: string, 
+    password: string, 
+    name: string, 
+    email?: string
+  ): Promise<{ success: boolean; error?: string }> => {
+    try {
+      const res = await fetch("/api/auth/register", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ username, password, name, email }),
+      });
+
+      const data = await res.json();
+      
+      if (res.ok && data.success) {
+        setIsAuthenticated(true);
+        setUser(data.user);
+        return { success: true };
+      }
+      
+      return { success: false, error: data.error || "Registration failed" };
+    } catch (error) {
+      console.error("Registration failed:", error);
+      return { success: false, error: "Registration failed" };
+    }
+  };
+
+  const logout = async () => {
+    try {
+      await fetch("/api/auth/logout", { method: "POST" });
+    } catch (error) {
+      console.error("Logout error:", error);
+    } finally {
+      setIsAuthenticated(false);
+      setUser(null);
+    }
   };
 
   return (
-    <AuthContext.Provider value={{ isAuthenticated, user, login, logout }}>
+    <AuthContext.Provider value={{ isAuthenticated, isLoading, user, login, register, logout, checkAuth }}>
       {children}
     </AuthContext.Provider>
   );

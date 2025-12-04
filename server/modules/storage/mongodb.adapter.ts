@@ -320,6 +320,24 @@ const ScheduledBroadcastSchema = new Schema({
   failedCount: { type: Number, default: 0 },
 }, { collection: 'scheduled_broadcasts' });
 
+const UserCredentialsSchema = new Schema({
+  id: { type: String, required: true, unique: true },
+  userId: { type: String, required: true, unique: true, index: true },
+  whatsappToken: { type: String },
+  phoneNumberId: { type: String },
+  businessAccountId: { type: String },
+  webhookVerifyToken: { type: String },
+  appId: { type: String },
+  appSecret: { type: String },
+  openaiApiKey: { type: String },
+  facebookAccessToken: { type: String },
+  facebookPageId: { type: String },
+  isVerified: { type: Boolean, default: false },
+  lastVerifiedAt: { type: String },
+  createdAt: { type: String, required: true },
+  updatedAt: { type: String, required: true },
+}, { collection: 'user_credentials' });
+
 export const Agent = mongoose.models.Agent || mongoose.model('Agent', AgentSchema);
 export const Form = mongoose.models.Form || mongoose.model('Form', FormSchema);
 export const Lead = mongoose.models.Lead || mongoose.model('Lead', LeadSchema);
@@ -342,6 +360,7 @@ export const WhatsappSettings = mongoose.models.WhatsappSettings || mongoose.mod
 export const Billing = mongoose.models.Billing || mongoose.model('Billing', BillingSchema);
 export const PrefilledTextMapping = mongoose.models.PrefilledTextMapping || mongoose.model('PrefilledTextMapping', PrefilledTextMappingSchema);
 export const ScheduledBroadcast = mongoose.models.ScheduledBroadcast || mongoose.model('ScheduledBroadcast', ScheduledBroadcastSchema);
+export const UserCredentials = mongoose.models.UserCredentials || mongoose.model('UserCredentials', UserCredentialsSchema);
 
 const modelMap: Record<string, Model<any>> = {
   agents: Agent,
@@ -366,6 +385,7 @@ const modelMap: Record<string, Model<any>> = {
   billing: Billing,
   prefilled_text_mappings: PrefilledTextMapping,
   scheduled_broadcasts: ScheduledBroadcast,
+  user_credentials: UserCredentials,
 };
 
 export async function readCollection<T>(collectionName: string): Promise<T[]> {

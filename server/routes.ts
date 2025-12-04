@@ -18,6 +18,8 @@ import leadAutoReplyRoutes from "./modules/leadAutoReply/leadAutoReply.routes";
 import broadcastRoutes from "./modules/broadcast/broadcast.routes";
 import aiAnalyticsRoutes from "./modules/aiAnalytics/aiAnalytics.routes";
 import prefilledTextRoutes from "./modules/prefilledText/prefilledText.routes";
+import authRoutes from "./modules/auth/auth.routes";
+import credentialsRoutes from "./modules/credentials/credentials.routes";
 import * as broadcastService from "./modules/broadcast/broadcast.service";
 import * as agentService from "./modules/aiAgents/agent.service";
 import * as openaiService from "./modules/openai/openai.service";
@@ -1227,6 +1229,8 @@ export async function registerRoutes(
     }
   });
 
+  app.use("/api/auth", authRoutes);
+  app.use("/api/credentials", credentialsRoutes);
   app.use("/api/agents", agentRoutes);
   app.use("/api/facebook", fbRoutes);
   app.use("/api/map-agent", mappingRoutes);
