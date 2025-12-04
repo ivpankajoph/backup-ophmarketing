@@ -8,10 +8,27 @@ import * as aiAnalytics from '../aiAnalytics/aiAnalytics.service';
 import * as broadcastService from '../broadcast/broadcast.service';
 import * as contactAgentService from '../contactAgent/contactAgent.service';
 import * as prefilledTextService from '../prefilledText/prefilledText.service';
+import { credentialsService } from '../credentials/credentials.service';
+import * as whatsappService from './whatsapp.service';
 
 const WHATSAPP_TOKEN = process.env.WHATSAPP_TOKEN_NEW || process.env.WHATSAPP_TOKEN;
 const PHONE_NUMBER_ID = process.env.PHONE_NUMBER_ID;
 const VERIFY_TOKEN = process.env.VERIFY_TOKEN || 'whatsapp_webhook_verify_token_2025';
+
+async function resolveUserIdFromPhoneNumberId(phoneNumberId: string): Promise<string | undefined> {
+  try {
+    const result = await credentialsService.getCredentialsByPhoneNumberId(phoneNumberId);
+    if (result) {
+      console.log(`[Webhook] Resolved userId ${result.userId} for phone_number_id ${phoneNumberId}`);
+      return result.userId;
+    }
+    console.log(`[Webhook] No user found for phone_number_id ${phoneNumberId}, using system credentials`);
+    return undefined;
+  } catch (error) {
+    console.error('[Webhook] Error resolving userId:', error);
+    return undefined;
+  }
+}
 
 interface ConversationHistory {
   [phone: string]: { role: 'user' | 'assistant'; content: string }[];
@@ -52,6 +69,11 @@ export async function handleWebhook(req: Request, res: Response) {
     if (!messages || messages.length === 0) {
       return res.sendStatus(200);
     }
+
+    const webhookPhoneNumberId = value?.metadata?.phone_number_id;
+    const resolvedUserId = webhookPhoneNumberId 
+      ? await resolveUserIdFromPhoneNumberId(webhookPhoneNumberId)
+      : undefined;
 
     const message = messages[0];
     const from = message.from;
@@ -164,13 +186,11 @@ export async function handleWebhook(req: Request, res: Response) {
     const isButtonResponse = messageType === 'button' || messageType === 'interactive';
     
     if (isButtonResponse) {
-      // Send fixed thank you message for button responses
       const thankYouMessage = "Thanks for your feedback, we will keep in touch with you soon.";
       
-      await sendWhatsAppMessage(from, thankYouMessage);
+      await whatsappService.sendTextMessage(from, thankYouMessage, resolvedUserId);
       await saveOutboundMessage(from, thankYouMessage);
       
-      // Disable auto-reply for this contact - they will only get AI responses when manually selected
       await contactAgentService.disableAutoReply(from);
       
       console.log(`Button response auto-reply sent to ${from}: ${thankYouMessage} (auto-reply disabled)`);
@@ -252,12 +272,10 @@ export async function handleWebhook(req: Request, res: Response) {
       recentHistory = conversationHistory[from].slice(-10);
     }
     
-    // Add current message to history
     const historyForAI = [...recentHistory, { role: 'user' as const, content: contentForAI }];
 
-    const aiResponse = await generateAgentResponse(contentForAI, agentToUse, historyForAI.slice(0, -1));
+    const aiResponse = await generateAgentResponse(contentForAI, agentToUse, historyForAI.slice(0, -1), resolvedUserId);
     
-    // Store in appropriate history
     if (useStoredHistory) {
       await contactAgentService.addMessageToHistory(from, 'user', contentForAI);
       await contactAgentService.addMessageToHistory(from, 'assistant', aiResponse);
@@ -266,7 +284,7 @@ export async function handleWebhook(req: Request, res: Response) {
       conversationHistory[from].push({ role: 'assistant', content: aiResponse });
     }
 
-    await sendWhatsAppMessage(from, aiResponse);
+    await whatsappService.sendTextMessage(from, aiResponse, resolvedUserId);
     
     await saveOutboundMessage(from, aiResponse);
 
