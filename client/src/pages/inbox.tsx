@@ -31,7 +31,8 @@ import {
   MailOpen,
   CheckSquare,
   Ban,
-  Trash2
+  Trash2,
+  ArrowLeft
 } from "lucide-react";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
 import { Badge } from "@/components/ui/badge";
@@ -112,6 +113,7 @@ export default function Inbox() {
   const [blockDialogOpen, setBlockDialogOpen] = useState(false);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [blockReason, setBlockReason] = useState("");
+  const [mobileView, setMobileView] = useState<"list" | "chat">("list");
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const queryClient = useQueryClient();
 
@@ -403,10 +405,15 @@ export default function Inbox() {
 
   const handleSelectChat = (chatId: string) => {
     setSelectedChatId(chatId);
+    setMobileView("chat");
     const chat = chats.find(c => c.id === chatId);
     if (chat && chat.unreadCount > 0) {
       markAsReadMutation.mutate(chat.contactId);
     }
+  };
+
+  const handleBackToList = () => {
+    setMobileView("list");
   };
 
   useEffect(() => {
@@ -668,42 +675,42 @@ export default function Inbox() {
 
   return (
     <DashboardLayout>
-      <div className="h-full p-1 flex flex-col gap-4 animate-in fade-in duration-500">
-        <div className="flex items-center justify-between flex-shrink-0">
+      <div className="h-full p-1 flex flex-col gap-2 md:gap-4 animate-in fade-in duration-500">
+        <div className="flex flex-col md:flex-row md:items-center justify-between gap-2 flex-shrink-0">
           <div>
-            <h2 className="text-2xl font-bold tracking-tight">Inbox</h2>
-            <p className="text-sm text-muted-foreground">
+            <h2 className="text-lg md:text-2xl font-bold tracking-tight">Inbox</h2>
+            <p className="text-xs md:text-sm text-muted-foreground hidden md:block">
               All conversations. Contacts outside 24-hour window require templates.
             </p>
           </div>
           <div className="flex items-center gap-2">
-            <Button variant="outline" onClick={handleExportList}>
-              <Download className="mr-2 h-4 w-4" />
-              Export List ({windowLeads.length})
+            <Button variant="outline" size="sm" className="md:size-default" onClick={handleExportList}>
+              <Download className="h-4 w-4 md:mr-2" />
+              <span className="hidden md:inline">Export List ({windowLeads.length})</span>
             </Button>
             {selectedContacts.length > 0 && (
-              <Button onClick={() => setIsBulkSendOpen(true)}>
-                <Send className="mr-2 h-4 w-4" />
-                Send to {selectedContacts.length} Selected
+              <Button size="sm" className="md:size-default" onClick={() => setIsBulkSendOpen(true)}>
+                <Send className="h-4 w-4 md:mr-2" />
+                <span className="hidden md:inline">Send to</span> {selectedContacts.length}
               </Button>
             )}
           </div>
         </div>
 
-        <div className="flex items-center gap-4 p-3 bg-muted/50 rounded-lg flex-shrink-0">
+        <div className="flex items-center gap-2 md:gap-4 p-2 md:p-3 bg-muted/50 rounded-lg flex-shrink-0">
           <Checkbox 
             checked={selectedContacts.length === filteredChats.length && filteredChats.length > 0}
             onCheckedChange={handleSelectAll}
           />
-          <span className="text-sm font-medium">Select All ({filteredChats.length} chats)</span>
+          <span className="text-xs md:text-sm font-medium">Select All ({filteredChats.length} chats)</span>
           {selectedContacts.length > 0 && (
-            <Badge variant="secondary">{selectedContacts.length} selected</Badge>
+            <Badge variant="secondary" className="text-xs">{selectedContacts.length} selected</Badge>
           )}
         </div>
 
-      <div className="flex-1 min-h-screen p-2 flex bg-card border border-border rounded-lg overflow-hidden shadow-sm">
-        <div className="w-80 border-r border-border flex flex-col bg-background min-h-0">
-          <div className="p-4 border-b border-border">
+      <div className="flex-1 min-h-0 flex flex-col md:flex-row bg-card border border-border rounded-lg overflow-hidden shadow-sm">
+        <div className={`w-full md:w-80 lg:w-96 md:border-r border-border flex flex-col bg-background min-h-0 ${mobileView === "chat" ? "hidden md:flex" : "flex"}`}>
+          <div className="p-3 md:p-4 border-b border-border">
             <div className="relative">
               <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
               <Input 
@@ -791,32 +798,40 @@ export default function Inbox() {
           </ScrollArea>
         </div>
 
-        <div className="flex-1 flex flex-col bg-[#efeae2] dark:bg-zinc-900 bg-opacity-50">
+        <div className={`flex-1 flex flex-col bg-[#efeae2] dark:bg-zinc-900 bg-opacity-50 ${mobileView === "list" ? "hidden md:flex" : "flex"}`}>
           {selectedChat ? (
             <>
-              <div className="h-16 bg-background border-b border-border flex items-center justify-between px-6">
-                <div className="flex items-center gap-3">
-                  <Avatar>
-                    <AvatarFallback className="bg-primary/10 text-primary">
+              <div className="h-14 md:h-16 bg-background border-b border-border flex items-center justify-between px-2 md:px-6">
+                <div className="flex items-center gap-2 md:gap-3">
+                  <Button 
+                    variant="ghost" 
+                    size="icon" 
+                    className="flex md:hidden h-9 w-9 shrink-0"
+                    onClick={handleBackToList}
+                  >
+                    <ArrowLeft className="h-5 w-5" />
+                  </Button>
+                  <Avatar className="h-8 w-8 md:h-10 md:w-10">
+                    <AvatarFallback className="bg-primary/10 text-primary text-sm">
                       {getInitials(selectedChat.contact)}
                     </AvatarFallback>
                   </Avatar>
-                  <div>
-                    <h3 className="font-medium">{getContactName(selectedChat.contact)}</h3>
-                    <div className="flex items-center gap-2">
-                      <span className="text-xs text-muted-foreground">{selectedChat.contact.phone}</span>
+                  <div className="min-w-0">
+                    <h3 className="font-medium text-sm md:text-base truncate">{getContactName(selectedChat.contact)}</h3>
+                    <div className="flex items-center gap-1 md:gap-2 flex-wrap">
+                      <span className="text-[10px] md:text-xs text-muted-foreground truncate">{selectedChat.contact.phone}</span>
                       {isWithin24Hours(selectedChat) && (
-                        <Badge variant="outline" className="text-xs bg-green-50 text-green-700 border-green-200">
-                          <Clock className="h-3 w-3 mr-1" />
-                          24hr Window
+                        <Badge variant="outline" className="text-[9px] md:text-xs bg-green-50 text-green-700 border-green-200 py-0">
+                          <Clock className="h-2.5 w-2.5 md:h-3 md:w-3 mr-0.5 md:mr-1" />
+                          24hr
                         </Badge>
                       )}
                     </div>
                   </div>
                 </div>
-                <div className="flex items-center gap-2">
-                  <Button variant="ghost" size="icon"><Phone className="h-5 w-5 text-muted-foreground" /></Button>
-                  <Button variant="ghost" size="icon"><Video className="h-5 w-5 text-muted-foreground" /></Button>
+                <div className="flex items-center gap-1 md:gap-2">
+                  <Button variant="ghost" size="icon" className="hidden md:flex"><Phone className="h-5 w-5 text-muted-foreground" /></Button>
+                  <Button variant="ghost" size="icon" className="hidden md:flex"><Video className="h-5 w-5 text-muted-foreground" /></Button>
                   <DropdownMenu>
                     <DropdownMenuTrigger asChild>
                       <Button variant="ghost" size="icon"><MoreVertical className="h-5 w-5 text-muted-foreground" /></Button>
@@ -839,17 +854,17 @@ export default function Inbox() {
                 </div>
               </div>
 
-              <ScrollArea className="flex-1 p-6">
+              <ScrollArea className="flex-1 p-3 md:p-6">
                 {messagesLoading ? (
                   <div className="flex items-center justify-center h-full">
                     <Loader2 className="h-6 w-6 animate-spin text-primary" />
                   </div>
                 ) : messages.length === 0 ? (
-                  <div className="flex items-center justify-center h-full text-muted-foreground">
+                  <div className="flex items-center justify-center h-full text-muted-foreground text-sm">
                     No messages yet. Start the conversation!
                   </div>
                 ) : (
-                  <div className="space-y-4">
+                  <div className="space-y-3 md:space-y-4">
                     {messages.map((msg) => (
                       <div 
                         key={msg.id} 
@@ -860,7 +875,7 @@ export default function Inbox() {
                             <Button 
                               variant="ghost" 
                               size="icon" 
-                              className="h-6 w-6 opacity-0 group-hover:opacity-100 transition-opacity"
+                              className="h-6 w-6 opacity-0 group-hover:opacity-100 transition-opacity hidden md:flex"
                               onClick={() => setReplyingTo(msg)}
                             >
                               <Reply className="h-3 w-3" />
@@ -868,7 +883,7 @@ export default function Inbox() {
                           )}
                           <div 
                             className={`
-                              max-w-[70%] rounded-lg px-4 py-2 shadow-sm relative
+                              max-w-[85%] md:max-w-[70%] rounded-lg px-3 md:px-4 py-2 shadow-sm relative break-words
                               ${msg.direction === 'inbound' 
                                 ? 'bg-white dark:bg-card text-card-foreground rounded-tl-none' 
                                 : 'bg-[#d9fdd3] dark:bg-primary/20 text-foreground rounded-tr-none'
@@ -900,43 +915,43 @@ export default function Inbox() {
                 )}
               </ScrollArea>
 
-              <div className="p-4 bg-background border-t border-border">
+              <div className="p-2 md:p-4 bg-background border-t border-border">
                 {replyingTo && (
                   <div className="mb-2 p-2 bg-muted rounded-lg flex items-center justify-between">
-                    <div className="flex items-center gap-2 text-sm">
-                      <Reply className="h-4 w-4 text-muted-foreground" />
-                      <span className="text-muted-foreground">Replying to:</span>
-                      <span className="truncate max-w-[300px]">{replyingTo.content}</span>
+                    <div className="flex items-center gap-2 text-xs md:text-sm min-w-0">
+                      <Reply className="h-3 w-3 md:h-4 md:w-4 text-muted-foreground shrink-0" />
+                      <span className="text-muted-foreground hidden md:inline">Replying to:</span>
+                      <span className="truncate max-w-[150px] md:max-w-[300px]">{replyingTo.content}</span>
                     </div>
-                    <Button variant="ghost" size="icon" className="h-6 w-6" onClick={() => setReplyingTo(null)}>
+                    <Button variant="ghost" size="icon" className="h-6 w-6 shrink-0" onClick={() => setReplyingTo(null)}>
                       <X className="h-4 w-4" />
                     </Button>
                   </div>
                 )}
-                <div className="flex items-center gap-2">
-                  <Button variant="ghost" size="icon" className="text-muted-foreground hover:text-foreground">
+                <div className="flex items-center gap-1 md:gap-2">
+                  <Button variant="ghost" size="icon" className="text-muted-foreground hover:text-foreground hidden md:flex">
                     <Smile className="h-6 w-6" />
                   </Button>
-                  <Button variant="ghost" size="icon" className="text-muted-foreground hover:text-foreground">
-                    <Paperclip className="h-6 w-6" />
+                  <Button variant="ghost" size="icon" className="text-muted-foreground hover:text-foreground h-8 w-8 md:h-10 md:w-10">
+                    <Paperclip className="h-5 w-5 md:h-6 md:w-6" />
                   </Button>
                   <Input 
-                    placeholder={isWithin24Hours(selectedChat) ? "Type a message" : "Use templates for contacts outside 24hr window"} 
-                    className="flex-1 bg-secondary/50 border-none focus-visible:ring-1"
+                    placeholder="Type a message..." 
+                    className="flex-1 bg-secondary/50 border-none focus-visible:ring-1 text-sm h-9 md:h-10"
                     value={messageInput}
                     onChange={(e) => setMessageInput(e.target.value)}
                     onKeyPress={handleKeyPress}
                   />
                   <Button 
                     size="icon" 
-                    className="rounded-full h-10 w-10"
+                    className="rounded-full h-9 w-9 md:h-10 md:w-10 shrink-0"
                     onClick={handleSendMessage}
                     disabled={!messageInput.trim() || sendMessageMutation.isPending}
                   >
                     {sendMessageMutation.isPending ? (
-                      <Loader2 className="h-5 w-5 animate-spin" />
+                      <Loader2 className="h-4 w-4 md:h-5 md:w-5 animate-spin" />
                     ) : (
-                      <Send className="h-5 w-5" />
+                      <Send className="h-4 w-4 md:h-5 md:w-5" />
                     )}
                   </Button>
                 </div>

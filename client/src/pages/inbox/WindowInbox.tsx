@@ -1041,12 +1041,12 @@ export default function WindowInbox() {
           <div className={`flex-1 flex flex-col bg-[#efeae2] dark:bg-zinc-900 bg-opacity-50 ${mobileView === "list" ? "hidden md:flex" : "flex"}`}>
             {selectedChat ? (
               <>
-                <div className="h-14 md:h-16 bg-background border-b border-border flex items-center justify-between px-3 md:px-6">
+                <div className="h-14 md:h-16 bg-background border-b border-border flex items-center justify-between px-2 md:px-6">
                   <div className="flex items-center gap-2 md:gap-3">
                     <Button 
                       variant="ghost" 
                       size="icon" 
-                      className="md:hidden h-8 w-8"
+                      className="flex md:hidden h-9 w-9 shrink-0"
                       onClick={handleBackToList}
                     >
                       <ArrowLeft className="h-5 w-5" />
