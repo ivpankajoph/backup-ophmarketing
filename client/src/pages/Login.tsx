@@ -6,13 +6,14 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { MessageSquare, Lock, Mail, AlertCircle, User } from "lucide-react";
+import { MessageSquare, Lock, Mail, AlertCircle, User, AtSign } from "lucide-react";
 import { toast } from "sonner";
 
 export default function Login() {
-  const [email, setEmail] = useState("");
+  const [identifier, setIdentifier] = useState("");
   const [password, setPassword] = useState("");
   const [name, setName] = useState("");
+  const [email, setEmail] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
   const [activeTab, setActiveTab] = useState("login");
@@ -25,12 +26,12 @@ export default function Login() {
     setLoading(true);
 
     try {
-      const success = await login(email, password);
+      const success = await login(identifier, password);
       if (success) {
         toast.success("Welcome back!");
         setLocation("/");
       } else {
-        setError("Invalid email or password");
+        setError("Invalid email/username or password");
       }
     } catch (err) {
       setError("Login failed. Please try again.");
@@ -95,15 +96,15 @@ export default function Login() {
                   </div>
                 )}
                 <div className="space-y-2">
-                  <Label htmlFor="login-email" className="text-gray-700">Email</Label>
+                  <Label htmlFor="login-identifier" className="text-gray-700">Email or Username</Label>
                   <div className="relative">
-                    <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
+                    <AtSign className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
                     <Input
-                      id="login-email"
-                      type="email"
-                      placeholder="admin@whatsapp.com"
-                      value={email}
-                      onChange={(e) => setEmail(e.target.value)}
+                      id="login-identifier"
+                      type="text"
+                      placeholder="Enter email or username"
+                      value={identifier}
+                      onChange={(e) => setIdentifier(e.target.value)}
                       className="pl-10"
                       required
                     />
