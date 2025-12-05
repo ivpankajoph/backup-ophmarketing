@@ -905,8 +905,8 @@ export default function WindowInbox() {
 
   return (
     <DashboardLayout>
-      <div className="h-screen flex flex-col gap-2 md:gap-4 animate-in fade-in slide-in-from-bottom-4 duration-500">
-        <div className="flex flex-col md:flex-row md:items-center justify-between gap-2 flex-shrink-0">
+      <div className="h-[calc(100vh-80px)] md:h-[calc(100vh-100px)] flex flex-col gap-2 md:gap-4 animate-in fade-in slide-in-from-bottom-4 duration-500 overflow-hidden">
+        <div className={`flex flex-col md:flex-row md:items-center justify-between gap-2 flex-shrink-0 ${mobileView === "chat" ? "hidden md:flex" : "flex"}`}>
           <div>
             <h2 className="text-lg md:text-2xl font-bold tracking-tight flex items-center gap-2">
               <Clock className="h-5 w-5 md:h-7 md:w-7 text-primary" />
@@ -931,7 +931,7 @@ export default function WindowInbox() {
           </div>
         </div>
 
-        <div className="flex items-center gap-2 md:gap-4 p-2 md:p-3 bg-muted/50 rounded-lg flex-shrink-0">
+        <div className={`flex items-center gap-2 md:gap-4 p-2 md:p-3 bg-muted/50 rounded-lg flex-shrink-0 ${mobileView === "chat" ? "hidden md:flex" : "flex"}`}>
           <Checkbox
             checked={
               selectedContacts.length === chats.length && chats.length > 0
@@ -949,7 +949,7 @@ export default function WindowInbox() {
         </div>
 
         <div className="flex-1 min-h-0 flex flex-col md:flex-row bg-card border border-border rounded-lg overflow-hidden shadow-sm">
-          <div className={`w-full md:w-80 lg:w-96 md:border-r border-border flex flex-col bg-background min-h-0 ${mobileView === "chat" ? "hidden md:flex" : "flex"}`}>
+          <div className={`w-full md:w-80 lg:w-96 md:border-r border-border flex flex-col bg-background min-h-0 h-full ${mobileView === "chat" ? "hidden md:flex" : "flex"}`}>
             <div className="p-3 md:p-4 border-b border-border">
               <div className="relative">
                 <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
@@ -1038,10 +1038,10 @@ export default function WindowInbox() {
             </ScrollArea>
           </div>
 
-          <div className={`flex-1 flex flex-col bg-[#efeae2] dark:bg-zinc-900 bg-opacity-50 ${mobileView === "list" ? "hidden md:flex" : "flex"}`}>
+          <div className={`flex-1 flex flex-col bg-[#efeae2] dark:bg-zinc-900 bg-opacity-50 min-h-0 h-full ${mobileView === "list" ? "hidden md:flex" : "flex"}`}>
             {selectedChat ? (
               <>
-                <div className="h-14 md:h-16 bg-background border-b border-border flex items-center justify-between px-2 md:px-6">
+                <div className="h-14 md:h-16 bg-background border-b border-border flex items-center justify-between px-2 md:px-6 flex-shrink-0">
                   <div className="flex items-center gap-2 md:gap-3">
                     <Button 
                       variant="ghost" 
@@ -1114,7 +1114,7 @@ export default function WindowInbox() {
                   </div>
                 </div>
 
-                <ScrollArea className="flex-1 p-3 md:p-6">
+                <div className="flex-1 min-h-0 overflow-y-auto p-3 md:p-6">
                   {messagesLoading ? (
                     <div className="flex items-center justify-center h-full">
                       <Loader2 className="h-6 w-6 animate-spin text-primary" />
@@ -1186,9 +1186,9 @@ export default function WindowInbox() {
                       <div ref={messagesEndRef} />
                     </div>
                   )}
-                </ScrollArea>
+                </div>
 
-                <div className="p-2 md:p-4 bg-background border-t border-border">
+                <div className="p-2 md:p-4 bg-background border-t border-border flex-shrink-0">
                   {replyingTo && (
                     <div className="mb-2 p-2 bg-muted rounded-lg flex items-center justify-between">
                       <div className="flex items-center gap-2 text-xs md:text-sm min-w-0">
