@@ -18,7 +18,7 @@ function parseTimeFilter(req: Request): TimeFilter {
 
 router.get('/ai-agents', async (req: Request, res: Response) => {
   try {
-    const userId = getUserId(req);
+    const userId = getUserId(req) || undefined;
     const filter = parseTimeFilter(req);
     const data = await reportsService.getAIAgentPerformance(filter, userId);
     res.json(data);
@@ -30,7 +30,7 @@ router.get('/ai-agents', async (req: Request, res: Response) => {
 
 router.get('/customer-replies', async (req: Request, res: Response) => {
   try {
-    const userId = getUserId(req);
+    const userId = getUserId(req) || undefined;
     const filter = parseTimeFilter(req);
     const data = await reportsService.getCustomerReplies(filter, userId);
     res.json(data);
@@ -42,7 +42,7 @@ router.get('/customer-replies', async (req: Request, res: Response) => {
 
 router.get('/user-engagement', async (req: Request, res: Response) => {
   try {
-    const userId = getUserId(req);
+    const userId = getUserId(req) || undefined;
     const filter = parseTimeFilter(req);
     const data = await reportsService.getUserEngagement(filter, userId);
     res.json(data);
@@ -54,7 +54,7 @@ router.get('/user-engagement', async (req: Request, res: Response) => {
 
 router.get('/spending', async (req: Request, res: Response) => {
   try {
-    const userId = getUserId(req);
+    const userId = getUserId(req) || undefined;
     const filter = parseTimeFilter(req);
     const data = await reportsService.getSpendingReport(filter, userId);
     res.json(data);
@@ -66,13 +66,39 @@ router.get('/spending', async (req: Request, res: Response) => {
 
 router.get('/overview', async (req: Request, res: Response) => {
   try {
-    const userId = getUserId(req);
+    const userId = getUserId(req) || undefined;
     const filter = parseTimeFilter(req);
     const data = await reportsService.getDashboardOverview(filter, userId);
     res.json(data);
   } catch (error) {
     console.error('[Reports] Error fetching overview:', error);
     res.status(500).json({ error: 'Failed to fetch overview data' });
+  }
+});
+
+router.get('/campaign-performance', async (req: Request, res: Response) => {
+  try {
+    const userId = getUserId(req) || undefined;
+    const filter = parseTimeFilter(req);
+    const data = await reportsService.getCampaignPerformance(filter, userId);
+    res.json(data);
+  } catch (error) {
+    console.error('[Reports] Error fetching campaign performance:', error);
+    res.status(500).json({ error: 'Failed to fetch campaign performance data' });
+  }
+});
+
+router.get('/blocked-contacts', async (req: Request, res: Response) => {
+  try {
+    const userId = getUserId(req);
+    if (!userId) {
+      return res.status(401).json({ error: 'Not authenticated' });
+    }
+    const data = await reportsService.getBlockedContactsReport(userId);
+    res.json(data);
+  } catch (error) {
+    console.error('[Reports] Error fetching blocked contacts report:', error);
+    res.status(500).json({ error: 'Failed to fetch blocked contacts report' });
   }
 });
 

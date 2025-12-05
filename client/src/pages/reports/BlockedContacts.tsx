@@ -7,9 +7,10 @@ import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
-import { Search, Ban, UserCheck, Loader2, Phone } from "lucide-react";
+import { Search, Ban, UserCheck, Loader2, Phone, Calendar, MessageSquare, TrendingUp } from "lucide-react";
 import { toast } from "sonner";
 import { format } from "date-fns";
+import { fetchWithAuth } from "@/lib/fetchWithAuth";
 
 interface BlockedContact {
   id: string;
@@ -21,16 +22,29 @@ interface BlockedContact {
   isActive: boolean;
 }
 
+interface BlockedReportData {
+  contacts: BlockedContact[];
+  summary: {
+    totalBlocked: number;
+    blockedThisMonth: number;
+    blockedThisWeek: number;
+    blockedToday: number;
+    withReason: number;
+    topReasons: { reason: string; count: number }[];
+  };
+  recentBlocked: BlockedContact[];
+}
+
 export default function BlockedContacts() {
   const [searchQuery, setSearchQuery] = useState("");
   const [unblockDialogOpen, setUnblockDialogOpen] = useState(false);
   const [selectedContact, setSelectedContact] = useState<BlockedContact | null>(null);
   const queryClient = useQueryClient();
 
-  const { data: blockedContacts = [], isLoading } = useQuery<BlockedContact[]>({
-    queryKey: ["/api/contacts/blocked"],
+  const { data, isLoading } = useQuery<BlockedReportData>({
+    queryKey: ["/api/reports/blocked-contacts"],
     queryFn: async () => {
-      const res = await fetch("/api/contacts/blocked");
+      const res = await fetchWithAuth("/api/reports/blocked-contacts");
       if (!res.ok) throw new Error("Failed to fetch blocked contacts");
       return res.json();
     },
@@ -38,7 +52,7 @@ export default function BlockedContacts() {
 
   const unblockMutation = useMutation({
     mutationFn: async (phone: string) => {
-      const res = await fetch("/api/contacts/unblock", {
+      const res = await fetchWithAuth("/api/contacts/unblock", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ phone }),
@@ -47,6 +61,7 @@ export default function BlockedContacts() {
       return res.json();
     },
     onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/reports/blocked-contacts"] });
       queryClient.invalidateQueries({ queryKey: ["/api/contacts/blocked"] });
       setUnblockDialogOpen(false);
       setSelectedContact(null);
@@ -57,12 +72,15 @@ export default function BlockedContacts() {
     },
   });
 
+  const blockedContacts = data?.contacts || [];
+  const summary = data?.summary || { totalBlocked: 0, blockedThisMonth: 0, blockedThisWeek: 0, blockedToday: 0, withReason: 0, topReasons: [] };
+
   const filteredContacts = blockedContacts.filter(contact => {
     const query = searchQuery.toLowerCase();
     return (
       contact.phone.toLowerCase().includes(query) ||
       contact.name.toLowerCase().includes(query) ||
-      contact.reason.toLowerCase().includes(query)
+      contact.reason?.toLowerCase().includes(query)
     );
   });
 
@@ -73,55 +91,91 @@ export default function BlockedContacts() {
 
   return (
     <DashboardLayout>
-      <div className="space-y-6">
+      <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
         <div>
-          <h1 className="text-3xl font-bold">Blocked Contacts</h1>
+          <h1 className="text-3xl font-bold flex items-center gap-2">
+            <Ban className="h-8 w-8 text-red-500" />
+            Blocked Contacts Report
+          </h1>
           <p className="text-muted-foreground mt-1">
             Manage contacts you've blocked from sending messages
           </p>
         </div>
 
-        <div className="grid gap-4 md:grid-cols-3">
+        <div className="grid gap-4 md:grid-cols-5">
           <Card>
             <CardHeader className="pb-2">
-              <CardTitle className="text-sm font-medium text-muted-foreground">
+              <CardTitle className="text-sm font-medium text-muted-foreground flex items-center gap-2">
+                <Ban className="h-4 w-4" />
                 Total Blocked
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">{blockedContacts.length}</div>
+              <div className="text-2xl font-bold text-red-600">{summary.totalBlocked}</div>
             </CardContent>
           </Card>
           <Card>
             <CardHeader className="pb-2">
-              <CardTitle className="text-sm font-medium text-muted-foreground">
-                With Reason
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold">
-                {blockedContacts.filter(c => c.reason).length}
-              </div>
-            </CardContent>
-          </Card>
-          <Card>
-            <CardHeader className="pb-2">
-              <CardTitle className="text-sm font-medium text-muted-foreground">
+              <CardTitle className="text-sm font-medium text-muted-foreground flex items-center gap-2">
+                <Calendar className="h-4 w-4" />
                 This Month
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">
-                {blockedContacts.filter(c => {
-                  const blockDate = new Date(c.blockedAt);
-                  const now = new Date();
-                  return blockDate.getMonth() === now.getMonth() && 
-                         blockDate.getFullYear() === now.getFullYear();
-                }).length}
-              </div>
+              <div className="text-2xl font-bold">{summary.blockedThisMonth}</div>
+            </CardContent>
+          </Card>
+          <Card>
+            <CardHeader className="pb-2">
+              <CardTitle className="text-sm font-medium text-muted-foreground flex items-center gap-2">
+                <TrendingUp className="h-4 w-4" />
+                This Week
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold">{summary.blockedThisWeek}</div>
+            </CardContent>
+          </Card>
+          <Card>
+            <CardHeader className="pb-2">
+              <CardTitle className="text-sm font-medium text-muted-foreground flex items-center gap-2">
+                <Calendar className="h-4 w-4" />
+                Today
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold">{summary.blockedToday}</div>
+            </CardContent>
+          </Card>
+          <Card>
+            <CardHeader className="pb-2">
+              <CardTitle className="text-sm font-medium text-muted-foreground flex items-center gap-2">
+                <MessageSquare className="h-4 w-4" />
+                With Reason
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold">{summary.withReason}</div>
             </CardContent>
           </Card>
         </div>
+
+        {summary.topReasons.length > 0 && (
+          <Card>
+            <CardHeader>
+              <CardTitle>Top Block Reasons</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="flex flex-wrap gap-2">
+                {summary.topReasons.map((item, index) => (
+                  <Badge key={index} variant="outline" className="text-sm py-1 px-3">
+                    {item.reason} ({item.count})
+                  </Badge>
+                ))}
+              </div>
+            </CardContent>
+          </Card>
+        )}
 
         <Card>
           <CardHeader>
@@ -219,31 +273,31 @@ export default function BlockedContacts() {
             )}
           </CardContent>
         </Card>
-      </div>
 
-      <AlertDialog open={unblockDialogOpen} onOpenChange={setUnblockDialogOpen}>
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>Unblock Contact</AlertDialogTitle>
-            <AlertDialogDescription>
-              Are you sure you want to unblock {selectedContact?.name || formatPhone(selectedContact?.phone || "")}? 
-              You will start receiving messages from this contact again.
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel>Cancel</AlertDialogCancel>
-            <AlertDialogAction
-              onClick={() => {
-                if (selectedContact) {
-                  unblockMutation.mutate(selectedContact.phone);
-                }
-              }}
-            >
-              Unblock Contact
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
+        <AlertDialog open={unblockDialogOpen} onOpenChange={setUnblockDialogOpen}>
+          <AlertDialogContent>
+            <AlertDialogHeader>
+              <AlertDialogTitle>Unblock Contact</AlertDialogTitle>
+              <AlertDialogDescription>
+                Are you sure you want to unblock {selectedContact?.name || selectedContact?.phone}? 
+                They will be able to send messages again and may receive AI responses.
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter>
+              <AlertDialogCancel>Cancel</AlertDialogCancel>
+              <AlertDialogAction
+                onClick={() => selectedContact && unblockMutation.mutate(selectedContact.phone)}
+                disabled={unblockMutation.isPending}
+              >
+                {unblockMutation.isPending ? (
+                  <Loader2 className="h-4 w-4 animate-spin mr-2" />
+                ) : null}
+                Unblock
+              </AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
+      </div>
     </DashboardLayout>
   );
 }

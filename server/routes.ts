@@ -780,6 +780,106 @@ export async function registerRoutes(
     }
   });
 
+  // Get templates directly from Meta/Facebook (live data, not from database)
+  app.get("/api/templates/meta", async (req, res) => {
+    try {
+      const { credentialsService } = await import('./modules/credentials/credentials.service');
+      
+      const userId = (req as any).session?.user?.id;
+      let token: string | undefined;
+      let wabaId: string | undefined;
+      
+      if (userId) {
+        const credentials = await credentialsService.getDecryptedCredentials(userId);
+        if (credentials?.whatsappToken) {
+          token = credentials.whatsappToken;
+        }
+        if (credentials?.businessAccountId) {
+          wabaId = credentials.businessAccountId;
+        }
+      }
+      
+      if (!token) {
+        token = process.env.WHATSAPP_TOKEN_NEW || process.env.WHATSAPP_TOKEN || process.env.FB_ACCESS_TOKEN;
+      }
+      if (!wabaId) {
+        wabaId = process.env.WABA_ID;
+      }
+      
+      if (!token || !wabaId) {
+        return res.status(400).json({ 
+          message: "WhatsApp credentials not configured",
+          hint: "Please configure your WhatsApp Access Token and Business Account ID in Settings."
+        });
+      }
+
+      console.log(`[TemplatesMeta] Fetching templates directly from Meta for WABA: ${wabaId}`);
+
+      const response = await fetch(
+        `https://graph.facebook.com/v18.0/${wabaId}/message_templates?fields=id,name,status,category,language,quality_score,components,rejected_reason&limit=100&access_token=${token}`
+      );
+      
+      if (!response.ok) {
+        const errorData = await response.json();
+        console.error("[TemplatesMeta] Meta API Error:", errorData);
+        return res.status(response.status).json({ 
+          message: "Failed to fetch templates from Meta",
+          error: errorData.error?.message || "Unknown error"
+        });
+      }
+
+      const data = await response.json();
+      const metaTemplates = data.data || [];
+
+      const templates = metaTemplates.map((t: any) => {
+        let content = "";
+        let header = "";
+        let footer = "";
+        let buttons: any[] = [];
+        
+        if (t.components) {
+          for (const comp of t.components) {
+            if (comp.type === "HEADER") {
+              header = comp.text || comp.format || "";
+            } else if (comp.type === "BODY") {
+              content = comp.text || "";
+            } else if (comp.type === "FOOTER") {
+              footer = comp.text || "";
+            } else if (comp.type === "BUTTONS") {
+              buttons = comp.buttons || [];
+            }
+          }
+        }
+
+        return {
+          id: t.id,
+          name: t.name,
+          status: t.status?.toLowerCase() || 'pending',
+          category: t.category?.toLowerCase() || 'utility',
+          language: t.language || 'en',
+          content,
+          header,
+          footer,
+          buttons,
+          qualityScore: t.quality_score,
+          rejectedReason: t.rejected_reason,
+        };
+      });
+
+      const summary = {
+        total: templates.length,
+        approved: templates.filter((t: any) => t.status === 'approved').length,
+        pending: templates.filter((t: any) => t.status === 'pending').length,
+        rejected: templates.filter((t: any) => t.status === 'rejected').length,
+      };
+
+      res.json({ templates, summary });
+    } catch (error) {
+      console.error("[TemplatesMeta] Error:", error);
+      res.status(500).json({ message: "Failed to fetch templates from Meta" });
+    }
+  });
+
   // Sync templates from Meta Business Suite
   app.post("/api/templates/sync-meta", async (req, res) => {
     try {

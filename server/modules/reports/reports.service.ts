@@ -455,6 +455,184 @@ export async function getDashboardOverview(filter: TimeFilter, userId?: string) 
   };
 }
 
+export async function getCampaignPerformance(filter: TimeFilter, userId?: string) {
+  const { startDate, endDate } = getDateRange(filter);
+  
+  const messages = await mongodb.readCollection<any>('messages');
+  const campaigns = await mongodb.readCollection<any>('campaigns');
+  const broadcastLogs = await mongodb.readCollection<any>('broadcast_logs');
+  
+  const filteredMessages = messages.filter(m => {
+    const timestamp = new Date(m.timestamp || m.createdAt);
+    return timestamp >= startDate && timestamp <= endDate;
+  });
+  
+  const filteredLogs = broadcastLogs.filter(log => {
+    const timestamp = new Date(log.sentAt || log.createdAt);
+    return timestamp >= startDate && timestamp <= endDate;
+  });
+  
+  const campaignMap = new Map<string, any>();
+  
+  for (const campaign of campaigns) {
+    campaignMap.set(campaign.id, {
+      id: campaign.id,
+      name: campaign.name,
+      date: campaign.createdAt ? new Date(campaign.createdAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }) : 'N/A',
+      sent: 0,
+      delivered: 0,
+      read: 0,
+      replied: 0,
+      failed: 0,
+    });
+  }
+  
+  for (const log of filteredLogs) {
+    const campaignName = log.campaignName || log.templateName || 'Unknown Campaign';
+    
+    if (!campaignMap.has(campaignName)) {
+      campaignMap.set(campaignName, {
+        id: campaignName,
+        name: campaignName,
+        date: log.sentAt ? new Date(log.sentAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }) : 'N/A',
+        sent: 0,
+        delivered: 0,
+        read: 0,
+        replied: 0,
+        failed: 0,
+      });
+    }
+    
+    const campaign = campaignMap.get(campaignName);
+    campaign.sent++;
+    
+    if (log.status === 'delivered' || log.status === 'read' || log.status === 'sent') {
+      campaign.delivered++;
+    }
+    if (log.status === 'read') {
+      campaign.read++;
+    }
+    if (log.replied) {
+      campaign.replied++;
+    }
+    if (log.status === 'failed') {
+      campaign.failed++;
+    }
+  }
+  
+  const outboundByCampaign = new Map<string, any[]>();
+  for (const msg of filteredMessages) {
+    if (msg.direction === 'outbound' && msg.campaignId) {
+      if (!outboundByCampaign.has(msg.campaignId)) {
+        outboundByCampaign.set(msg.campaignId, []);
+      }
+      outboundByCampaign.get(msg.campaignId)!.push(msg);
+    }
+  }
+  
+  outboundByCampaign.forEach((msgs, campaignId) => {
+    if (campaignMap.has(campaignId)) {
+      const campaign = campaignMap.get(campaignId);
+      campaign.sent += msgs.length;
+      campaign.delivered += msgs.filter((m: any) => m.status === 'delivered' || m.status === 'read').length;
+      campaign.read += msgs.filter((m: any) => m.status === 'read').length;
+    }
+  });
+  
+  const campaignList = Array.from(campaignMap.values())
+    .filter(c => c.sent > 0)
+    .map(c => ({
+      ...c,
+      deliveryRate: c.sent > 0 ? Math.round((c.delivered / c.sent) * 100) : 0,
+      readRate: c.sent > 0 ? Math.round((c.read / c.sent) * 100) : 0,
+      replyRate: c.sent > 0 ? Math.round((c.replied / c.sent) * 100 * 10) / 10 : 0,
+      cost: (c.sent * 0.009).toFixed(2),
+    }))
+    .sort((a, b) => b.sent - a.sent);
+  
+  const chartData = campaignList.slice(0, 6).map(c => ({
+    name: c.name.length > 15 ? c.name.substring(0, 15) + '...' : c.name,
+    sent: c.sent,
+    read: c.read,
+    replied: c.replied,
+  }));
+  
+  const totalSent = campaignList.reduce((sum, c) => sum + c.sent, 0);
+  const totalDelivered = campaignList.reduce((sum, c) => sum + c.delivered, 0);
+  const totalRead = campaignList.reduce((sum, c) => sum + c.read, 0);
+  const totalReplied = campaignList.reduce((sum, c) => sum + c.replied, 0);
+  
+  return {
+    campaigns: campaignList,
+    chartData,
+    summary: {
+      totalCampaigns: campaignList.length,
+      totalSent,
+      totalDelivered,
+      totalRead,
+      totalReplied,
+      avgDeliveryRate: totalSent > 0 ? Math.round((totalDelivered / totalSent) * 100) : 0,
+      avgReadRate: totalSent > 0 ? Math.round((totalRead / totalSent) * 100) : 0,
+      avgReplyRate: totalSent > 0 ? Math.round((totalReplied / totalSent) * 100 * 10) / 10 : 0,
+      totalCost: (totalSent * 0.009).toFixed(2),
+    },
+    period: filter.period,
+  };
+}
+
+export async function getBlockedContactsReport(userId: string) {
+  const blockedContacts = await mongodb.readCollection<any>('blocked_contacts');
+  
+  const userBlocked = blockedContacts.filter(c => c.userId === userId && c.isActive !== false);
+  
+  const now = new Date();
+  const thisMonth = userBlocked.filter(c => {
+    const blockDate = new Date(c.blockedAt);
+    return blockDate.getMonth() === now.getMonth() && blockDate.getFullYear() === now.getFullYear();
+  });
+  
+  const thisWeek = userBlocked.filter(c => {
+    const blockDate = new Date(c.blockedAt);
+    const weekAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
+    return blockDate >= weekAgo;
+  });
+  
+  const today = userBlocked.filter(c => {
+    const blockDate = new Date(c.blockedAt);
+    return blockDate.toDateString() === now.toDateString();
+  });
+  
+  const withReason = userBlocked.filter(c => c.reason && c.reason.trim() !== '');
+  
+  const reasonCounts = new Map<string, number>();
+  for (const contact of withReason) {
+    const reason = contact.reason || 'No reason';
+    reasonCounts.set(reason, (reasonCounts.get(reason) || 0) + 1);
+  }
+  
+  const topReasons = Array.from(reasonCounts.entries())
+    .sort((a, b) => b[1] - a[1])
+    .slice(0, 5)
+    .map(([reason, count]) => ({ reason, count }));
+  
+  const recentBlocked = userBlocked
+    .sort((a, b) => new Date(b.blockedAt).getTime() - new Date(a.blockedAt).getTime())
+    .slice(0, 10);
+  
+  return {
+    contacts: userBlocked,
+    summary: {
+      totalBlocked: userBlocked.length,
+      blockedThisMonth: thisMonth.length,
+      blockedThisWeek: thisWeek.length,
+      blockedToday: today.length,
+      withReason: withReason.length,
+      topReasons,
+    },
+    recentBlocked,
+  };
+}
+
 export const reportsService = {
   getDateRange,
   getAIAgentPerformance,
@@ -462,4 +640,6 @@ export const reportsService = {
   getUserEngagement,
   getSpendingReport,
   getDashboardOverview,
+  getCampaignPerformance,
+  getBlockedContactsReport,
 };
