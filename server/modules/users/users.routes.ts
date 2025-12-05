@@ -19,7 +19,9 @@ function requireAdmin(req: Request, res: Response, next: NextFunction) {
   if (!user) {
     return res.status(401).json({ error: 'Unauthorized' });
   }
-  if (user.role !== 'super_admin' && user.role !== 'sub_admin') {
+  const isMainUser = !user.pageAccess || user.pageAccess.length === 0;
+  const isAdmin = user.role === 'super_admin' || user.role === 'sub_admin';
+  if (!isMainUser && !isAdmin) {
     return res.status(403).json({ error: 'Admin access required' });
   }
   next();

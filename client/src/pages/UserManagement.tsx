@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import DashboardLayout from "@/components/layout/DashboardLayout";
+import { getAuthHeaders } from "@/contexts/AuthContext";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -111,7 +112,9 @@ export default function UserManagement() {
   const { data: users = [], isLoading: usersLoading } = useQuery<SystemUser[]>({
     queryKey: ["/api/users"],
     queryFn: async () => {
-      const res = await fetch("/api/users");
+      const res = await fetch("/api/users", {
+        headers: getAuthHeaders()
+      });
       if (!res.ok) throw new Error("Failed to fetch users");
       return res.json();
     }
@@ -120,7 +123,9 @@ export default function UserManagement() {
   const { data: pages = [] } = useQuery<Page[]>({
     queryKey: ["/api/users/pages"],
     queryFn: async () => {
-      const res = await fetch("/api/users/pages");
+      const res = await fetch("/api/users/pages", {
+        headers: getAuthHeaders()
+      });
       if (!res.ok) throw new Error("Failed to fetch pages");
       return res.json();
     }
@@ -129,7 +134,9 @@ export default function UserManagement() {
   const { data: roles = [] } = useQuery<Role[]>({
     queryKey: ["/api/users/roles"],
     queryFn: async () => {
-      const res = await fetch("/api/users/roles");
+      const res = await fetch("/api/users/roles", {
+        headers: getAuthHeaders()
+      });
       if (!res.ok) throw new Error("Failed to fetch roles");
       return res.json();
     }
@@ -139,7 +146,7 @@ export default function UserManagement() {
     mutationFn: async (data: typeof formData) => {
       const res = await fetch("/api/users", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: { "Content-Type": "application/json", ...getAuthHeaders() },
         body: JSON.stringify(data)
       });
       if (!res.ok) {
@@ -165,7 +172,7 @@ export default function UserManagement() {
     mutationFn: async (data: { id: string } & Partial<typeof formData>) => {
       const res = await fetch(`/api/users/${data.id}`, {
         method: "PUT",
-        headers: { "Content-Type": "application/json" },
+        headers: { "Content-Type": "application/json", ...getAuthHeaders() },
         body: JSON.stringify(data)
       });
       if (!res.ok) {
@@ -188,7 +195,10 @@ export default function UserManagement() {
 
   const deleteUserMutation = useMutation({
     mutationFn: async (id: string) => {
-      const res = await fetch(`/api/users/${id}`, { method: "DELETE" });
+      const res = await fetch(`/api/users/${id}`, { 
+        method: "DELETE",
+        headers: getAuthHeaders()
+      });
       if (!res.ok) throw new Error("Failed to delete user");
       return res.json();
     },
@@ -205,7 +215,10 @@ export default function UserManagement() {
 
   const resetPasswordMutation = useMutation({
     mutationFn: async (id: string) => {
-      const res = await fetch(`/api/users/${id}/reset-password`, { method: "POST" });
+      const res = await fetch(`/api/users/${id}/reset-password`, { 
+        method: "POST",
+        headers: getAuthHeaders()
+      });
       if (!res.ok) throw new Error("Failed to reset password");
       return res.json();
     },

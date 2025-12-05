@@ -133,9 +133,7 @@ export default function Login() {
                 </Button>
               </form>
               <div className="mt-6 p-3 bg-gray-50 rounded-lg border border-gray-100">
-                <p className="text-xs text-gray-500 text-center">
-                  Demo credentials: <span className="font-medium text-gray-700">admin@whatsapp.com</span> / <span className="font-medium text-gray-700">admin123</span>
-                </p>
+              
               </div>
             </TabsContent>
 
