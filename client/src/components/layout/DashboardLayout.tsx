@@ -373,8 +373,8 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
                   </Avatar>
                 </Button>
               </DropdownMenuTrigger>
-              <DropdownMenuContent className="w-56" align="end" forceMount>
-                <DropdownMenuLabel className="font-normal">
+              <DropdownMenuContent className="w-56 bg-white" align="end" forceMount>
+                <DropdownMenuLabel className="font-normal bg-white">
                   <div className="flex flex-col space-y-1">
                     <p className="text-sm font-medium leading-none">WhatsApp Admin</p>
                     <p className="text-xs leading-none text-muted-foreground">

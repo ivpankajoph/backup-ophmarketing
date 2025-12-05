@@ -91,6 +91,47 @@ export async function createUser(username: string, password: string, name: strin
   }
 }
 
+export async function updateUserProfile(
+  userId: string, 
+  updates: { name?: string; email?: string; phone?: string }
+): Promise<AuthUser | null> {
+  try {
+    const user = await User.findOne({ id: userId });
+    if (user) {
+      if (updates.name) user.name = updates.name;
+      if (updates.email) user.email = updates.email;
+      await user.save();
+      return {
+        id: user.id,
+        username: user.username,
+        name: user.name,
+        email: user.email,
+        role: user.role,
+      };
+    }
+
+    const systemUser = await SystemUser.findOne({ id: userId });
+    if (systemUser) {
+      if (updates.name) systemUser.name = updates.name;
+      if (updates.email) systemUser.email = updates.email;
+      await systemUser.save();
+      return {
+        id: systemUser.id,
+        username: systemUser.username,
+        name: systemUser.name,
+        email: systemUser.email,
+        role: systemUser.role,
+        pageAccess: systemUser.pageAccess,
+      };
+    }
+
+    return null;
+  } catch (error) {
+    console.error('[Auth] Error updating profile:', error);
+    return null;
+  }
+}
+
 export async function validateLogin(username: string, password: string): Promise<AuthUser | null> {
   try {
     const user = await findUserByUsername(username);

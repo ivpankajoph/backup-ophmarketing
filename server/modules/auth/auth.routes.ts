@@ -138,4 +138,32 @@ router.get('/check', async (req: Request, res: Response) => {
   });
 });
 
+router.put('/update-profile', requireAuth, async (req: Request, res: Response) => {
+  try {
+    const userId = req.headers['x-user-id'] as string;
+    const { name, email, phone } = req.body;
+    
+    const updatedUser = await authService.updateUserProfile(userId, { name, email, phone });
+    
+    if (!updatedUser) {
+      return res.status(404).json({ error: 'User not found' });
+    }
+    
+    res.json({
+      success: true,
+      user: {
+        id: updatedUser.id,
+        username: updatedUser.username,
+        name: updatedUser.name,
+        email: updatedUser.email,
+        role: updatedUser.role,
+        pageAccess: updatedUser.pageAccess,
+      }
+    });
+  } catch (error) {
+    console.error('[Auth] Update profile error:', error);
+    res.status(500).json({ error: 'Failed to update profile' });
+  }
+});
+
 export default router;
