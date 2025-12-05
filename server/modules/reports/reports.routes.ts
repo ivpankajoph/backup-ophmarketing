@@ -102,4 +102,28 @@ router.get('/blocked-contacts', async (req: Request, res: Response) => {
   }
 });
 
+router.get('/24hour-window', async (req: Request, res: Response) => {
+  try {
+    const userId = getUserId(req) || undefined;
+    const filter = parseTimeFilter(req);
+    const data = await reportsService.get24HourWindowStats(filter, userId);
+    res.json(data);
+  } catch (error) {
+    console.error('[Reports] Error fetching 24-hour window stats:', error);
+    res.status(500).json({ error: 'Failed to fetch 24-hour window stats' });
+  }
+});
+
+router.get('/enhanced-dashboard', async (req: Request, res: Response) => {
+  try {
+    const userId = getUserId(req) || undefined;
+    const filter = parseTimeFilter(req);
+    const data = await reportsService.getEnhancedDashboardStats(filter, userId);
+    res.json(data);
+  } catch (error) {
+    console.error('[Reports] Error fetching enhanced dashboard stats:', error);
+    res.status(500).json({ error: 'Failed to fetch enhanced dashboard stats' });
+  }
+});
+
 export default router;

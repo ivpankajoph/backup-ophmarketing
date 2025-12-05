@@ -633,12 +633,169 @@ export async function getBlockedContactsReport(userId: string) {
   };
 }
 
+export async function get24HourWindowStats(filter: TimeFilter, userId?: string) {
+  const { startDate, endDate } = getDateRange(filter);
+  
+  const messages = await mongodb.readCollection<any>('messages');
+  const chats = await mongodb.readCollection<any>('chats');
+  const contactAgents = await mongodb.readCollection<any>('contact_agents');
+  const contacts = await mongodb.readCollection<any>('contacts');
+  
+  const lastInboundMap = new Map<string, Date>();
+  for (const chat of chats) {
+    if (chat.lastInboundMessageTime) {
+      lastInboundMap.set(chat.contactId, new Date(chat.lastInboundMessageTime));
+    }
+  }
+  
+  const filteredMessages = messages.filter(m => {
+    const timestamp = new Date(m.timestamp || m.createdAt);
+    return timestamp >= startDate && timestamp <= endDate;
+  });
+  
+  const outbound = filteredMessages.filter(m => m.direction === 'outbound');
+  const inbound = filteredMessages.filter(m => m.direction === 'inbound');
+  
+  let windowCompliant = 0;
+  let windowNonCompliant = 0;
+  let aiInWindow = 0;
+  let humanInWindow = 0;
+  
+  for (const msg of outbound) {
+    const lastInbound = lastInboundMap.get(msg.contactId);
+    const msgTime = new Date(msg.timestamp || msg.createdAt);
+    
+    if (lastInbound) {
+      const hoursDiff = (msgTime.getTime() - lastInbound.getTime()) / (1000 * 60 * 60);
+      if (hoursDiff <= 24 && hoursDiff >= 0) {
+        windowCompliant++;
+        if (msg.agentId && msg.agentId !== 'manual') {
+          aiInWindow++;
+        } else {
+          humanInWindow++;
+        }
+      } else {
+        windowNonCompliant++;
+      }
+    } else {
+      windowNonCompliant++;
+    }
+  }
+  
+  const uniqueContacts = new Set(filteredMessages.map(m => m.contactId));
+  const newContacts = contacts.filter(c => {
+    const createdAt = new Date(c.createdAt);
+    return createdAt >= startDate && createdAt <= endDate;
+  });
+  
+  const activeAgentAssignments = contactAgents.filter(ca => ca.isActive);
+  const aiConversations = activeAgentAssignments.length;
+  
+  const totalAiResponses = outbound.filter(m => m.agentId && m.agentId !== 'manual').length;
+  const totalHumanResponses = outbound.filter(m => !m.agentId || m.agentId === 'manual').length;
+  
+  const delivered = outbound.filter(m => ['delivered', 'read'].includes(m.status)).length;
+  const read = outbound.filter(m => m.status === 'read').length;
+  
+  const dayNames = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+  const dayWise: { day: string; sent: number; delivered: number; read: number; inbound: number; ai: number; human: number }[] = [];
+  
+  const duration = endDate.getTime() - startDate.getTime();
+  const days = Math.ceil(duration / (24 * 60 * 60 * 1000));
+  
+  for (let d = 0; d < Math.min(days, 30); d++) {
+    const dayStart = new Date(startDate.getTime() + d * 24 * 60 * 60 * 1000);
+    dayStart.setHours(0, 0, 0, 0);
+    const dayEnd = new Date(dayStart.getTime() + 24 * 60 * 60 * 1000);
+    
+    const dayMessages = filteredMessages.filter(m => {
+      const timestamp = new Date(m.timestamp || m.createdAt);
+      return timestamp >= dayStart && timestamp < dayEnd;
+    });
+    
+    const dayOutbound = dayMessages.filter(m => m.direction === 'outbound');
+    const dayInbound = dayMessages.filter(m => m.direction === 'inbound');
+    const dayDelivered = dayOutbound.filter(m => ['delivered', 'read'].includes(m.status));
+    const dayRead = dayOutbound.filter(m => m.status === 'read');
+    const dayAi = dayOutbound.filter(m => m.agentId && m.agentId !== 'manual');
+    const dayHuman = dayOutbound.filter(m => !m.agentId || m.agentId === 'manual');
+    
+    dayWise.push({
+      day: days <= 7 ? dayNames[dayStart.getDay()] : `${dayStart.getDate()}/${dayStart.getMonth() + 1}`,
+      sent: dayOutbound.length,
+      delivered: dayDelivered.length,
+      read: dayRead.length,
+      inbound: dayInbound.length,
+      ai: dayAi.length,
+      human: dayHuman.length
+    });
+  }
+  
+  return {
+    summary: {
+      totalMessages: filteredMessages.length,
+      outboundMessages: outbound.length,
+      inboundMessages: inbound.length,
+      delivered,
+      read,
+      deliveryRate: outbound.length > 0 ? Math.round((delivered / outbound.length) * 100) : 0,
+      readRate: delivered > 0 ? Math.round((read / delivered) * 100) : 0,
+      windowCompliant,
+      windowNonCompliant,
+      windowComplianceRate: outbound.length > 0 ? Math.round((windowCompliant / outbound.length) * 100) : 0,
+      aiInWindow,
+      humanInWindow,
+      totalAiResponses,
+      totalHumanResponses,
+      aiPercentage: outbound.length > 0 ? Math.round((totalAiResponses / outbound.length) * 100) : 0,
+      activeContacts: uniqueContacts.size,
+      newContacts: newContacts.length,
+      aiConversations,
+    },
+    dayWise,
+    period: filter.period,
+  };
+}
+
+export async function getEnhancedDashboardStats(filter: TimeFilter, userId?: string) {
+  const { startDate, endDate } = getDateRange(filter);
+  
+  const previousDuration = endDate.getTime() - startDate.getTime();
+  const previousStartDate = new Date(startDate.getTime() - previousDuration);
+  const previousEndDate = new Date(startDate.getTime());
+  
+  const [currentStats, previousStats] = await Promise.all([
+    get24HourWindowStats(filter, userId),
+    get24HourWindowStats({ period: 'custom', startDate: previousStartDate.toISOString(), endDate: previousEndDate.toISOString() }, userId)
+  ]);
+  
+  const calculateChange = (current: number, previous: number) => {
+    if (previous === 0) return current > 0 ? 100 : 0;
+    return Math.round(((current - previous) / previous) * 100);
+  };
+  
+  return {
+    ...currentStats,
+    changes: {
+      messagesChange: calculateChange(currentStats.summary.totalMessages, previousStats.summary.totalMessages),
+      outboundChange: calculateChange(currentStats.summary.outboundMessages, previousStats.summary.outboundMessages),
+      deliveredChange: calculateChange(currentStats.summary.delivered, previousStats.summary.delivered),
+      readRateChange: calculateChange(currentStats.summary.readRate, previousStats.summary.readRate),
+      aiChange: calculateChange(currentStats.summary.totalAiResponses, previousStats.summary.totalAiResponses),
+      newContactsChange: calculateChange(currentStats.summary.newContacts, previousStats.summary.newContacts),
+      windowComplianceChange: calculateChange(currentStats.summary.windowComplianceRate, previousStats.summary.windowComplianceRate),
+    }
+  };
+}
+
 export const reportsService = {
   getDateRange,
   getAIAgentPerformance,
   getCustomerReplies,
   getUserEngagement,
   getSpendingReport,
+  get24HourWindowStats,
+  getEnhancedDashboardStats,
   getDashboardOverview,
   getCampaignPerformance,
   getBlockedContactsReport,
