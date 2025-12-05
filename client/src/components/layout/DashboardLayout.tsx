@@ -212,14 +212,20 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
     },
   ];
 
+  const isSystemUser = user?.pageAccess && user.pageAccess.length > 0;
   const isAdmin = user?.role === 'super_admin' || user?.role === 'sub_admin';
-  const userPageAccess = user?.pageAccess || [];
   
   const filteredNavStructure = navStructure.filter(item => {
-    if (item.adminOnly && !isAdmin) return false;
-    if (!item.pageId) return true;
-    if (isAdmin) return true;
-    return userPageAccess.includes(item.pageId);
+    if (!isSystemUser) {
+      return true;
+    }
+    if (item.adminOnly && !isAdmin) {
+      return false;
+    }
+    if (!item.pageId) {
+      return true;
+    }
+    return user?.pageAccess?.includes(item.pageId) ?? false;
   });
 
   const NavItem = ({ item }: { item: any }) => {
