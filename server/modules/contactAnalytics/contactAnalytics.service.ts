@@ -97,7 +97,7 @@ export async function analyzeContactConversation(
         { role: 'system', content: INTEREST_ANALYSIS_PROMPT },
         { role: 'user', content: conversationText }
       ],
-      { id: 'analysis', name: 'Conversation Analyzer', model: 'gpt-4o', temperature: 0.3 },
+      { id: 'analysis', name: 'Conversation Analyzer', model: 'gemini-2.5-flash', temperature: 0.3 },
       userId
     );
 

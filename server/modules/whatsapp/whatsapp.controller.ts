@@ -357,6 +357,41 @@ export async function handleWebhook(req: Request, res: Response) {
       }
     }
 
+    // Analyze conversation for interest level (async, non-blocking)
+    (async () => {
+      try {
+        const contacts = await storage.getContacts();
+        const contact = contacts.find(c => {
+          const contactPhone = (c.phone || '').replace(/\D/g, '');
+          const normalizedFrom = from.replace(/\D/g, '');
+          return contactPhone.includes(normalizedFrom) || normalizedFrom.includes(contactPhone);
+        });
+        
+        if (contact) {
+          const fullHistory = useStoredHistory 
+            ? await contactAgentService.getConversationHistory(from)
+            : conversationHistory[from] || [];
+          
+          const messagesForAnalysis = fullHistory.map(m => ({
+            direction: m.role === 'user' ? 'inbound' : 'outbound',
+            content: m.content,
+            timestamp: new Date().toISOString()
+          }));
+          
+          await contactAnalyticsService.analyzeAndUpdateContact(
+            contact.id,
+            from,
+            contact.name || from,
+            messagesForAnalysis,
+            resolvedUserId
+          );
+          console.log(`[Webhook] Contact analytics updated for ${from}`);
+        }
+      } catch (analyticsError) {
+        console.error('[Webhook] Error analyzing contact:', analyticsError);
+      }
+    })();
+
     console.log(`AI auto-reply sent to ${from}: ${aiResponse.substring(0, 100)}...`);
 
     return res.sendStatus(200);
