@@ -184,6 +184,11 @@ export async function ensureDefaultAdmin(): Promise<void> {
     
     const admin = await User.findOne({ username: 'admin@whatsapp.com' });
     if (admin) {
+      if (admin.role !== 'super_admin') {
+        admin.role = 'super_admin';
+        await admin.save();
+        console.log('[Auth] Admin role updated to super_admin');
+      }
       await seedAdminCredentials(admin.id);
     }
   } catch (error) {
