@@ -9,6 +9,8 @@ function getAuthHeaders(): Record<string, string> {
     const user = JSON.parse(stored);
     return {
       "x-user-id": user.id,
+      "x-user-role": user.role || 'user',
+      "x-user-name": user.name || '',
       "x-user": JSON.stringify(user),
     };
   } catch {
