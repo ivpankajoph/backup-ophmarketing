@@ -222,3 +222,33 @@ export async function enableAutoReply(phone: string): Promise<boolean> {
   console.log(`[ContactAgent] Enabled auto-reply for ${phone}`);
   return result !== null;
 }
+
+export async function enableAutoReplyForAll(): Promise<{ updated: number; total: number }> {
+  const allRecords = await mongodb.readCollection<ContactAgent>('contact_agents');
+  const disabledRecords = allRecords.filter(r => r.autoReplyDisabled === true);
+  
+  let updated = 0;
+  const now = new Date().toISOString();
+  
+  for (const record of disabledRecords) {
+    await mongodb.updateOne<ContactAgent>('contact_agents', 
+      { id: record.id },
+      { autoReplyDisabled: false, updatedAt: now }
+    );
+    updated++;
+    console.log(`[ContactAgent] Re-enabled auto-reply for ${record.phone}`);
+  }
+  
+  console.log(`[ContactAgent] Bulk re-enabled auto-reply for ${updated}/${allRecords.length} contacts`);
+  return { updated, total: allRecords.length };
+}
+
+export async function getAutoReplyStats(): Promise<{ total: number; enabled: number; disabled: number }> {
+  const allRecords = await mongodb.readCollection<ContactAgent>('contact_agents');
+  const disabled = allRecords.filter(r => r.autoReplyDisabled === true).length;
+  return {
+    total: allRecords.length,
+    enabled: allRecords.length - disabled,
+    disabled
+  };
+}

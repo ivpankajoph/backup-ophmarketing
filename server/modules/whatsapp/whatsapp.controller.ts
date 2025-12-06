@@ -193,8 +193,17 @@ export async function handleWebhook(req: Request, res: Response) {
 
     console.log(`Received ${messageType} message from ${from}: ${messageText}`);
 
-    // Save the inbound message with actual button text and media info
-    await saveInboundMessage(from, messageText || buttonPayload, messageType, buttonPayload, mediaUrl);
+    // Get WhatsApp message ID for deduplication
+    const whatsappMessageId = message.id || '';
+    
+    // Save the inbound message with actual button text and media info (with deduplication)
+    const savedMessage = await saveInboundMessage(from, messageText || buttonPayload, messageType, buttonPayload, mediaUrl, whatsappMessageId);
+    
+    // If message was a duplicate, skip AI processing
+    if (!savedMessage) {
+      console.log(`[Webhook] Duplicate message detected (${whatsappMessageId}), skipping AI processing`);
+      return res.sendStatus(200);
+    }
 
     // For media messages, we still save them but don't process with AI
     if (isMediaMessage) {
@@ -275,7 +284,13 @@ export async function handleWebhook(req: Request, res: Response) {
     }
 
     if (!agentToUse) {
-      console.log('No active agent found');
+      console.log('[Webhook] No active agent found - skipping AI response');
+      return res.sendStatus(200);
+    }
+    
+    // Validate agent has required fields before proceeding
+    if (!agentToUse.id || !agentToUse.name) {
+      console.log(`[Webhook] Agent is missing required fields (id: ${agentToUse.id}, name: ${agentToUse.name}) - skipping AI response`);
       return res.sendStatus(200);
     }
     
@@ -294,7 +309,13 @@ export async function handleWebhook(req: Request, res: Response) {
     
     const historyForAI = [...recentHistory, { role: 'user' as const, content: contentForAI }];
 
-    const aiResponse = await generateAgentResponse(contentForAI, agentToUse, historyForAI.slice(0, -1), resolvedUserId);
+    let aiResponse: string;
+    try {
+      aiResponse = await generateAgentResponse(contentForAI, agentToUse, historyForAI.slice(0, -1), resolvedUserId);
+    } catch (aiError) {
+      console.error(`[Webhook] Error generating AI response for ${from}:`, aiError);
+      return res.sendStatus(200); // Return 200 to prevent retries
+    }
     
     if (useStoredHistory) {
       await contactAgentService.addMessageToHistory(from, 'user', contentForAI);
@@ -336,9 +357,22 @@ async function findLeadByPhone(phone: string) {
   });
 }
 
-async function saveInboundMessage(from: string, content: string, type: string, buttonPayload?: string, mediaUrl?: string) {
+async function saveInboundMessage(from: string, content: string, type: string, buttonPayload?: string, mediaUrl?: string, whatsappMessageId?: string): Promise<any | null> {
   try {
     const normalizedPhone = from.replace(/\D/g, '');
+    
+    // Check for duplicate message using WhatsApp message ID
+    if (whatsappMessageId) {
+      const existingMessages = await storage.getMessages();
+      const isDuplicate = existingMessages.some(m => 
+        m.direction === 'inbound' && 
+        (m as any).whatsappMessageId === whatsappMessageId
+      );
+      if (isDuplicate) {
+        console.log(`[Webhook] Skipping duplicate message: ${whatsappMessageId}`);
+        return null;
+      }
+    }
     
     // Mark broadcast logs as replied when we receive a message from this phone
     try {
@@ -381,15 +415,22 @@ async function saveInboundMessage(from: string, content: string, type: string, b
     const validTypes = ['text', 'image', 'video', 'document', 'audio', 'sticker', 'location', 'contacts'] as const;
     const messageType = validTypes.includes(type as any) ? type as typeof validTypes[number] : 'text';
     
-    const message = await storage.createMessage({
+    const messageData: any = {
       contactId: contact.id,
       content: displayContent || `[${type} message]`,
       type: messageType,
       direction: 'inbound',
       status: 'read' as const,
       mediaUrl: mediaUrl || undefined,
-    });
-    console.log('Saved inbound message:', message.id, 'type:', messageType, 'mediaUrl:', mediaUrl || 'none');
+    };
+    
+    // Store WhatsApp message ID for deduplication
+    if (whatsappMessageId) {
+      messageData.whatsappMessageId = whatsappMessageId;
+    }
+    
+    const message = await storage.createMessage(messageData);
+    console.log('Saved inbound message:', message.id, 'type:', messageType, 'whatsappId:', whatsappMessageId || 'none');
 
     await storage.updateChatInboundTime(contact.id);
     console.log('Updated chat inbound time for contact:', contact.id);
@@ -430,9 +471,12 @@ async function saveInboundMessage(from: string, content: string, type: string, b
     } catch (analyticsError) {
       console.error('Error tracking AI qualification:', analyticsError);
     }
+    
+    return message;
 
   } catch (error) {
     console.error('Error saving inbound message:', error);
+    return null;
   }
 }
 

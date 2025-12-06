@@ -1396,6 +1396,30 @@ export async function registerRoutes(
     }
   });
 
+  app.get("/api/contact-agents/stats", async (req, res) => {
+    try {
+      const stats = await contactAgentService.getAutoReplyStats();
+      res.json(stats);
+    } catch (error) {
+      console.error('[ContactAgents] Error getting stats:', error);
+      res.status(500).json({ message: "Failed to get contact agent stats" });
+    }
+  });
+
+  app.post("/api/contact-agents/enable-all-auto-reply", async (req, res) => {
+    try {
+      const result = await contactAgentService.enableAutoReplyForAll();
+      console.log(`[ContactAgents] Bulk enabled auto-reply: ${result.updated}/${result.total} contacts`);
+      res.json({ 
+        message: `Re-enabled auto-reply for ${result.updated} contacts`,
+        ...result 
+      });
+    } catch (error) {
+      console.error('[ContactAgents] Error enabling all auto-reply:', error);
+      res.status(500).json({ message: "Failed to enable auto-reply for all contacts" });
+    }
+  });
+
   app.use("/api/auth", authRoutes);
   app.use("/api/credentials", credentialsRoutes);
   app.use("/api/agents", agentRoutes);
