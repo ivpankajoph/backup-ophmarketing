@@ -356,6 +356,37 @@ const UserCredentialsSchema = new Schema({
   updatedAt: { type: String, required: true },
 }, { collection: 'user_credentials' });
 
+const ContactAnalyticsSchema = new Schema({
+  id: { type: String, required: true, unique: true },
+  contactId: { type: String, required: true },
+  phone: { type: String, required: true, index: true },
+  contactName: { type: String, default: '' },
+  interestLevel: { type: String, enum: ['highly_interested', 'interested', 'neutral', 'not_interested', 'pending'], default: 'pending' },
+  interestScore: { type: Number, default: 0 },
+  interestReason: { type: String, default: '' },
+  totalMessages: { type: Number, default: 0 },
+  inboundMessages: { type: Number, default: 0 },
+  outboundMessages: { type: Number, default: 0 },
+  keyTopics: { type: [String], default: [] },
+  objections: { type: [String], default: [] },
+  positiveSignals: { type: [String], default: [] },
+  negativeSignals: { type: [String], default: [] },
+  firstContactTime: { type: String },
+  lastContactTime: { type: String },
+  conversationDuration: { type: Number, default: 0 },
+  aiAgentInteractions: [{
+    agentId: String,
+    agentName: String,
+    messagesCount: Number,
+    firstInteraction: String,
+    lastInteraction: String,
+    durationMinutes: Number,
+  }],
+  lastAnalyzedAt: { type: String },
+  createdAt: { type: String, required: true },
+  updatedAt: { type: String, required: true },
+}, { collection: 'contact_analytics' });
+
 export const Agent = mongoose.models.Agent || mongoose.model('Agent', AgentSchema);
 export const Form = mongoose.models.Form || mongoose.model('Form', FormSchema);
 export const Lead = mongoose.models.Lead || mongoose.model('Lead', LeadSchema);
@@ -380,6 +411,7 @@ export const PrefilledTextMapping = mongoose.models.PrefilledTextMapping || mong
 export const ScheduledBroadcast = mongoose.models.ScheduledBroadcast || mongoose.model('ScheduledBroadcast', ScheduledBroadcastSchema);
 export const BlockedContact = mongoose.models.BlockedContact || mongoose.model('BlockedContact', BlockedContactSchema);
 export const UserCredentials = mongoose.models.UserCredentials || mongoose.model('UserCredentials', UserCredentialsSchema);
+export const ContactAnalytics = mongoose.models.ContactAnalytics || mongoose.model('ContactAnalytics', ContactAnalyticsSchema);
 
 const modelMap: Record<string, Model<any>> = {
   agents: Agent,
@@ -406,6 +438,7 @@ const modelMap: Record<string, Model<any>> = {
   scheduled_broadcasts: ScheduledBroadcast,
   blocked_contacts: BlockedContact,
   user_credentials: UserCredentials,
+  contact_analytics: ContactAnalytics,
 };
 
 export async function readCollection<T>(collectionName: string): Promise<T[]> {

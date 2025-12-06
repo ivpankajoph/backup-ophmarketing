@@ -1,6 +1,7 @@
 import { Router, Request, Response } from 'express';
 import { contactAnalyticsService } from './contactAnalytics.service';
 import * as mongodb from '../storage/mongodb.adapter';
+import { storage } from '../../storage';
 
 const router = Router();
 
@@ -79,49 +80,91 @@ router.post('/analyze-all', async (req: Request, res: Response) => {
   try {
     const userId = (req as any).userId;
     
-    const contacts = await mongodb.readCollection<any>('contacts');
-    const messages = await mongodb.readCollection<any>('messages');
+    const chats = await storage.getChats();
+    const contactAgents = await mongodb.readCollection<any>('contact_agents');
+    
+    console.log(`[ContactAnalytics] Analyzing ${chats.length} chats, ${contactAgents.length} agent assignments`);
     
     const results = [];
+    let processed = 0;
+    let errors = 0;
     
-    for (const contact of contacts) {
+    for (const chat of chats) {
       try {
-        const contactPhone = (contact.phone || contact.id)?.replace(/\D/g, '') || '';
-        const contactPhoneLast10 = contactPhone.slice(-10);
+        if (!chat.contact) {
+          console.log(`[ContactAnalytics] Chat ${chat.id} has no contact, skipping`);
+          continue;
+        }
         
-        const contactMessages = messages.filter((m: any) => {
-          const msgContactId = (m.contactId || '').replace(/\D/g, '');
-          const msgPhone = (m.phone || '').replace(/\D/g, '');
-          const msgIdLast10 = msgContactId.slice(-10);
-          const msgPhoneLast10 = msgPhone.slice(-10);
-          return msgIdLast10 === contactPhoneLast10 || msgPhoneLast10 === contactPhoneLast10 ||
-                 msgContactId === contactPhone || msgPhone === contactPhone;
+        const contactPhone = (chat.contact.phone || '').replace(/\D/g, '') || '';
+        if (!contactPhone) {
+          console.log(`[ContactAnalytics] Chat ${chat.id} has no phone, skipping`);
+          continue;
+        }
+        
+        const phoneLast10 = contactPhone.slice(-10);
+        const assignment = contactAgents.find((a: any) => {
+          const assignPhone = (a.phone || '').replace(/\D/g, '');
+          return assignPhone.includes(phoneLast10) || phoneLast10.includes(assignPhone.slice(-10));
         });
         
-        if (contactMessages.length > 0) {
-          contactMessages.sort((a: any, b: any) => 
-            new Date(a.timestamp || a.createdAt).getTime() - new Date(b.timestamp || b.createdAt).getTime()
+        let conversationMessages: any[] = [];
+        
+        if (assignment && assignment.conversationHistory && assignment.conversationHistory.length > 0) {
+          conversationMessages = assignment.conversationHistory.map((h: any) => ({
+            direction: h.role === 'user' ? 'inbound' : 'outbound',
+            content: h.content,
+            timestamp: h.timestamp || new Date().toISOString()
+          }));
+        } else if (chat.lastInboundMessage || chat.lastMessage) {
+          if (chat.lastInboundMessage) {
+            conversationMessages.push({
+              direction: 'inbound',
+              content: chat.lastInboundMessage,
+              timestamp: chat.lastInboundMessageTime || new Date().toISOString()
+            });
+          }
+          if (chat.lastMessage && chat.lastMessage !== chat.lastInboundMessage) {
+            conversationMessages.push({
+              direction: 'outbound',
+              content: chat.lastMessage,
+              timestamp: chat.lastMessageTime || new Date().toISOString()
+            });
+          }
+        }
+        
+        if (conversationMessages.length > 0) {
+          conversationMessages.sort((a: any, b: any) => 
+            new Date(a.timestamp || 0).getTime() - new Date(b.timestamp || 0).getTime()
           );
           
+          processed++;
+          console.log(`[ContactAnalytics] Processing ${contactPhone} with ${conversationMessages.length} messages`);
+          
           const report = await contactAnalyticsService.analyzeAndUpdateContact(
-            contact.id,
+            chat.contact.id || chat.contactId,
             contactPhone,
-            contact.name || 'Unknown',
-            contactMessages,
+            chat.contact.name || 'Unknown',
+            conversationMessages,
             userId
           );
           
           results.push({
             phone: contactPhone,
-            name: contact.name,
+            name: chat.contact.name,
             interestLevel: report.interestLevel,
             interestScore: report.interestScore,
           });
+        } else {
+          console.log(`[ContactAnalytics] Chat ${chat.id} has no messages, skipping`);
         }
       } catch (err) {
-        console.error(`[ContactAnalytics] Error analyzing contact ${contact.id}:`, err);
+        errors++;
+        console.error(`[ContactAnalytics] Error analyzing chat ${chat.id}:`, err);
       }
     }
+    
+    console.log(`[ContactAnalytics] Completed: processed=${processed}, results=${results.length}, errors=${errors}`);
     
     res.json({
       analyzed: results.length,

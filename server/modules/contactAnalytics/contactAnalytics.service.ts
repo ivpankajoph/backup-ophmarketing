@@ -40,26 +40,26 @@ interface ConversationMessage {
   timestamp: string;
 }
 
-const INTEREST_ANALYSIS_PROMPT = `You are an expert sales analyst. Analyze the following WhatsApp conversation and determine the customer's interest level.
+const INTEREST_ANALYSIS_PROMPT = `You are an expert sales analyst. Analyze the WhatsApp conversation below and determine the customer's interest level.
 
-Respond in this EXACT JSON format only (no markdown, no explanation):
-{
-  "interestLevel": "interested" | "not_interested" | "neutral" | "highly_interested",
-  "interestScore": <number 1-100>,
-  "interestReason": "<brief explanation of your assessment>",
-  "keyTopics": ["<topic1>", "<topic2>"],
-  "objections": ["<objection1>", "<objection2>"],
-  "positiveSignals": ["<signal1>", "<signal2>"],
-  "negativeSignals": ["<signal1>", "<signal2>"]
-}
+IMPORTANT: You MUST respond with ONLY a valid JSON object. No explanations, no markdown, no text before or after. Just pure JSON.
+
+Required JSON format:
+{"interestLevel":"interested","interestScore":75,"interestReason":"Customer asked about pricing","keyTopics":["award","pricing"],"objections":[],"positiveSignals":["asked questions"],"negativeSignals":[]}
+
+Field rules:
+- interestLevel: MUST be exactly one of: "highly_interested", "interested", "neutral", "not_interested"
+- interestScore: number from 1-100
+- interestReason: short string explaining your assessment
+- keyTopics, objections, positiveSignals, negativeSignals: arrays of strings (can be empty [])
 
 Interest Level Guidelines:
-- "highly_interested": Customer explicitly wants to proceed, asks about payment, provides details eagerly
-- "interested": Customer shows positive engagement, asks questions, considers the offer
-- "neutral": Customer is non-committal, short responses, neither positive nor negative
-- "not_interested": Customer declines, shows disinterest, stops responding, or explicitly says no
+- highly_interested (score 75-100): Customer wants to proceed, asks about payment, provides details eagerly
+- interested (score 50-74): Customer shows positive engagement, asks questions, considers the offer
+- neutral (score 25-49): Customer is non-committal, short responses, neither positive nor negative
+- not_interested (score 1-24): Customer declines, shows disinterest, stops responding, or says no
 
-Analyze this conversation:
+Conversation to analyze:
 `;
 
 export async function analyzeContactConversation(
@@ -97,11 +97,20 @@ export async function analyzeContactConversation(
         { role: 'system', content: INTEREST_ANALYSIS_PROMPT },
         { role: 'user', content: conversationText }
       ],
-      { id: 'analysis', name: 'Conversation Analyzer', model: 'gemini-2.5-flash', temperature: 0.3 },
+      { id: 'analysis', name: 'Conversation Analyzer', model: 'gemini-2.5-flash', temperature: 0.1 },
       userId
     );
 
-    const cleanedResponse = response.replace(/```json\n?/g, '').replace(/```\n?/g, '').trim();
+    let cleanedResponse = response
+      .replace(/```json\n?/g, '')
+      .replace(/```\n?/g, '')
+      .trim();
+    
+    const jsonMatch = cleanedResponse.match(/\{[\s\S]*\}/);
+    if (jsonMatch) {
+      cleanedResponse = jsonMatch[0];
+    }
+    
     const analysis = JSON.parse(cleanedResponse);
 
     return {
