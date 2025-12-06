@@ -342,8 +342,10 @@ export async function handleWebhook(req: Request, res: Response) {
 
     return res.sendStatus(200);
   } catch (error) {
+    // CRITICAL: Always return 200 to prevent Meta webhook retries
+    // Returning 500 causes Meta to retry the webhook, creating duplicate messages
     console.error('Error handling webhook:', error);
-    return res.sendStatus(500);
+    return res.sendStatus(200);
   }
 }
 

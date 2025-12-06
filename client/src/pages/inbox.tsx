@@ -238,7 +238,7 @@ export default function Inbox() {
   const selectedChat = chats.find(c => c.id === selectedChatId);
   const selectedContactId = selectedChat?.contactId;
 
-  const { data: messages = [], isLoading: messagesLoading } = useQuery<Message[]>({
+  const { data: rawMessages = [], isLoading: messagesLoading } = useQuery<Message[]>({
     queryKey: ["/api/messages", selectedContactId],
     queryFn: async () => {
       if (!selectedContactId) return [];
@@ -249,6 +249,19 @@ export default function Inbox() {
     enabled: !!selectedContactId,
     refetchInterval: 2000,
   });
+
+  // Deduplicate messages using message ID (keep only unique messages)
+  // This filters out any duplicate database entries based on unique message ID
+  const messages = useMemo(() => {
+    const seen = new Set<string>();
+    return rawMessages.filter(msg => {
+      if (seen.has(msg.id)) {
+        return false;
+      }
+      seen.add(msg.id);
+      return true;
+    });
+  }, [rawMessages]);
 
   const sendMessageMutation = useMutation({
     mutationFn: async ({ content, phone, contactId, replyToMessageId, replyToContent }: { 
