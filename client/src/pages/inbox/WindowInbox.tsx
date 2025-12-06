@@ -223,7 +223,9 @@ export default function WindowInbox() {
   const { data: chats = [], isLoading: chatsLoading } = useQuery<Chat[]>({
     queryKey: ["/api/chats/window"],
     queryFn: async () => {
-      const res = await fetch("/api/chats");
+      const res = await fetch("/api/chats", {
+        headers: getAuthHeaders()
+      });
       if (!res.ok) throw new Error("Failed to fetch chats");
       const allChats = await res.json();
       const now = new Date();

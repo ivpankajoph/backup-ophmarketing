@@ -658,7 +658,26 @@ export async function registerRoutes(
 
   app.get("/api/chats/window", async (req, res) => {
     try {
-      const chats = await storage.getChats();
+      const userId = req.headers['x-user-id'] as string;
+      const userRole = (req.headers['x-user-role'] as string) || 'super_admin';
+      const userName = req.headers['x-user-name'] as string;
+      
+      let chats = await storage.getChats();
+      
+      if (userId && userRole !== 'super_admin' && userRole !== 'sub_admin') {
+        const permittedContactIds = await leadManagementService.getFilteredChatsForUser({
+          userId,
+          role: userRole as any,
+          name: userName,
+        });
+        
+        if (permittedContactIds.length > 0) {
+          chats = chats.filter(chat => permittedContactIds.includes(chat.contact.id));
+        } else if (userRole === 'user') {
+          chats = [];
+        }
+      }
+      
       const now = new Date();
       const windowChats = chats.filter(chat => {
         if (chat.lastInboundMessageTime) {

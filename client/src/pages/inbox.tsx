@@ -175,7 +175,9 @@ export default function Inbox() {
   const { data: chats = [], isLoading: chatsLoading } = useQuery<Chat[]>({
     queryKey: ["/api/chats"],
     queryFn: async () => {
-      const res = await fetch("/api/chats");
+      const res = await fetch("/api/chats", {
+        headers: getAuthHeaders()
+      });
       if (!res.ok) throw new Error("Failed to fetch chats");
       return res.json();
     },
