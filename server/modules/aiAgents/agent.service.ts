@@ -1,4 +1,4 @@
-import { readCollection, addItem, updateItem, deleteItem, findById } from '../storage';
+import { readCollection, addItem, updateItem, deleteItem, findById, updateManyItems } from '../storage';
 
 export interface Agent {
   id: string;
@@ -47,4 +47,14 @@ export async function updateAgent(id: string, data: Partial<Omit<Agent, 'id' | '
 
 export async function deleteAgent(id: string): Promise<boolean> {
   return deleteItem<Agent>(COLLECTION, id);
+}
+
+export async function updateAllAgentsToGemini(): Promise<{ updated: number; agents: Agent[] }> {
+  const updated = await updateManyItems(COLLECTION, {}, { 
+    model: 'gemini-2.0-flash',
+    updatedAt: new Date().toISOString()
+  });
+  const agents = await getAllAgents();
+  console.log(`[Agent Service] Updated ${updated} agents to use gemini-2.0-flash`);
+  return { updated, agents };
 }

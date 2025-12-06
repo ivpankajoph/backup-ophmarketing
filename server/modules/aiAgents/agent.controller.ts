@@ -104,3 +104,17 @@ export async function testAgent(req: Request, res: Response) {
     res.status(500).json({ error: 'Failed to test agent' });
   }
 }
+
+export async function migrateAllToGemini(req: Request, res: Response) {
+  try {
+    const result = await agentService.updateAllAgentsToGemini();
+    res.json({ 
+      success: true, 
+      message: `Successfully updated ${result.updated} agents to use gemini-2.0-flash`,
+      agents: result.agents
+    });
+  } catch (error) {
+    console.error('Error migrating agents to Gemini:', error);
+    res.status(500).json({ error: 'Failed to migrate agents to Gemini' });
+  }
+}

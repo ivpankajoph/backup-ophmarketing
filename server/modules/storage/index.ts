@@ -29,4 +29,8 @@ export async function findByField<T>(collection: string, field: keyof T, value: 
   return mongodb.findOne<T>(collection, { [field]: value });
 }
 
+export async function updateManyItems(collection: string, query: Record<string, any>, updates: Record<string, any>): Promise<number> {
+  return mongodb.updateMany(collection, query, updates);
+}
+
 export { connectToMongoDB } from './mongodb.adapter';

@@ -672,3 +672,20 @@ export async function insertMany<T extends Record<string, any>>(collectionName: 
     return [];
   }
 }
+
+export async function updateMany(collectionName: string, query: Record<string, any>, update: Record<string, any>): Promise<number> {
+  await connectToMongoDB();
+  const model = modelMap[collectionName];
+  if (!model) {
+    console.error(`[MongoDB] Unknown collection: ${collectionName}`);
+    return 0;
+  }
+  try {
+    const result = await model.updateMany(query, { $set: update });
+    console.log(`[MongoDB] Updated ${result.modifiedCount} documents in ${collectionName}`);
+    return result.modifiedCount;
+  } catch (error) {
+    console.error(`[MongoDB] Error updating many in ${collectionName}:`, error);
+    return 0;
+  }
+}
