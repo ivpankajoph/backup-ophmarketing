@@ -33,6 +33,9 @@ The system incorporates a modular backend structure, allowing for independent de
 - **Meta Business Suite**: For syncing and approving message templates.
 
 ## Recent Changes (December 2025)
+- **Role-Based Inbox Filtering**: System users now only see contacts/chats that are assigned to them in both the Inbox and 24-Hour Window views. Admins and Sub-admins see all chats, managers see their own and team members' assignments, and regular users only see their assigned contacts.
+- **Lead Assignment Reports Fix**: Fixed priority and status aggregation in reports. Backend now properly calculates priority distribution and uses correct status values.
+- **Auth Headers Enhancement**: getAuthHeaders() now includes x-user-role and x-user-name for proper role-based filtering across all authenticated API calls.
 - **Gemini AI Migration**: AI agents now primarily use Google Gemini (gemini-2.5-flash) with GOOGLE_API_KEY environment variable.
 - **AI Analytics Bug Fixes**: Added null safety guards to prevent crashes when phone numbers are undefined or malformed.
 - **Prefilled Text Mapping Fix**: Aligned MongoDB schema field from `text` to `prefilledText` to match service layer.
