@@ -409,6 +409,8 @@ export async function registerRoutes(
       const userRole = (req.headers['x-user-role'] as string) || 'super_admin';
       const userName = req.headers['x-user-name'] as string;
       
+      console.log(`[Inbox Filter] User: ${userName}, Role: ${userRole}, ID: ${userId}`);
+      
       let chats = await storage.getChats();
       
       if (userId && userRole !== 'super_admin' && userRole !== 'sub_admin') {
