@@ -31,6 +31,7 @@ import * as openaiService from "./modules/openai/openai.service";
 import * as templateService from "./modules/leadAutoReply/templateMessages.service";
 import * as mongodb from "./modules/storage/mongodb.adapter";
 import * as contactAgentService from "./modules/contactAgent/contactAgent.service";
+import * as leadManagementService from "./modules/leadManagement/leadManagement.service";
 
 export async function registerRoutes(
   httpServer: Server,
@@ -403,9 +404,39 @@ export async function registerRoutes(
 
   app.get("/api/chats", async (req, res) => {
     try {
-      const chats = await storage.getChats();
-      res.json(chats);
+      const userId = req.headers['x-user-id'] as string;
+      const userRole = (req.headers['x-user-role'] as string) || 'super_admin';
+      const userName = req.headers['x-user-name'] as string;
+      
+      let chats = await storage.getChats();
+      
+      if (userId && userRole !== 'super_admin' && userRole !== 'sub_admin') {
+        const permittedContactIds = await leadManagementService.getFilteredChatsForUser({
+          userId,
+          role: userRole as any,
+          name: userName,
+        });
+        
+        if (permittedContactIds.length > 0) {
+          chats = chats.filter(chat => permittedContactIds.includes(chat.contact.id));
+        } else if (userRole === 'user') {
+          chats = [];
+        }
+      }
+      
+      const assignments = await leadManagementService.getAllLeadAssignments({ 
+        status: 'assigned' 
+      });
+      const assignmentMap = new Map(assignments.map((a: any) => [a.contactId, a]));
+      
+      const chatsWithAssignment = chats.map(chat => ({
+        ...chat,
+        assignment: assignmentMap.get(chat.contact.id) || null,
+      }));
+      
+      res.json(chatsWithAssignment);
     } catch (error) {
+      console.error('Error getting chats:', error);
       res.status(500).json({ message: "Failed to get chats" });
     }
   });

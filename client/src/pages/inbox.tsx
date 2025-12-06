@@ -33,7 +33,9 @@ import {
   CheckSquare,
   Ban,
   Trash2,
-  ArrowLeft
+  ArrowLeft,
+  UserPlus,
+  Users
 } from "lucide-react";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
 import { Badge } from "@/components/ui/badge";
@@ -60,6 +62,22 @@ interface Message {
   mediaUrl?: string;
 }
 
+interface LeadAssignment {
+  id: string;
+  contactId: string;
+  assignedToUserId: string;
+  assignedToUserName: string;
+  status: string;
+  priority: string;
+}
+
+interface AssignableUser {
+  id: string;
+  name: string;
+  email: string;
+  role: string;
+}
+
 interface Chat {
   id: string;
   contactId: string;
@@ -70,6 +88,7 @@ interface Chat {
   unreadCount: number;
   status: string;
   fromWindowInbox?: boolean;
+  assignment?: LeadAssignment | null;
 }
 
 interface Template {
@@ -146,6 +165,10 @@ export default function Inbox() {
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [blockReason, setBlockReason] = useState("");
   const [mobileView, setMobileView] = useState<"list" | "chat">("list");
+  const [assignDialogOpen, setAssignDialogOpen] = useState(false);
+  const [selectedUserToAssign, setSelectedUserToAssign] = useState("");
+  const [assignPriority, setAssignPriority] = useState<string>("medium");
+  const [bulkAssignDialogOpen, setBulkAssignDialogOpen] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const queryClient = useQueryClient();
 
@@ -184,6 +207,72 @@ export default function Inbox() {
       if (!res.ok) throw new Error("Failed to fetch contacts");
       return res.json();
     },
+  });
+
+  const { data: assignableUsers = [] } = useQuery<AssignableUser[]>({
+    queryKey: ["/api/lead-management/assignable-users"],
+    queryFn: async () => {
+      const res = await fetch("/api/lead-management/assignable-users", {
+        headers: getAuthHeaders()
+      });
+      if (!res.ok) throw new Error("Failed to fetch assignable users");
+      return res.json();
+    },
+  });
+
+  const assignLeadMutation = useMutation({
+    mutationFn: async ({ contactId, phone, contactName, assignedToUserId, priority }: { 
+      contactId: string; 
+      phone: string;
+      contactName: string;
+      assignedToUserId: string;
+      priority: string;
+    }) => {
+      const res = await fetch("/api/lead-management/assign", {
+        method: "POST",
+        headers: { "Content-Type": "application/json", ...getAuthHeaders() },
+        body: JSON.stringify({ contactId, phone, contactName, assignedToUserId, priority }),
+      });
+      if (!res.ok) throw new Error("Failed to assign lead");
+      return res.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/chats"] });
+      setAssignDialogOpen(false);
+      setSelectedUserToAssign("");
+      setAssignPriority("medium");
+      toast.success("Lead assigned successfully");
+    },
+    onError: () => {
+      toast.error("Failed to assign lead");
+    }
+  });
+
+  const bulkAssignMutation = useMutation({
+    mutationFn: async ({ contactIds, assignedToUserId, priority }: { 
+      contactIds: string[]; 
+      assignedToUserId: string;
+      priority: string;
+    }) => {
+      const res = await fetch("/api/lead-management/bulk-assign", {
+        method: "POST",
+        headers: { "Content-Type": "application/json", ...getAuthHeaders() },
+        body: JSON.stringify({ contactIds, assignedToUserId, priority }),
+      });
+      if (!res.ok) throw new Error("Failed to bulk assign leads");
+      return res.json();
+    },
+    onSuccess: (data) => {
+      queryClient.invalidateQueries({ queryKey: ["/api/chats"] });
+      setBulkAssignDialogOpen(false);
+      setSelectedContacts([]);
+      setSelectedUserToAssign("");
+      setAssignPriority("medium");
+      toast.success(`${data.assigned} leads assigned successfully`);
+    },
+    onError: () => {
+      toast.error("Failed to bulk assign leads");
+    }
   });
 
   const { phoneToNameMap, last10ToNameMap } = useMemo(() => {
@@ -741,10 +830,16 @@ export default function Inbox() {
               <span className="hidden md:inline">Export List ({windowLeads.length})</span>
             </Button>
             {selectedContacts.length > 0 && (
+              <>
+              <Button size="sm" className="md:size-default" variant="outline" onClick={() => setBulkAssignDialogOpen(true)}>
+                <Users className="h-4 w-4 md:mr-2" />
+                <span className="hidden md:inline">Assign</span> {selectedContacts.length}
+              </Button>
               <Button size="sm" className="md:size-default" onClick={() => setIsBulkSendOpen(true)}>
                 <Send className="h-4 w-4 md:mr-2" />
                 <span className="hidden md:inline">Send to</span> {selectedContacts.length}
               </Button>
+              </>
             )}
           </div>
         </div>
@@ -829,6 +924,12 @@ export default function Inbox() {
                               <Clock className="h-2.5 w-2.5" />
                             </Badge>
                           )}
+                          {chat.assignment && (
+                            <Badge variant="outline" className="text-[10px] bg-blue-50 text-blue-700 border-blue-200 px-1 py-0">
+                              <UserPlus className="h-2.5 w-2.5 mr-0.5" />
+                              {chat.assignment.assignedToUserName?.split(' ')[0] || 'Assigned'}
+                            </Badge>
+                          )}
                           {chat.unreadCount > 0 && (
                             <span className="h-4 w-4 rounded-full bg-primary text-primary-foreground text-[9px] flex items-center justify-center font-medium">
                               {chat.unreadCount}
@@ -892,6 +993,10 @@ export default function Inbox() {
                       <DropdownMenuItem onClick={() => markAsUnreadMutation.mutate(selectedChat.contactId)}>
                         <MailOpen className="mr-2 h-4 w-4" />
                         Mark as Unread
+                      </DropdownMenuItem>
+                      <DropdownMenuItem onClick={() => setAssignDialogOpen(true)} className="text-blue-600">
+                        <UserPlus className="mr-2 h-4 w-4" />
+                        Assign Lead
                       </DropdownMenuItem>
                       <DropdownMenuItem onClick={() => setBlockDialogOpen(true)} className="text-orange-600">
                         <Ban className="mr-2 h-4 w-4" />
@@ -1186,6 +1291,132 @@ export default function Inbox() {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+
+      <Dialog open={assignDialogOpen} onOpenChange={setAssignDialogOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Assign Lead</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div>
+              <p className="text-sm text-muted-foreground mb-2">
+                Assign {selectedChat ? getContactName(selectedChat.contact) : "this contact"} to a team member
+              </p>
+            </div>
+            <div className="space-y-2">
+              <Label>Assign To</Label>
+              <Select value={selectedUserToAssign} onValueChange={setSelectedUserToAssign}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Select team member" />
+                </SelectTrigger>
+                <SelectContent>
+                  {assignableUsers.map(user => (
+                    <SelectItem key={user.id} value={user.id}>
+                      {user.name} ({user.role})
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="space-y-2">
+              <Label>Priority</Label>
+              <Select value={assignPriority} onValueChange={setAssignPriority}>
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="low">Low</SelectItem>
+                  <SelectItem value="medium">Medium</SelectItem>
+                  <SelectItem value="high">High</SelectItem>
+                  <SelectItem value="urgent">Urgent</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setAssignDialogOpen(false)}>Cancel</Button>
+            <Button 
+              onClick={() => {
+                if (selectedChat && selectedUserToAssign) {
+                  assignLeadMutation.mutate({
+                    contactId: selectedChat.contact.id,
+                    phone: selectedChat.contact.phone,
+                    contactName: getContactName(selectedChat.contact),
+                    assignedToUserId: selectedUserToAssign,
+                    priority: assignPriority,
+                  });
+                }
+              }}
+              disabled={!selectedUserToAssign || assignLeadMutation.isPending}
+            >
+              {assignLeadMutation.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+              Assign Lead
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      <Dialog open={bulkAssignDialogOpen} onOpenChange={setBulkAssignDialogOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Bulk Assign Leads</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div>
+              <p className="text-sm text-muted-foreground mb-2">
+                Assign {selectedContacts.length} selected contact{selectedContacts.length > 1 ? 's' : ''} to a team member
+              </p>
+            </div>
+            <div className="space-y-2">
+              <Label>Assign To</Label>
+              <Select value={selectedUserToAssign} onValueChange={setSelectedUserToAssign}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Select team member" />
+                </SelectTrigger>
+                <SelectContent>
+                  {assignableUsers.map(user => (
+                    <SelectItem key={user.id} value={user.id}>
+                      {user.name} ({user.role})
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="space-y-2">
+              <Label>Priority</Label>
+              <Select value={assignPriority} onValueChange={setAssignPriority}>
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="low">Low</SelectItem>
+                  <SelectItem value="medium">Medium</SelectItem>
+                  <SelectItem value="high">High</SelectItem>
+                  <SelectItem value="urgent">Urgent</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setBulkAssignDialogOpen(false)}>Cancel</Button>
+            <Button 
+              onClick={() => {
+                if (selectedContacts.length > 0 && selectedUserToAssign) {
+                  bulkAssignMutation.mutate({
+                    contactIds: selectedContacts,
+                    assignedToUserId: selectedUserToAssign,
+                    priority: assignPriority,
+                  });
+                }
+              }}
+              disabled={!selectedUserToAssign || bulkAssignMutation.isPending}
+            >
+              {bulkAssignMutation.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+              Assign {selectedContacts.length} Lead{selectedContacts.length > 1 ? 's' : ''}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </DashboardLayout>
   );
 }
