@@ -139,7 +139,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
       pageId: "templates",
       subItems: [
         { label: "Add Template", href: "/templates/add" },
-        { label: "Template Status", href: "/templates/status" },
+        // { label: "Template Status", href: "/templates/status" },
         { label: "Manage Templates", href: "/templates/manage" },
       ]
     },
@@ -153,7 +153,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
         { label: "New Agent", href: "/ai/new" },
         // { label: "Agent Mapping", href: "/ai/map" },
         { label: "Pre-filled Text", href: "/ai/prefilled" },
-        { label: "AI Reports", href: "/ai/reports" },
+        // { label: "AI Reports", href: "/ai/reports" },
       ]
     },
     {
@@ -200,7 +200,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
       subItems: [
         { label: "Team Members", href: "/settings/team" },
         { label: "Permissions", href: "/settings/permissions" },
-        { label: "WhatsApp Number", href: "/settings/whatsapp" },
+        // { label: "WhatsApp Number", href: "/settings/whatsapp" },
         { label: "Profile Details", href: "/settings/profile" },
         { label: "Webhook & API", href: "/settings/api" },
         { label: "Billing & Credits", href: "/settings/billing" },
@@ -320,11 +320,11 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
       </div>
 
       <div className="p-4 border-t border-sidebar-border shrink-0">
-        <div className="p-4 rounded-lg bg-sidebar-accent/50">
-          <h4 className="text-sm font-medium text-sidebar-foreground mb-1">Need Help?</h4>
-          <p className="text-xs text-sidebar-foreground/60 mb-3">Check our documentation for guides.</p>
-          <Button size="sm" variant="secondary" className="w-full text-xs">Documentation</Button>
-        </div>
+        {/* <div className="p-4 rounded-lg bg-sidebar-accent/50"> */}
+          {/* <h4 className="text-sm font-medium text-sidebar-foreground mb-1">Need Help?</h4> */}
+          {/* <p className="text-xs text-sidebar-foreground/60 mb-3">Check our documentation for guides.</p> */}
+          {/* <Button size="sm" variant="secondary" className="w-full text-xs">Documentation</Button> */}
+        {/* </div> */}
       </div>
     </div>
   );
@@ -332,7 +332,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
   return (
     <div className="min-h-screen bg-gray-50/50 flex">
       {/* Desktop Sidebar */}
-      <div className="hidden md:block w-64 bg-sidebar border-r border-sidebar-border text-sidebar-foreground shrink-0">
+      <div className="hidden md:block w-64 bg-[#3F4F44] border-r border-sidebar-border text-sidebar-foreground shrink-0">
         <NavContent />
       </div>
 

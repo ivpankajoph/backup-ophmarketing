@@ -3,19 +3,43 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useLocation } from "wouter";
 import DashboardLayout from "@/components/layout/DashboardLayout";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+  CardDescription,
+} from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Alert, AlertDescription } from "@/components/ui/alert";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import {
+  MoreHorizontal,
+  Edit,
+  Trash2,
+  Plus,
+  Copy,
+  RefreshCw,
+  Send,
+  AlertTriangle,
+  ExternalLink,
+} from "lucide-react";
+
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Loader2, Info, CheckCircle2 } from "lucide-react";
 import { toast } from "sonner";
 
 export default function AddTemplate() {
   const [, setLocation] = useLocation();
   const queryClient = useQueryClient();
-  
+
   const [name, setName] = useState("");
   const [category, setCategory] = useState("");
   const [language, setLanguage] = useState("en_US");
@@ -62,7 +86,7 @@ export default function AddTemplate() {
     }
 
     const templateName = name.toLowerCase().replace(/[^a-z0-9_]/g, "_");
-    
+
     createTemplateMutation.mutate({
       name: templateName,
       category,
@@ -77,10 +101,70 @@ export default function AddTemplate() {
 
   return (
     <DashboardLayout>
+      <h2 className="text-3xl font-bold tracking-tight">
+        Add New Template
+      </h2>
+      <Card className="mt-4 border-blue-200 bg-blue-50/50 dark:bg-blue-950/20 dark:border-blue-900">
+        <CardHeader className="pb-3">
+          <CardTitle className="text-lg flex items-center gap-2">
+            <Info className="h-5 w-5 text-blue-600" />
+            WhatsApp Template Rules & Guidelines
+          </CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <div className="grid gap-4 md:grid-cols-2">
+            <div className="space-y-2">
+              <h4 className="font-semibold text-sm flex items-center gap-2">
+                <CheckCircle2 className="h-4 w-4 text-green-600" />
+                Allowed Content
+              </h4>
+              <ul className="text-sm text-muted-foreground space-y-1 pl-6 list-disc">
+                <li>Transaction confirmations (orders, bookings)</li>
+                <li>Account updates and notifications</li>
+                <li>Customer service responses</li>
+                <li>One-time passwords (OTP)</li>
+                <li>Appointment reminders</li>
+              </ul>
+            </div>
+            <div className="space-y-2">
+              <h4 className="font-semibold text-sm flex items-center gap-2">
+                <AlertTriangle className="h-4 w-4 text-red-600" />
+                Not Allowed
+              </h4>
+              <ul className="text-sm text-muted-foreground space-y-1 pl-6 list-disc">
+                <li>Promotional content without opt-in</li>
+                <li>Adult or gambling content</li>
+                <li>Misleading or spam messages</li>
+                <li>Political content</li>
+                <li>Cryptocurrency promotions</li>
+              </ul>
+            </div>
+          </div>
+          <Alert>
+            <Info className="h-4 w-4" />
+            <AlertTitle>Approval Process</AlertTitle>
+            <AlertDescription>
+              Templates must be approved by Meta before use. Marketing templates
+              may take 24-48 hours. Utility and authentication templates are
+              usually approved faster.
+              <a
+                href="https://developers.facebook.com/docs/whatsapp/message-templates/guidelines"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center gap-1 ml-2 text-blue-600 hover:underline"
+              >
+                View Full Guidelines <ExternalLink className="h-3 w-3" />
+              </a>
+            </AlertDescription>
+          </Alert>
+        </CardContent>
+      </Card>
       <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
         <div>
-          <h2 className="text-3xl font-bold tracking-tight">Add New Template</h2>
-          <p className="text-muted-foreground">Create a WhatsApp message template for approval</p>
+       
+          <p className="text-muted-foreground">
+            Create a WhatsApp message template for approval
+          </p>
         </div>
 
         <div className="grid gap-6 lg:grid-cols-3">
@@ -88,14 +172,16 @@ export default function AddTemplate() {
             <Card>
               <CardHeader>
                 <CardTitle>Template Details</CardTitle>
-                <CardDescription>Fill in the details for your new template</CardDescription>
+                <CardDescription>
+                  Fill in the details for your new template
+                </CardDescription>
               </CardHeader>
               <CardContent className="space-y-4">
                 <div className="grid gap-2">
                   <Label htmlFor="name">Template Name *</Label>
-                  <Input 
+                  <Input
                     id="name"
-                    placeholder="e.g., welcome_message_v2" 
+                    placeholder="e.g., welcome_message_v2"
                     value={name}
                     onChange={(e) => setName(e.target.value)}
                   />
@@ -114,7 +200,9 @@ export default function AddTemplate() {
                       <SelectContent>
                         <SelectItem value="marketing">Marketing</SelectItem>
                         <SelectItem value="utility">Utility</SelectItem>
-                        <SelectItem value="authentication">Authentication</SelectItem>
+                        <SelectItem value="authentication">
+                          Authentication
+                        </SelectItem>
                       </SelectContent>
                     </Select>
                   </div>
@@ -129,7 +217,9 @@ export default function AddTemplate() {
                         <SelectItem value="en_GB">English (UK)</SelectItem>
                         <SelectItem value="es_ES">Spanish</SelectItem>
                         <SelectItem value="hi">Hindi</SelectItem>
-                        <SelectItem value="pt_BR">Portuguese (Brazil)</SelectItem>
+                        <SelectItem value="pt_BR">
+                          Portuguese (Brazil)
+                        </SelectItem>
                       </SelectContent>
                     </Select>
                   </div>
@@ -154,7 +244,7 @@ export default function AddTemplate() {
                 {headerType === "text" && (
                   <div className="grid gap-2">
                     <Label>Header Text</Label>
-                    <Input 
+                    <Input
                       placeholder="Enter header text"
                       value={headerText}
                       onChange={(e) => setHeaderText(e.target.value)}
@@ -164,9 +254,9 @@ export default function AddTemplate() {
 
                 <div className="grid gap-2">
                   <Label htmlFor="body">Body Text *</Label>
-                  <Textarea 
+                  <Textarea
                     id="body"
-                    placeholder="Enter your message here. Use {{1}}, {{2}} for variables." 
+                    placeholder="Enter your message here. Use {{1}}, {{2}} for variables."
                     className="min-h-[120px]"
                     value={body}
                     onChange={(e) => setBody(e.target.value)}
@@ -178,15 +268,15 @@ export default function AddTemplate() {
 
                 <div className="grid gap-2">
                   <Label>Footer (Optional)</Label>
-                  <Input 
+                  <Input
                     placeholder="e.g., Reply STOP to unsubscribe"
                     value={footer}
                     onChange={(e) => setFooter(e.target.value)}
                   />
                 </div>
 
-                <Button 
-                  className="w-full" 
+                <Button
+                  className="w-full"
                   onClick={handleSubmit}
                   disabled={createTemplateMutation.isPending}
                 >
@@ -243,7 +333,9 @@ export default function AddTemplate() {
                     )}
                     <p className="whitespace-pre-wrap">{body}</p>
                     {footer && (
-                      <p className="text-xs text-muted-foreground mt-2 pt-2 border-t">{footer}</p>
+                      <p className="text-xs text-muted-foreground mt-2 pt-2 border-t">
+                        {footer}
+                      </p>
                     )}
                   </div>
                 </CardContent>
