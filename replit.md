@@ -33,6 +33,15 @@ The system incorporates a modular backend structure, allowing for independent de
 - **Meta Business Suite**: For syncing and approving message templates.
 
 ## Recent Changes (December 2025)
+- **Connected Apps System**: New dynamic integration framework allowing users to connect their own external service accounts (similar to Shopify's app integration model). Supports WhatsApp Business API, Facebook, Gemini AI, OpenAI, SMTP, Razorpay, and Stripe. Features include:
+    - Provider registry with metadata (auth type, required fields, capabilities)
+    - ConnectedAccount model with AES-256-GCM encrypted credential storage
+    - Multi-tenant isolation with per-user credential management
+    - Connection verification endpoints for each provider type
+    - Fallback to system credentials for backward compatibility
+    - Settings > Connected Apps UI with provider cards, connection status, and credential input modals
+    - Protected API routes with requireAuth middleware
+- **GCP Cloud Run Deployment**: Added Dockerfile, cloudbuild.yaml, and .dockerignore for containerized deployment. Health endpoint at /api/health for Cloud Run health checks.
 - **Role-Based Inbox Filtering**: System users now only see contacts/chats that are assigned to them in both the Inbox and 24-Hour Window views. Admins and Sub-admins see all chats, managers see their own and team members' assignments, and regular users only see their assigned contacts.
 - **Lead Assignment Reports Fix**: Fixed priority and status aggregation in reports. Backend now properly calculates priority distribution and uses correct status values.
 - **Auth Headers Enhancement**: getAuthHeaders() now includes x-user-role and x-user-name for proper role-based filtering across all authenticated API calls.
