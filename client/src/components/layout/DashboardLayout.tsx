@@ -115,14 +115,17 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
     {
       icon: GitBranch,
       label: "Automation",
-      href: "/automation",
+      href: "/automation/dashboard",
       pageId: "auto-reply",
       subItems: [
+        { label: "Dashboard", href: "/automation/dashboard" },
+        { label: "Triggers", href: "/automation/triggers" },
+        { label: "Flows", href: "/automation/flows" },
+        { label: "Drip Campaigns", href: "/automation/campaigns" },
+        { label: "Segments", href: "/automation/segments" },
         { label: "Builder", href: "/automation" },
         { label: "Auto Leads", href: "/automation/leads" },
-        // { label: "Keyword Reply", href: "/automation/keywords" },
         { label: "Follow-up", href: "/automation/follow-up" },
-        { label: "Drip Campaign", href: "/automation/drip" },
         { label: "New Lead Alert", href: "/automation/new-leads" },
       ]
     },
