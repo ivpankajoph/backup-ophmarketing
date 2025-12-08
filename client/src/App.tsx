@@ -35,6 +35,11 @@ import Keywords from "@/pages/automation/Keywords";
 import FollowUp from "@/pages/automation/FollowUp";
 import Drip from "@/pages/automation/Drip";
 import NewLeads from "@/pages/automation/NewLeads";
+import AutomationDashboard from "@/pages/automation/AutomationDashboard";
+import TriggersPage from "@/pages/automation/TriggersPage";
+import FlowsPage from "@/pages/automation/FlowsPage";
+import CampaignsPage from "@/pages/automation/CampaignsPage";
+import SegmentsPage from "@/pages/automation/SegmentsPage";
 
 import ConnectApps from "@/pages/apps/ConnectApps";
 
@@ -97,6 +102,11 @@ function Router() {
 
       {/* Automation */}
       <Route path="/automation">{() => <ProtectedRoute component={Automation} />}</Route>
+      <Route path="/automation/dashboard">{() => <ProtectedRoute component={AutomationDashboard} />}</Route>
+      <Route path="/automation/triggers">{() => <ProtectedRoute component={TriggersPage} />}</Route>
+      <Route path="/automation/flows">{() => <ProtectedRoute component={FlowsPage} />}</Route>
+      <Route path="/automation/campaigns">{() => <ProtectedRoute component={CampaignsPage} />}</Route>
+      <Route path="/automation/segments">{() => <ProtectedRoute component={SegmentsPage} />}</Route>
       <Route path="/automation/leads">{() => <ProtectedRoute component={AutoLeads} />}</Route>
       <Route path="/automation/keywords">{() => <ProtectedRoute component={Keywords} />}</Route>
       <Route path="/automation/follow-up">{() => <ProtectedRoute component={FollowUp} />}</Route>

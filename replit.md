@@ -33,6 +33,15 @@ The system incorporates a modular backend structure, allowing for independent de
 - **Meta Business Suite**: For syncing and approving message templates.
 
 ## Recent Changes (December 2025)
+- **Automation Platform**: Comprehensive automation engine with real-time triggers, visual flow builder, drip campaigns, and dynamic user segmentation. Features include:
+    - **Triggers Engine**: Event-based automation with AND/OR condition groups, supporting webhook, WhatsApp message, Facebook lead, CRM update, and scheduled events. Trigger actions include send WhatsApp/template messages, assign to groups, update CRM, API calls, start flows, add/remove tags.
+    - **Flow Builder**: Visual drag-and-drop flow builder for multi-step automation pipelines with support for message nodes, condition branches, delays, and actions. Flow instances track individual contact journeys.
+    - **Drip Campaigns**: Scheduled message sequences with template support, enrollment management, and performance tracking. Supports segment-based, tag-based, trigger-based, and manual targeting.
+    - **User Segments**: Dynamic and static segmentation with rule-based conditions (demographics, behavior, engagement, custom fields). Real-time, hourly, or daily refresh strategies.
+    - **Automation Analytics**: Dashboard with KPIs, AI-powered insights using Gemini, engagement heatmaps, and export functionality (CSV/XLSX/PDF).
+    - Backend: Modular structure under server/modules/automation/ with separate folders for triggers, flows, drips, segments, analytics
+    - Frontend: React pages at /automation/dashboard, /automation/triggers, /automation/flows, /automation/campaigns, /automation/segments
+    - All routes protected with requireAuth middleware and tenant-scoped queries
 - **Connected Apps System**: New dynamic integration framework allowing users to connect their own external service accounts (similar to Shopify's app integration model). Supports WhatsApp Business API, Facebook, Gemini AI, OpenAI, SMTP, Razorpay, and Stripe. Features include:
     - Provider registry with metadata (auth type, required fields, capabilities)
     - ConnectedAccount model with AES-256-GCM encrypted credential storage
