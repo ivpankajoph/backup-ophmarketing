@@ -6,7 +6,7 @@ export interface DateRange {
 }
 
 export interface TimeFilter {
-  period: 'hour' | 'today' | 'yesterday' | 'week' | 'month' | 'year' | 'custom';
+  period: 'hour' | 'today' | 'today_hourly' | 'yesterday' | 'yesterday_hourly' | 'week' | 'month' | 'year' | 'custom';
   startDate?: string;
   endDate?: string;
 }
@@ -21,9 +21,11 @@ export function getDateRange(filter: TimeFilter): DateRange {
       startDate = new Date(now.getTime() - 60 * 60 * 1000);
       break;
     case 'today':
+    case 'today_hourly':
       startDate = new Date(now.getFullYear(), now.getMonth(), now.getDate());
       break;
     case 'yesterday':
+    case 'yesterday_hourly':
       startDate = new Date(now.getFullYear(), now.getMonth(), now.getDate() - 1);
       endDate = new Date(now.getFullYear(), now.getMonth(), now.getDate());
       break;
@@ -711,9 +713,10 @@ export async function get24HourWindowStats(filter: TimeFilter, userId?: string) 
   const days = Math.ceil(duration / (24 * 60 * 60 * 1000));
   const hours = Math.ceil(duration / (60 * 60 * 1000));
   
-  // If hourly period or short duration, show hourly breakdown
-  if (filter.period === 'hour' || hours <= 24) {
-    for (let h = 0; h < Math.min(hours, 24); h++) {
+  // If hourly period, show hourly breakdown (24 hours)
+  const isHourlyView = filter.period === 'hour' || filter.period === 'today_hourly' || filter.period === 'yesterday_hourly';
+  if (isHourlyView) {
+    for (let h = 0; h < 24; h++) {
       const hourStart = new Date(startDate.getTime() + h * 60 * 60 * 1000);
       const hourEnd = new Date(hourStart.getTime() + 60 * 60 * 1000);
       

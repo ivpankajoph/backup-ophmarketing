@@ -155,7 +155,9 @@ export default function Dashboard() {
     switch (period) {
       case 'hour': return 'in the last hour';
       case 'today': return 'today';
+      case 'today_hourly': return 'today (hourly)';
       case 'yesterday': return 'yesterday';
+      case 'yesterday_hourly': return 'yesterday (hourly)';
       case 'week': return 'this week';
       case 'month': return 'this month';
       case 'year': return 'this year';
@@ -175,13 +177,14 @@ export default function Dashboard() {
           <div className="flex items-center gap-2">
           
             <Select value={period} onValueChange={setPeriod}>
-              <SelectTrigger className="w-[160px]">
+              <SelectTrigger className="w-[180px]">
                 <SelectValue placeholder="Select period" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="hour">Last Hour</SelectItem>
                 <SelectItem value="today">Today</SelectItem>
+                <SelectItem value="today_hourly">Today (Per Hour)</SelectItem>
                 <SelectItem value="yesterday">Yesterday</SelectItem>
+                <SelectItem value="yesterday_hourly">Yesterday (Per Hour)</SelectItem>
                 <SelectItem value="week">Last 7 Days</SelectItem>
                 <SelectItem value="month">Last 30 Days</SelectItem>
                 <SelectItem value="year">Last Year</SelectItem>
