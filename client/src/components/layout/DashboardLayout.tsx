@@ -106,10 +106,10 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
       pageId: "broadcast",
       subItems: [
         { label: "Broadcasts", href: "/campaigns/broadcast" },
-        { label: "Selected Contacts", href: "/campaigns/selected-contacts" },
+        // { label: "Selected Contacts", href: "/campaigns/selected-contacts" },
         { label: "Schedule Messages", href: "/campaigns/schedule" },
         { label: "Single Message", href: "/campaigns/single" },
-        { label: "Reports", href: "/campaigns/report" },
+        // { label: "Reports", href: "/campaigns/report" },
       ]
     },
     {
@@ -125,9 +125,9 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
         { label: "Segments", href: "/automation/segments" },
         { label: "Analytics", href: "/automation/analytics" },
         { label: "Builder", href: "/automation" },
-        { label: "Auto Leads", href: "/automation/leads" },
+        // { label: "Auto Leads", href: "/automation/leads" },
         { label: "Follow-up", href: "/automation/follow-up" },
-        { label: "New Lead Alert", href: "/automation/new-leads" },
+        // { label: "New Lead Alert", href: "/automation/new-leads" },
       ]
     },
     {
@@ -145,6 +145,17 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
         { label: "Add Template", href: "/templates/add" },
         // { label: "Template Status", href: "/templates/status" },
         { label: "Manage Templates", href: "/templates/manage" },
+      ]
+    },
+    {
+      icon: FileText,
+      label: "Usage & Billings",
+      href: "/templates",
+
+      subItems: [
+        { label: "Billing & Credits", href: "/settings/billing" },
+         { label: "Credits", href: "/reports/credits" },
+        { label: "Spending", href: "/reports/spending" },
       ]
     },
     {
@@ -178,16 +189,16 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
       subItems: [
         { label: "Delivery Report", href: "/reports/delivery" },
         { label: "Broadcast Report", href: "/reports/broadcast" },
-        { label: "Campaign Perf.", href: "/reports/campaigns" },
+        { label: "Campaign Perf.", href: "/campaigns/report" },
         { label: "Replies", href: "/reports/replies" },
         { label: "Agent Perf.", href: "/reports/agents" },
         { label: "Contact Analytics", href: "/reports/contacts" },
         { label: "Lead Assignments", href: "/reports/lead-assignments" },
         { label: "User Activity", href: "/reports/user-activity" },
         { label: "Blocked Contacts", href: "/reports/blocked" },
-        { label: "Spending", href: "/reports/spending" },
+      
         { label: "User Engagement", href: "/reports/user-engagement" },
-        { label: "Credits", href: "/reports/credits" },
+ 
       ]
     },
     {
@@ -197,26 +208,27 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
       pageId: "contacts",
     },
     {
-      icon: Settings,
-      label: "Settings",
-      href: "/settings",
-      pageId: "settings",
-      subItems: [
-        { label: "Team Members", href: "/settings/team" },
-        { label: "Permissions", href: "/settings/permissions" },
-        // { label: "WhatsApp Number", href: "/settings/whatsapp" },
-        { label: "Profile Details", href: "/settings/profile" },
-        { label: "Webhook & API", href: "/settings/api" },
-        { label: "Billing & Credits", href: "/settings/billing" },
-      ]
-    },
-    {
       icon: UserCog,
       label: "User Management",
       href: "/user-management",
       pageId: "user-management",
       adminOnly: true,
     },
+    {
+      icon: Settings,
+      label: "Settings",
+      href: "/settings",
+      pageId: "settings",
+      subItems: [
+        // { label: "Team Members", href: "/settings/team" },
+        // { label: "Permissions", href: "/settings/permissions" },
+        // { label: "WhatsApp Number", href: "/settings/whatsapp" },
+        { label: "Profile Details", href: "/settings/profile" },
+        { label: "Webhook & API", href: "/settings/api" },
+      
+      ]
+    },
+   
   ];
 
   const isSystemUser = user?.pageAccess && user.pageAccess.length > 0;

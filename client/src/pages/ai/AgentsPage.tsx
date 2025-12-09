@@ -287,7 +287,7 @@ export default function AgentsPage() {
                   className="text-xs"
                   title="Switch all agents to OpenAI GPT-4o"
                 >
-                  OpenAI
+                  Boomer
                 </Button>
                 <Button
                   variant="outline"
@@ -296,7 +296,7 @@ export default function AgentsPage() {
                   className="text-xs"
                   title="Switch all agents to Gemini 2.5 Flash"
                 >
-                  Gemini
+                  Kaaya
                 </Button>
               </div>
             )}
@@ -334,14 +334,14 @@ export default function AgentsPage() {
                         <SelectValue />
                       </SelectTrigger>
                       <SelectContent>
-                        <SelectItem value="gpt-4o">OpenAI GPT-4o (Most Intelligent)</SelectItem>
-                        <SelectItem value="gpt-4o-mini">OpenAI GPT-4o Mini (Smart & Fast)</SelectItem>
-                        <SelectItem value="gpt-4-turbo">OpenAI GPT-4 Turbo (Premium)</SelectItem>
-                        <SelectItem value="gpt-3.5-turbo">OpenAI GPT-3.5 (Economy)</SelectItem>
-                        <SelectItem value="gemini-2.5-flash">Gemini 2.5 Flash (Fast & Efficient)</SelectItem>
-                        <SelectItem value="gemini-2.5-pro">Gemini 2.5 Pro (Advanced)</SelectItem>
-                        <SelectItem value="gemini-1.5-flash">Gemini 1.5 Flash (Budget)</SelectItem>
-                        <SelectItem value="gemini-1.5-pro">Gemini 1.5 Pro (Multimodal)</SelectItem>
+                        <SelectItem value="gpt-4o">Boomer GPT-4o (Most Intelligent)</SelectItem>
+                        <SelectItem value="gpt-4o-mini">Boomer GPT-4o Mini (Smart & Fast)</SelectItem>
+                        <SelectItem value="gpt-4-turbo">Boomer GPT-4 Turbo (Premium)</SelectItem>
+                        <SelectItem value="gpt-3.5-turbo">Boomer GPT-3.5 (Economy)</SelectItem>
+                        <SelectItem value="gemini-2.5-flash">Kaaya 2.5 Flash (Fast & Efficient)</SelectItem>
+                        <SelectItem value="gemini-2.5-pro">Kaaya 2.5 Pro (Advanced)</SelectItem>
+                        <SelectItem value="gemini-1.5-flash">Kaaya 1.5 Flash (Budget)</SelectItem>
+                        <SelectItem value="gemini-1.5-pro">Kaaya 1.5 Pro (Multimodal)</SelectItem>
                       </SelectContent>
                     </Select>
                     <p className="text-xs text-muted-foreground">
@@ -442,7 +442,7 @@ export default function AgentsPage() {
                             onClick={() => switchAgentProvider(agent, 'openai')}
                             title="Switch to OpenAI GPT-4o"
                           >
-                            OpenAI
+                            Boomer
                           </Button>
                           <Button
                             variant={getProviderFromModel(agent.model) === 'gemini' ? "default" : "outline"}
@@ -451,7 +451,7 @@ export default function AgentsPage() {
                             onClick={() => switchAgentProvider(agent, 'gemini')}
                             title="Switch to Gemini 2.5 Flash"
                           >
-                            Gemini
+                            Kaaya
                           </Button>
                         </div>
                       </TableCell>

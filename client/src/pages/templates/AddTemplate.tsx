@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useLocation } from "wouter";
 import DashboardLayout from "@/components/layout/DashboardLayout";
@@ -21,20 +21,17 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import {
-  MoreHorizontal,
-  Edit,
-  Trash2,
-  Plus,
-  Copy,
-  RefreshCw,
-  Send,
   AlertTriangle,
   ExternalLink,
+  Upload,
+  X,
+  Image as ImageIcon,
 } from "lucide-react";
 
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Loader2, Info, CheckCircle2 } from "lucide-react";
 import { toast } from "sonner";
+import { PhonePreview } from "@/components/ui/phone-preview";
 
 export default function AddTemplate() {
   const [, setLocation] = useLocation();
@@ -45,8 +42,35 @@ export default function AddTemplate() {
   const [language, setLanguage] = useState("en_US");
   const [headerType, setHeaderType] = useState("none");
   const [headerText, setHeaderText] = useState("");
+  const [headerImage, setHeaderImage] = useState("");
+  const [headerImageFile, setHeaderImageFile] = useState<File | null>(null);
   const [body, setBody] = useState("");
   const [footer, setFooter] = useState("");
+  const imageInputRef = useRef<HTMLInputElement>(null);
+
+  const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      if (file.size > 5 * 1024 * 1024) {
+        toast.error("Image must be less than 5MB");
+        return;
+      }
+      setHeaderImageFile(file);
+      const reader = new FileReader();
+      reader.onload = (event) => {
+        setHeaderImage(event.target?.result as string);
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
+  const removeImage = () => {
+    setHeaderImage("");
+    setHeaderImageFile(null);
+    if (imageInputRef.current) {
+      imageInputRef.current.value = "";
+    }
+  };
 
   const createTemplateMutation = useMutation({
     mutationFn: async (data: any) => {
@@ -252,6 +276,50 @@ export default function AddTemplate() {
                   </div>
                 )}
 
+                {headerType === "image" && (
+                  <div className="grid gap-2">
+                    <Label>Header Image</Label>
+                    <input
+                      type="file"
+                      ref={imageInputRef}
+                      onChange={handleImageUpload}
+                      accept="image/*"
+                      className="hidden"
+                    />
+                    {headerImage ? (
+                      <div className="relative">
+                        <img
+                          src={headerImage}
+                          alt="Header preview"
+                          className="w-full h-40 object-cover rounded-lg border"
+                        />
+                        <Button
+                          type="button"
+                          variant="destructive"
+                          size="icon"
+                          className="absolute top-2 right-2 h-8 w-8"
+                          onClick={removeImage}
+                        >
+                          <X className="h-4 w-4" />
+                        </Button>
+                      </div>
+                    ) : (
+                      <div
+                        onClick={() => imageInputRef.current?.click()}
+                        className="border-2 border-dashed rounded-lg p-8 text-center cursor-pointer hover:border-primary hover:bg-muted/50 transition-colors"
+                      >
+                        <ImageIcon className="h-10 w-10 mx-auto text-muted-foreground mb-2" />
+                        <p className="text-sm text-muted-foreground">
+                          Click to upload image (max 5MB)
+                        </p>
+                        <p className="text-xs text-muted-foreground mt-1">
+                          PNG, JPG, or JPEG recommended
+                        </p>
+                      </div>
+                    )}
+                  </div>
+                )}
+
                 <div className="grid gap-2">
                   <Label htmlFor="body">Body Text *</Label>
                   <Textarea
@@ -321,26 +389,23 @@ export default function AddTemplate() {
               </CardContent>
             </Card>
 
-            {body && (
-              <Card>
-                <CardHeader>
-                  <CardTitle className="text-base">Preview</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="bg-green-50 rounded-lg p-3 text-sm border border-green-200">
-                    {headerType === "text" && headerText && (
-                      <p className="font-semibold mb-2">{headerText}</p>
-                    )}
-                    <p className="whitespace-pre-wrap">{body}</p>
-                    {footer && (
-                      <p className="text-xs text-muted-foreground mt-2 pt-2 border-t">
-                        {footer}
-                      </p>
-                    )}
-                  </div>
-                </CardContent>
-              </Card>
-            )}
+            <Card>
+              <CardHeader>
+                <CardTitle className="text-base">Phone Preview</CardTitle>
+                <CardDescription>
+                  See how your template will look on WhatsApp
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <PhonePreview
+                  headerType={headerType === "none" ? undefined : headerType}
+                  headerText={headerText}
+                  headerImage={headerImage}
+                  body={body}
+                  footer={footer}
+                />
+              </CardContent>
+            </Card>
           </div>
         </div>
       </div>
