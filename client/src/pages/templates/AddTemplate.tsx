@@ -283,7 +283,7 @@ export default function AddTemplate() {
                       type="file"
                       ref={imageInputRef}
                       onChange={handleImageUpload}
-                      accept="image/*"
+                      accept=".png,.jpg,.jpeg,.gif,.webp,image/png,image/jpeg,image/gif,image/webp"
                       className="hidden"
                     />
                     {headerImage ? (
@@ -306,14 +306,37 @@ export default function AddTemplate() {
                     ) : (
                       <div
                         onClick={() => imageInputRef.current?.click()}
+                        onDragOver={(e) => {
+                          e.preventDefault();
+                          e.stopPropagation();
+                        }}
+                        onDrop={(e) => {
+                          e.preventDefault();
+                          e.stopPropagation();
+                          const file = e.dataTransfer.files?.[0];
+                          if (file && file.type.startsWith('image/')) {
+                            if (file.size > 5 * 1024 * 1024) {
+                              toast.error("Image must be less than 5MB");
+                              return;
+                            }
+                            setHeaderImageFile(file);
+                            const reader = new FileReader();
+                            reader.onload = (event) => {
+                              setHeaderImage(event.target?.result as string);
+                            };
+                            reader.readAsDataURL(file);
+                          } else {
+                            toast.error("Please drop a valid image file");
+                          }
+                        }}
                         className="border-2 border-dashed rounded-lg p-8 text-center cursor-pointer hover:border-primary hover:bg-muted/50 transition-colors"
                       >
-                        <ImageIcon className="h-10 w-10 mx-auto text-muted-foreground mb-2" />
-                        <p className="text-sm text-muted-foreground">
-                          Click to upload image (max 5MB)
+                        <Upload className="h-10 w-10 mx-auto text-muted-foreground mb-2" />
+                        <p className="text-sm font-medium text-muted-foreground">
+                          Click to upload or drag and drop
                         </p>
                         <p className="text-xs text-muted-foreground mt-1">
-                          PNG, JPG, or JPEG recommended
+                          PNG, JPG, JPEG, GIF, WebP (max 5MB)
                         </p>
                       </div>
                     )}
