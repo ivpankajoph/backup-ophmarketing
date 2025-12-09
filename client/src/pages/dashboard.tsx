@@ -153,10 +153,12 @@ export default function Dashboard() {
 
   const getPeriodLabel = () => {
     switch (period) {
+      case 'hour': return 'in the last hour';
       case 'today': return 'today';
       case 'yesterday': return 'yesterday';
       case 'week': return 'this week';
       case 'month': return 'this month';
+      case 'year': return 'this year';
       default: return 'selected period';
     }
   };
@@ -173,19 +175,25 @@ export default function Dashboard() {
           <div className="flex items-center gap-2">
           
             <Select value={period} onValueChange={setPeriod}>
-              <SelectTrigger className="w-[140px]">
+              <SelectTrigger className="w-[160px]">
                 <SelectValue placeholder="Select period" />
               </SelectTrigger>
               <SelectContent>
+                <SelectItem value="hour">Last Hour</SelectItem>
                 <SelectItem value="today">Today</SelectItem>
                 <SelectItem value="yesterday">Yesterday</SelectItem>
                 <SelectItem value="week">Last 7 Days</SelectItem>
                 <SelectItem value="month">Last 30 Days</SelectItem>
+                <SelectItem value="year">Last Year</SelectItem>
               </SelectContent>
             </Select>
           </div>
         </div>
-         <h1>ACTIVITY REPORT</h1>
+        {/* Activity Report Section */}
+        <div className="flex items-center gap-2 mt-2">
+          <MessageCircle className="h-5 w-5 text-primary" />
+          <h3 className="text-lg font-semibold text-foreground">Activity Report</h3>
+        </div>
         <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
           <StatsCard 
             title="Total Messages" 
@@ -212,7 +220,11 @@ export default function Dashboard() {
             trend={{ value: stats?.changes.deliveredChange || 0, label: "from previous period" }}
           />
         </div>
-        <h1>AI REPORT</h1>
+        {/* AI Report Section */}
+        <div className="flex items-center gap-2 mt-2">
+          <Bot className="h-5 w-5 text-blue-500" />
+          <h3 className="text-lg font-semibold text-foreground">AI Report</h3>
+        </div>
         <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
 
           <Card className="border-blue-200 bg-gradient-to-br from-blue-50 to-white dark:from-blue-950/20 dark:to-background">
@@ -221,7 +233,7 @@ export default function Dashboard() {
               <Bot className="h-4 w-4 text-blue-500" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">124</div>
+              <div className="text-2xl font-bold">{stats?.summary.totalAiResponses?.toLocaleString() || "0"}</div>
               <div className="flex items-center gap-1 mt-1">
                 <Badge variant="secondary" className="text-xs">
                   {stats?.summary.aiPercentage || 0}% of outbound
@@ -284,7 +296,11 @@ export default function Dashboard() {
             </CardContent>
           </Card>
         </div>
-        <h1>PERFORMANCE REPORT</h1>
+        {/* Performance Report Section */}
+        <div className="flex items-center gap-2 mt-2">
+          <TrendingUp className="h-5 w-5 text-green-500" />
+          <h3 className="text-lg font-semibold text-foreground">Performance Report</h3>
+        </div>
         <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
           <Card>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">

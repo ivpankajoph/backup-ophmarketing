@@ -247,8 +247,8 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
               className={`
                 flex items-center justify-between px-3 py-2.5 rounded-md text-sm font-medium transition-colors cursor-pointer select-none
                 ${isActive 
-                  ? "bg-sidebar-accent/50 text-sidebar-accent-foreground" 
-                  : "text-sidebar-foreground/70 hover:bg-sidebar-accent/30 hover:text-sidebar-foreground"
+                  ? "bg-sidebar-accent/50 text-sidebar-accent-foreground"
+                  : "text-black hover:bg-sidebar-accent/30 hover:text-sidebar-foreground"
                 }
               `}
             >
@@ -267,7 +267,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
                     block px-3 py-2 rounded-md text-xs font-medium transition-colors cursor-pointer
                     ${location === sub.href 
                       ? "bg-sidebar-accent text-sidebar-accent-foreground" 
-                      : "text-sidebar-foreground/60 hover:bg-sidebar-accent/30 hover:text-sidebar-foreground"
+                      : "text-black hover:bg-sidebar-accent/30 hover:text-sidebar-foreground"
                     }
                   `}
                 >
@@ -287,7 +287,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
             flex items-center justify-between px-3 py-2.5 rounded-md text-sm font-medium transition-colors cursor-pointer
             ${isActive 
               ? "bg-sidebar-accent text-sidebar-accent-foreground" 
-              : "text-sidebar-foreground/70 hover:bg-sidebar-accent/50 hover:text-sidebar-foreground"
+              : "text-black hover:bg-sidebar-accent/50 hover:text-sidebar-foreground"
             }
           `}
         >
@@ -336,7 +336,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
   return (
     <div className="min-h-screen bg-gray-50/50 flex">
       {/* Desktop Sidebar */}
-      <div className="hidden md:block w-64 bg-[#3F4F44] border-r border-sidebar-border text-sidebar-foreground shrink-0">
+      <div className="hidden md:block w-64 bg-[#9fadcc] text-black border-r border-sidebar-border shrink-0">
         <NavContent />
       </div>
 
@@ -351,13 +351,13 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
                   <Menu className="h-5 w-5" />
                 </Button>
               </SheetTrigger>
-              <SheetContent side="left" className="p-0 w-64 bg-sidebar border-r border-sidebar-border text-sidebar-foreground">
+              <SheetContent side="left" className="p-0 w-64 bg-sidebar border-r border-sidebar-border text-black">
                 <NavContent />
               </SheetContent>
             </Sheet>
             
             <div className="relative hidden sm:block w-96">
-              <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
+              <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-black" />
               <Input 
                 placeholder="Search messages, contacts, campaigns..." 
                 className="pl-9 bg-secondary/50 border-none focus-visible:ring-1"
