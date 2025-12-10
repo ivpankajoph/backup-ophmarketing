@@ -59,6 +59,7 @@ import PrefilledTextMappings from "@/pages/ai/PrefilledTextMappings";
 
 import LeadForms from "@/pages/facebook/LeadForms";
 import Leads from "@/pages/facebook/Leads";
+import WhatsAppFlowsPage from "@/pages/whatsapp/FlowsPage";
 
 import DeliveryReport from "@/pages/reports/DeliveryReport";
 import CampaignPerformance from "@/pages/reports/CampaignPerformance";
@@ -142,6 +143,9 @@ function Router() {
       {/* Facebook */}
       <Route path="/facebook/forms">{() => <ProtectedRoute component={LeadForms} />}</Route>
       <Route path="/facebook/leads">{() => <ProtectedRoute component={Leads} />}</Route>
+
+      {/* WhatsApp */}
+      <Route path="/whatsapp/flows">{() => <ProtectedRoute component={WhatsAppFlowsPage} />}</Route>
 
       {/* Reports */}
       <Route path="/reports">{() => <ProtectedRoute component={DeliveryReport} />}</Route>
