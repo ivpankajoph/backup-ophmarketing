@@ -36,7 +36,11 @@ The system incorporates a modular backend structure, allowing for independent de
 - **Automation Platform**: Comprehensive automation engine with real-time triggers, visual flow builder, drip campaigns, and dynamic user segmentation. Features include:
     - **Triggers Engine**: Event-based automation with AND/OR condition groups, supporting webhook, WhatsApp message, Facebook lead, CRM update, and scheduled events. Trigger actions include send WhatsApp/template messages, assign to groups, update CRM, API calls, start flows, add/remove tags.
     - **Flow Builder**: Visual drag-and-drop flow builder for multi-step automation pipelines with support for message nodes, condition branches, delays, and actions. Flow instances track individual contact journeys.
-    - **Drip Campaigns**: Scheduled message sequences with template support, enrollment management, and performance tracking. Supports segment-based, tag-based, trigger-based, and manual targeting.
+    - **Drip Campaigns**: Scheduled message sequences with template and AI agent delivery modes, enrollment management, and performance tracking. Features include:
+        - **Delivery Mode**: Choose between Template Messages, AI Agent Responses, or Mixed mode
+        - **Auto-Trigger Sources**: Automatic enrollment on interest_interested, interest_not_interested, interest_neutral, facebook_new_lead, or new_message events
+        - **Targeting Types**: Supports auto-trigger, interest-based, segment, tag-based, and manual targeting
+        - **Integration**: Auto-enrollment triggered from interest classification and Facebook lead ingestion flows
     - **User Segments**: Dynamic and static segmentation with rule-based conditions (demographics, behavior, engagement, custom fields). Real-time, hourly, or daily refresh strategies.
     - **Automation Analytics**: Dashboard with KPIs, AI-powered insights using Gemini, engagement heatmaps, and export functionality (CSV/XLSX/PDF).
     - Backend: Modular structure under server/modules/automation/ with separate folders for triggers, flows, drips, segments, analytics
