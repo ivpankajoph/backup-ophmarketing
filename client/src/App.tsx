@@ -42,6 +42,7 @@ import FlowEditor from "@/pages/automation/FlowEditor";
 import CampaignsPage from "@/pages/automation/CampaignsPage";
 import SegmentsPage from "@/pages/automation/SegmentsPage";
 import AnalyticsPage from "@/pages/automation/AnalyticsPage";
+import InterestLists from "@/pages/automation/InterestLists";
 
 import ConnectApps from "@/pages/apps/ConnectApps";
 
@@ -113,6 +114,7 @@ function Router() {
       <Route path="/automation/campaigns">{() => <ProtectedRoute component={CampaignsPage} />}</Route>
       <Route path="/automation/segments">{() => <ProtectedRoute component={SegmentsPage} />}</Route>
       <Route path="/automation/analytics">{() => <ProtectedRoute component={AnalyticsPage} />}</Route>
+      <Route path="/automation/interest">{() => <ProtectedRoute component={InterestLists} />}</Route>
       <Route path="/automation/leads">{() => <ProtectedRoute component={AutoLeads} />}</Route>
       <Route path="/automation/keywords">{() => <ProtectedRoute component={Keywords} />}</Route>
       <Route path="/automation/follow-up">{() => <ProtectedRoute component={FollowUp} />}</Route>

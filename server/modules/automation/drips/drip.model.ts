@@ -34,13 +34,18 @@ export interface IDripCampaign extends Document {
   description?: string;
   status: 'draft' | 'active' | 'paused' | 'completed' | 'archived';
   steps: IDripStep[];
-  targetType: 'segment' | 'tag' | 'manual' | 'trigger' | 'imported';
+  targetType: 'segment' | 'tag' | 'manual' | 'trigger' | 'imported' | 'interest';
   targetSegmentIds?: string[];
   targetTags?: string[];
   targetTriggerId?: string;
   importedContacts?: string[];
   excludeSegmentIds?: string[];
   excludeTags?: string[];
+  interestTargeting?: {
+    targetInterestLevels: ('interested' | 'not_interested' | 'neutral' | 'pending')[];
+    autoEnroll: boolean;
+    enrollOnClassification: boolean;
+  };
   timezone: string;
   startDate?: Date;
   endDate?: Date;
@@ -108,13 +113,18 @@ const DripCampaignSchema = new Schema<IDripCampaign>({
   description: { type: String },
   status: { type: String, enum: ['draft', 'active', 'paused', 'completed', 'archived'], default: 'draft' },
   steps: { type: [DripStepSchema], default: [] },
-  targetType: { type: String, enum: ['segment', 'tag', 'manual', 'trigger', 'imported'], required: true },
+  targetType: { type: String, enum: ['segment', 'tag', 'manual', 'trigger', 'imported', 'interest'], required: true },
   targetSegmentIds: { type: [String] },
   targetTags: { type: [String] },
   targetTriggerId: { type: String },
   importedContacts: { type: [String] },
   excludeSegmentIds: { type: [String] },
   excludeTags: { type: [String] },
+  interestTargeting: {
+    targetInterestLevels: { type: [String], enum: ['interested', 'not_interested', 'neutral', 'pending'], default: [] },
+    autoEnroll: { type: Boolean, default: false },
+    enrollOnClassification: { type: Boolean, default: true }
+  },
   timezone: { type: String, default: 'UTC' },
   startDate: { type: Date },
   endDate: { type: Date },

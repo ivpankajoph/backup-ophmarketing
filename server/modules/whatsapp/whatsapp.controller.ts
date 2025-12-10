@@ -13,6 +13,7 @@ import * as whatsappService from './whatsapp.service';
 import { isContactBlocked, isPhoneBlocked, listAllBlockedContacts } from '../contacts/contacts.routes';
 import { getUserId } from '../auth/auth.routes';
 import { contactAnalyticsService } from '../contactAnalytics/contactAnalytics.service';
+import { interestClassificationService } from '../automation/interest/interest.service';
 
 const WHATSAPP_TOKEN = process.env.WHATSAPP_TOKEN_NEW || process.env.WHATSAPP_TOKEN;
 const PHONE_NUMBER_ID = process.env.PHONE_NUMBER_ID;
@@ -203,6 +204,24 @@ export async function handleWebhook(req: Request, res: Response) {
     if (!savedMessage) {
       console.log(`[Webhook] Duplicate message detected (${whatsappMessageId}), skipping AI processing`);
       return res.sendStatus(200);
+    }
+
+    // Classify contact interest level based on message content
+    if (savedMessage && savedMessage.contactId && (messageText || buttonPayload)) {
+      try {
+        const classificationResult = await interestClassificationService.classifyAndUpdateContact(
+          messageText || buttonPayload,
+          savedMessage.contactId,
+          from,
+          resolvedUserId || 'system'
+        );
+        console.log(`[Webhook] Interest classification for ${from}: ${classificationResult.classification.status} (${classificationResult.classification.confidence})`);
+        if (classificationResult.triggeredCampaigns.length > 0) {
+          console.log(`[Webhook] Triggered drip campaigns: ${classificationResult.triggeredCampaigns.join(', ')}`);
+        }
+      } catch (classifyError) {
+        console.error('[Webhook] Error classifying interest:', classifyError);
+      }
     }
 
     // For media messages, we still save them but don't process with AI

@@ -5,6 +5,7 @@ import * as flowService from './flows/flow.service';
 import * as dripService from './drips/drip.service';
 import * as segmentService from './segments/segment.service';
 import * as analyticsService from './analytics/analytics.service';
+import { interestClassificationService } from './interest/interest.service';
 
 const router = Router();
 
@@ -888,6 +889,109 @@ router.post('/analytics/export', requireAuth, async (req: Request, res: Response
   } catch (error) {
     console.error('[Automation] Export error:', error);
     res.status(500).json({ error: 'Failed to export report' });
+  }
+});
+
+router.get('/interest/lists', requireAuth, async (req: Request, res: Response) => {
+  try {
+    const userId = getUserId(req);
+    if (!userId) return res.status(401).json({ error: 'Unauthorized' });
+
+    const lists = await interestClassificationService.getInterestLists(userId);
+    res.json(lists);
+  } catch (error) {
+    console.error('[Interest] Get lists error:', error);
+    res.status(500).json({ error: 'Failed to get interest lists' });
+  }
+});
+
+router.post('/interest/classify', requireAuth, async (req: Request, res: Response) => {
+  try {
+    const userId = getUserId(req);
+    if (!userId) return res.status(401).json({ error: 'Unauthorized' });
+
+    const { messageContent, contactId, contactPhone } = req.body;
+    if (!messageContent || !contactId || !contactPhone) {
+      return res.status(400).json({ error: 'Missing required fields' });
+    }
+
+    const result = await interestClassificationService.classifyAndUpdateContact(
+      messageContent, contactId, contactPhone, userId
+    );
+    res.json(result);
+  } catch (error) {
+    console.error('[Interest] Classify error:', error);
+    res.status(500).json({ error: 'Failed to classify contact' });
+  }
+});
+
+router.put('/interest/contacts/:contactId', requireAuth, async (req: Request, res: Response) => {
+  try {
+    const userId = getUserId(req);
+    if (!userId) return res.status(401).json({ error: 'Unauthorized' });
+
+    const { status } = req.body;
+    if (!['interested', 'not_interested', 'neutral'].includes(status)) {
+      return res.status(400).json({ error: 'Invalid status' });
+    }
+
+    await interestClassificationService.manuallyClassifyContact(
+      req.params.contactId, userId, status
+    );
+    res.json({ success: true });
+  } catch (error) {
+    console.error('[Interest] Manual classify error:', error);
+    res.status(500).json({ error: 'Failed to classify contact' });
+  }
+});
+
+router.get('/interest/logs', requireAuth, async (req: Request, res: Response) => {
+  try {
+    const userId = getUserId(req);
+    if (!userId) return res.status(401).json({ error: 'Unauthorized' });
+
+    const { contactId, status, limit, offset } = req.query;
+    const result = await interestClassificationService.getClassificationLogs(userId, {
+      contactId: contactId as string,
+      status: status as string,
+      limit: limit ? parseInt(limit as string) : undefined,
+      offset: offset ? parseInt(offset as string) : undefined
+    });
+    res.json(result);
+  } catch (error) {
+    console.error('[Interest] Get logs error:', error);
+    res.status(500).json({ error: 'Failed to get logs' });
+  }
+});
+
+router.get('/interest/report', requireAuth, async (req: Request, res: Response) => {
+  try {
+    const userId = getUserId(req);
+    if (!userId) return res.status(401).json({ error: 'Unauthorized' });
+
+    const { days } = req.query;
+    const report = await interestClassificationService.getInterestReport(
+      userId, days ? parseInt(days as string) : 7
+    );
+    res.json(report);
+  } catch (error) {
+    console.error('[Interest] Get report error:', error);
+    res.status(500).json({ error: 'Failed to get report' });
+  }
+});
+
+router.post('/interest/test', requireAuth, async (req: Request, res: Response) => {
+  try {
+    const { message } = req.body;
+    if (!message) {
+      return res.status(400).json({ error: 'Message is required' });
+    }
+
+    const result = await interestClassificationService.classifyMessage(message, 'test', 'test', true);
+    res.json(result);
+  } catch (error) {
+    console.error('[Interest] Test classify error:', error);
+    res.status(500).json({ error: 'Failed to test classification' });
   }
 });
 
