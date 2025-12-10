@@ -4,7 +4,10 @@ export interface IDripStep {
   id: string;
   order: number;
   name: string;
-  dayOffset: number;
+  dayOffset?: number;
+  delayDays?: number;
+  delayHours?: number;
+  delayMinutes?: number;
   timeOfDay?: string;
   messageType: 'template' | 'text' | 'media' | 'interactive' | 'ai_agent';
   templateId?: string;
@@ -22,11 +25,11 @@ export interface IDripStep {
     operator: string;
     value: any;
   }[];
-  skipIfReplied: boolean;
-  skipIfConverted: boolean;
+  skipIfReplied?: boolean;
+  skipIfConverted?: boolean;
   aiAgentId?: string;
   aiAgentName?: string;
-  status: 'active' | 'paused';
+  status?: 'active' | 'paused';
 }
 
 export type AutoTriggerSource = 'interest_interested' | 'interest_not_interested' | 'interest_neutral' | 'facebook_new_lead' | 'new_message' | 'none';
@@ -95,9 +98,12 @@ export interface IDripCampaign extends Document {
 
 const DripStepSchema = new Schema({
   id: { type: String, required: true },
-  order: { type: Number, required: true },
+  order: { type: Number, default: 0 },
   name: { type: String, required: true },
-  dayOffset: { type: Number, required: true },
+  dayOffset: { type: Number, default: 0 },
+  delayDays: { type: Number, default: 0 },
+  delayHours: { type: Number, default: 0 },
+  delayMinutes: { type: Number, default: 0 },
   timeOfDay: { type: String },
   messageType: { type: String, enum: ['template', 'text', 'media', 'interactive', 'ai_agent'], required: true },
   templateId: { type: String },

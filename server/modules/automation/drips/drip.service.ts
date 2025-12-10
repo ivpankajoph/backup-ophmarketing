@@ -229,7 +229,13 @@ export async function enrollContact(userId: string, campaignId: string, contactI
 
 function calculateNextStepTime(campaign: IDripCampaign, step: IDripStep, baseDate: Date): Date {
   const result = new Date(baseDate);
-  result.setDate(result.getDate() + step.dayOffset);
+  const totalDays = (step.dayOffset || 0) + (step.delayDays || 0);
+  const totalHours = step.delayHours || 0;
+  const totalMinutes = step.delayMinutes || 0;
+  
+  result.setDate(result.getDate() + totalDays);
+  result.setHours(result.getHours() + totalHours);
+  result.setMinutes(result.getMinutes() + totalMinutes);
   
   if (step.timeOfDay) {
     const [hours, minutes] = step.timeOfDay.split(':').map(Number);
