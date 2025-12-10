@@ -581,6 +581,63 @@ router.get('/campaigns/:campaignId/runs', requireAuth, async (req: Request, res:
   }
 });
 
+router.post('/campaigns/:campaignId/steps', requireAuth, async (req: Request, res: Response) => {
+  try {
+    const userId = getUserId(req);
+    if (!userId) return res.status(401).json({ error: 'Unauthorized' });
+
+    const campaign = await dripService.addStep(userId, req.params.campaignId, req.body);
+    if (!campaign) return res.status(404).json({ error: 'Campaign not found' });
+    res.status(201).json(campaign);
+  } catch (error) {
+    console.error('[Automation] Add step error:', error);
+    res.status(500).json({ error: 'Failed to add step' });
+  }
+});
+
+router.post('/campaigns/:campaignId/steps/reorder', requireAuth, async (req: Request, res: Response) => {
+  try {
+    const userId = getUserId(req);
+    if (!userId) return res.status(401).json({ error: 'Unauthorized' });
+
+    const { stepOrder } = req.body;
+    const campaign = await dripService.reorderSteps(userId, req.params.campaignId, stepOrder);
+    if (!campaign) return res.status(404).json({ error: 'Campaign not found' });
+    res.json(campaign);
+  } catch (error) {
+    console.error('[Automation] Reorder steps error:', error);
+    res.status(500).json({ error: 'Failed to reorder steps' });
+  }
+});
+
+router.put('/campaigns/:campaignId/steps/:stepId', requireAuth, async (req: Request, res: Response) => {
+  try {
+    const userId = getUserId(req);
+    if (!userId) return res.status(401).json({ error: 'Unauthorized' });
+
+    const campaign = await dripService.updateStep(userId, req.params.campaignId, req.params.stepId, req.body);
+    if (!campaign) return res.status(404).json({ error: 'Campaign or step not found' });
+    res.json(campaign);
+  } catch (error) {
+    console.error('[Automation] Update step error:', error);
+    res.status(500).json({ error: 'Failed to update step' });
+  }
+});
+
+router.delete('/campaigns/:campaignId/steps/:stepId', requireAuth, async (req: Request, res: Response) => {
+  try {
+    const userId = getUserId(req);
+    if (!userId) return res.status(401).json({ error: 'Unauthorized' });
+
+    const campaign = await dripService.removeStep(userId, req.params.campaignId, req.params.stepId);
+    if (!campaign) return res.status(404).json({ error: 'Campaign not found' });
+    res.json(campaign);
+  } catch (error) {
+    console.error('[Automation] Remove step error:', error);
+    res.status(500).json({ error: 'Failed to remove step' });
+  }
+});
+
 router.get('/segments', requireAuth, async (req: Request, res: Response) => {
   try {
     const userId = getUserId(req);
