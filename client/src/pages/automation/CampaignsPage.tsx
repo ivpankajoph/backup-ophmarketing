@@ -11,6 +11,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger, DialogFooter } from "@/components/ui/dialog";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Progress } from "@/components/ui/progress";
+import { Checkbox } from "@/components/ui/checkbox";
 import { 
   Mail, 
   Plus, 
@@ -25,11 +26,32 @@ import {
   Users,
   CheckCircle2,
   TrendingUp,
-  MessageSquare
+  MessageSquare,
+  Bot,
+  FileText,
+  Zap,
+  Facebook,
+  ThumbsUp,
+  ThumbsDown,
+  Minus
 } from "lucide-react";
 import { Link } from "wouter";
 import { getAuthHeaders } from "@/contexts/AuthContext";
 import { toast } from "sonner";
+
+interface Template {
+  id: string;
+  name: string;
+  content: string;
+  status: string;
+}
+
+interface Agent {
+  id: string;
+  name: string;
+  description: string;
+  isActive: boolean;
+}
 
 interface DripCampaign {
   _id: string;
@@ -61,7 +83,18 @@ export default function CampaignsPage() {
   const [newCampaign, setNewCampaign] = useState({ 
     name: "", 
     description: "",
-    targetType: "segment"
+    targetType: "auto_trigger",
+    deliveryMode: "template" as "template" | "ai_agent" | "mixed",
+    defaultTemplateId: "",
+    defaultTemplateName: "",
+    defaultAiAgentId: "",
+    defaultAiAgentName: "",
+    autoTrigger: {
+      enabled: true,
+      sources: [] as string[],
+      sendImmediately: true,
+      initialMessage: ""
+    }
   });
 
   const queryClient = useQueryClient();
@@ -87,6 +120,38 @@ export default function CampaignsPage() {
     }
   });
 
+  const { data: templates = [] } = useQuery<Template[]>({
+    queryKey: ["/api/templates"],
+    queryFn: async () => {
+      const res = await fetch("/api/templates", { headers: getAuthHeaders() });
+      if (!res.ok) throw new Error("Failed to fetch templates");
+      return res.json();
+    }
+  });
+
+  const { data: agents = [] } = useQuery<Agent[]>({
+    queryKey: ["/api/agents"],
+    queryFn: async () => {
+      const res = await fetch("/api/agents", { headers: getAuthHeaders() });
+      if (!res.ok) throw new Error("Failed to fetch agents");
+      return res.json();
+    }
+  });
+
+  const approvedTemplates = templates.filter(t => t.status === "approved");
+  const activeAgents = agents.filter(a => a.isActive);
+
+  const handleAutoTriggerSourceToggle = (source: string) => {
+    const sources = newCampaign.autoTrigger.sources;
+    const newSources = sources.includes(source) 
+      ? sources.filter(s => s !== source)
+      : [...sources, source];
+    setNewCampaign({
+      ...newCampaign,
+      autoTrigger: { ...newCampaign.autoTrigger, sources: newSources }
+    });
+  };
+
   const createMutation = useMutation({
     mutationFn: async (data: typeof newCampaign) => {
       const res = await fetch("/api/automation/campaigns", {
@@ -100,7 +165,22 @@ export default function CampaignsPage() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/automation/campaigns"] });
       setIsCreateOpen(false);
-      setNewCampaign({ name: "", description: "", targetType: "segment" });
+      setNewCampaign({ 
+        name: "", 
+        description: "", 
+        targetType: "auto_trigger",
+        deliveryMode: "template",
+        defaultTemplateId: "",
+        defaultTemplateName: "",
+        defaultAiAgentId: "",
+        defaultAiAgentName: "",
+        autoTrigger: {
+          enabled: true,
+          sources: [],
+          sendImmediately: true,
+          initialMessage: ""
+        }
+      });
       toast.success("Campaign created successfully");
     },
     onError: () => toast.error("Failed to create campaign")
@@ -228,20 +308,41 @@ export default function CampaignsPage() {
                 Create Campaign
               </Button>
             </DialogTrigger>
-            <DialogContent>
+            <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
               <DialogHeader>
                 <DialogTitle>Create Drip Campaign</DialogTitle>
-                <DialogDescription>Set up a new message sequence campaign</DialogDescription>
+                <DialogDescription>Set up an auto-triggered message sequence</DialogDescription>
               </DialogHeader>
-              <div className="space-y-4 py-4">
-                <div className="space-y-2">
-                  <Label>Campaign Name</Label>
-                  <Input
-                    placeholder="e.g., Onboarding Sequence"
-                    value={newCampaign.name}
-                    onChange={(e) => setNewCampaign({ ...newCampaign, name: e.target.value })}
-                  />
+              <div className="space-y-6 py-4">
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <Label>Campaign Name</Label>
+                    <Input
+                      placeholder="e.g., Initial Trigger Sequence"
+                      value={newCampaign.name}
+                      onChange={(e) => setNewCampaign({ ...newCampaign, name: e.target.value })}
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label>Target Type</Label>
+                    <Select
+                      value={newCampaign.targetType}
+                      onValueChange={(value) => setNewCampaign({ ...newCampaign, targetType: value })}
+                    >
+                      <SelectTrigger>
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="auto_trigger">Auto Trigger</SelectItem>
+                        <SelectItem value="interest">Interest-based</SelectItem>
+                        <SelectItem value="segment">Segment</SelectItem>
+                        <SelectItem value="tag">Tag-based</SelectItem>
+                        <SelectItem value="manual">Manual Selection</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
                 </div>
+
                 <div className="space-y-2">
                   <Label>Description</Label>
                   <Textarea
@@ -250,28 +351,190 @@ export default function CampaignsPage() {
                     onChange={(e) => setNewCampaign({ ...newCampaign, description: e.target.value })}
                   />
                 </div>
-                <div className="space-y-2">
-                  <Label>Target Type</Label>
+
+                <div className="space-y-3 p-4 border rounded-lg bg-muted/30">
+                  <Label className="flex items-center gap-2 text-base font-semibold">
+                    <Zap className="h-4 w-4 text-yellow-500" />
+                    Auto-Trigger Settings
+                  </Label>
+                  <p className="text-sm text-muted-foreground">
+                    Choose when this campaign should automatically trigger and send messages
+                  </p>
+                  
+                  <div className="space-y-3 pt-2">
+                    <div className="flex items-center space-x-2">
+                      <Checkbox 
+                        id="trigger-interested"
+                        checked={newCampaign.autoTrigger.sources.includes('interest_interested')}
+                        onCheckedChange={() => handleAutoTriggerSourceToggle('interest_interested')}
+                      />
+                      <label htmlFor="trigger-interested" className="flex items-center gap-2 text-sm cursor-pointer">
+                        <ThumbsUp className="h-4 w-4 text-green-600" />
+                        User shows interest (interested)
+                      </label>
+                    </div>
+                    <div className="flex items-center space-x-2">
+                      <Checkbox 
+                        id="trigger-not-interested"
+                        checked={newCampaign.autoTrigger.sources.includes('interest_not_interested')}
+                        onCheckedChange={() => handleAutoTriggerSourceToggle('interest_not_interested')}
+                      />
+                      <label htmlFor="trigger-not-interested" className="flex items-center gap-2 text-sm cursor-pointer">
+                        <ThumbsDown className="h-4 w-4 text-red-600" />
+                        User not interested (follow-up)
+                      </label>
+                    </div>
+                    <div className="flex items-center space-x-2">
+                      <Checkbox 
+                        id="trigger-neutral"
+                        checked={newCampaign.autoTrigger.sources.includes('interest_neutral')}
+                        onCheckedChange={() => handleAutoTriggerSourceToggle('interest_neutral')}
+                      />
+                      <label htmlFor="trigger-neutral" className="flex items-center gap-2 text-sm cursor-pointer">
+                        <Minus className="h-4 w-4 text-yellow-600" />
+                        User neutral (nurture)
+                      </label>
+                    </div>
+                    <div className="flex items-center space-x-2">
+                      <Checkbox 
+                        id="trigger-facebook"
+                        checked={newCampaign.autoTrigger.sources.includes('facebook_new_lead')}
+                        onCheckedChange={() => handleAutoTriggerSourceToggle('facebook_new_lead')}
+                      />
+                      <label htmlFor="trigger-facebook" className="flex items-center gap-2 text-sm cursor-pointer">
+                        <Facebook className="h-4 w-4 text-blue-600" />
+                        New Facebook lead
+                      </label>
+                    </div>
+                    <div className="flex items-center space-x-2">
+                      <Checkbox 
+                        id="trigger-new-message"
+                        checked={newCampaign.autoTrigger.sources.includes('new_message')}
+                        onCheckedChange={() => handleAutoTriggerSourceToggle('new_message')}
+                      />
+                      <label htmlFor="trigger-new-message" className="flex items-center gap-2 text-sm cursor-pointer">
+                        <MessageSquare className="h-4 w-4 text-purple-600" />
+                        Any new message
+                      </label>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="space-y-3 p-4 border rounded-lg">
+                  <Label className="text-base font-semibold">Message Delivery Mode</Label>
                   <Select
-                    value={newCampaign.targetType}
-                    onValueChange={(value) => setNewCampaign({ ...newCampaign, targetType: value })}
+                    value={newCampaign.deliveryMode}
+                    onValueChange={(value: "template" | "ai_agent" | "mixed") => 
+                      setNewCampaign({ ...newCampaign, deliveryMode: value })
+                    }
                   >
                     <SelectTrigger>
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="segment">Segment</SelectItem>
-                      <SelectItem value="tag">Tag-based</SelectItem>
-                      <SelectItem value="trigger">Trigger-based</SelectItem>
-                      <SelectItem value="manual">Manual Selection</SelectItem>
-                      <SelectItem value="imported">Imported List</SelectItem>
+                      <SelectItem value="template">
+                        <span className="flex items-center gap-2">
+                          <FileText className="h-4 w-4" />
+                          Template Messages
+                        </span>
+                      </SelectItem>
+                      <SelectItem value="ai_agent">
+                        <span className="flex items-center gap-2">
+                          <Bot className="h-4 w-4" />
+                          AI Agent Responses
+                        </span>
+                      </SelectItem>
+                      <SelectItem value="mixed">
+                        <span className="flex items-center gap-2">
+                          <MessageSquare className="h-4 w-4" />
+                          Mixed (Template + AI)
+                        </span>
+                      </SelectItem>
                     </SelectContent>
                   </Select>
+
+                  {(newCampaign.deliveryMode === 'template' || newCampaign.deliveryMode === 'mixed') && (
+                    <div className="space-y-2 pt-2">
+                      <Label>Default Template</Label>
+                      <Select
+                        value={newCampaign.defaultTemplateId}
+                        onValueChange={(value) => {
+                          const template = approvedTemplates.find(t => t.id === value);
+                          setNewCampaign({ 
+                            ...newCampaign, 
+                            defaultTemplateId: value,
+                            defaultTemplateName: template?.name || ""
+                          });
+                        }}
+                      >
+                        <SelectTrigger>
+                          <SelectValue placeholder="Select a template" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {approvedTemplates.map(template => (
+                            <SelectItem key={template.id} value={template.id}>
+                              {template.name}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
+                  )}
+
+                  {(newCampaign.deliveryMode === 'ai_agent' || newCampaign.deliveryMode === 'mixed') && (
+                    <div className="space-y-2 pt-2">
+                      <Label>Default AI Agent</Label>
+                      <Select
+                        value={newCampaign.defaultAiAgentId}
+                        onValueChange={(value) => {
+                          const agent = activeAgents.find(a => a.id === value);
+                          setNewCampaign({ 
+                            ...newCampaign, 
+                            defaultAiAgentId: value,
+                            defaultAiAgentName: agent?.name || ""
+                          });
+                        }}
+                      >
+                        <SelectTrigger>
+                          <SelectValue placeholder="Select an AI agent" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {activeAgents.map(agent => (
+                            <SelectItem key={agent.id} value={agent.id}>
+                              <span className="flex items-center gap-2">
+                                <Bot className="h-4 w-4" />
+                                {agent.name}
+                              </span>
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
+                  )}
+                </div>
+
+                <div className="flex items-center space-x-2 p-3 border rounded-lg">
+                  <Checkbox 
+                    id="send-immediately"
+                    checked={newCampaign.autoTrigger.sendImmediately}
+                    onCheckedChange={(checked) => 
+                      setNewCampaign({
+                        ...newCampaign,
+                        autoTrigger: { ...newCampaign.autoTrigger, sendImmediately: checked === true }
+                      })
+                    }
+                  />
+                  <label htmlFor="send-immediately" className="text-sm cursor-pointer">
+                    Send first message immediately when triggered (otherwise follow schedule)
+                  </label>
                 </div>
               </div>
               <DialogFooter>
                 <Button variant="outline" onClick={() => setIsCreateOpen(false)}>Cancel</Button>
-                <Button onClick={() => createMutation.mutate(newCampaign)} disabled={!newCampaign.name}>
+                <Button 
+                  onClick={() => createMutation.mutate(newCampaign)} 
+                  disabled={!newCampaign.name || newCampaign.autoTrigger.sources.length === 0}
+                >
                   Create Campaign
                 </Button>
               </DialogFooter>

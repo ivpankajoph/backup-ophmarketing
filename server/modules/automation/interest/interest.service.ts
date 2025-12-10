@@ -1,5 +1,6 @@
 import { Contact, InterestClassificationLog } from '../../storage/mongodb.adapter';
-import { DripCampaign, DripRun } from '../drips/drip.model';
+import { DripCampaign, DripRun, AutoTriggerSource } from '../drips/drip.model';
+import { autoEnrollContact } from '../drips/drip.service';
 import { GoogleGenAI } from '@google/genai';
 
 const INTERESTED_KEYWORDS = [
@@ -161,7 +162,7 @@ Respond ONLY with a JSON object in this exact format (no markdown, no code block
 
     const triggeredCampaigns: string[] = [];
     
-    if (classification.status !== 'pending' && classification.status !== 'neutral') {
+    if (classification.status !== 'pending') {
       const eligibleCampaigns = await this.findEligibleCampaigns(userId, classification.status);
       
       for (const campaign of eligibleCampaigns) {
@@ -169,6 +170,27 @@ Respond ONLY with a JSON object in this exact format (no markdown, no code block
         if (enrolled) {
           triggeredCampaigns.push(campaign._id.toString());
         }
+      }
+
+      const triggerSource = `interest_${classification.status}` as AutoTriggerSource;
+      try {
+        const autoTriggerResult = await autoEnrollContact(
+          userId,
+          contactId,
+          contactPhone,
+          triggerSource,
+          {
+            contactName: contact.name,
+            interestStatus: classification.status,
+            confidence: classification.confidence
+          }
+        );
+        
+        if (autoTriggerResult.enrolled.length > 0) {
+          console.log(`[InterestClassification] Auto-triggered campaigns: ${autoTriggerResult.enrolled.join(', ')}`);
+        }
+      } catch (autoTriggerError) {
+        console.error('[InterestClassification] Auto-trigger enrollment failed:', autoTriggerError);
       }
     }
 
