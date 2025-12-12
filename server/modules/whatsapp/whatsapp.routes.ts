@@ -14,6 +14,7 @@ router.get('/conversations/:phone', controller.getConversation);
 router.get('/media/:mediaId', requireAuth, controller.getMediaUrl);
 
 router.post('/flows/sync', requireAuth, flowsController.syncFlows);
+router.post('/flows/create', requireAuth, flowsController.createFlow);
 router.get('/flows', requireAuth, flowsController.getFlows);
 router.get('/flows/stats', requireAuth, flowsController.getFlowStats);
 router.get('/flows/sync-status', requireAuth, flowsController.getSyncStatus);
@@ -24,6 +25,9 @@ router.delete('/flows/:id/attach-template/:templateId', requireAuth, flowsContro
 router.post('/flows/:id/attach-agent', requireAuth, flowsController.attachToAgent);
 router.delete('/flows/:id/attach-agent/:agentId', requireAuth, flowsController.detachFromAgent);
 router.post('/flows/:id/send', requireAuth, flowsController.sendFlow);
+router.post('/flows/:id/publish', requireAuth, flowsController.publishFlow);
+router.post('/flows/:id/deprecate', requireAuth, flowsController.deprecateFlow);
 router.delete('/flows/:id', requireAuth, flowsController.deleteFlow);
+router.delete('/flows/:id/meta', requireAuth, flowsController.deleteFlowFromMeta);
 
 export default router;

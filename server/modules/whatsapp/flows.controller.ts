@@ -203,3 +203,70 @@ export async function deleteFlow(req: Request, res: Response) {
     res.status(500).json({ error: 'Failed to delete flow' });
   }
 }
+
+export async function createFlow(req: Request, res: Response) {
+  try {
+    const userId = getUserId(req);
+    if (!userId) return res.status(401).json({ error: 'Unauthorized' });
+
+    const { name, categories, endpointUri } = req.body;
+
+    if (!name || !categories || !Array.isArray(categories) || categories.length === 0) {
+      return res.status(400).json({ error: 'Name and at least one category are required' });
+    }
+
+    const result = await flowsService.createFlowInMeta(userId, {
+      name,
+      categories,
+      endpointUri
+    });
+
+    res.json({
+      success: true,
+      flowId: result.flowId,
+      flow: result.flow
+    });
+  } catch (error: any) {
+    console.error('[Flows] Create flow error:', error);
+    res.status(500).json({ error: error.message || 'Failed to create flow' });
+  }
+}
+
+export async function publishFlow(req: Request, res: Response) {
+  try {
+    const userId = getUserId(req);
+    if (!userId) return res.status(401).json({ error: 'Unauthorized' });
+
+    const flow = await flowsService.publishFlowInMeta(userId, req.params.id);
+    res.json({ success: true, flow });
+  } catch (error: any) {
+    console.error('[Flows] Publish flow error:', error);
+    res.status(500).json({ error: error.message || 'Failed to publish flow' });
+  }
+}
+
+export async function deprecateFlow(req: Request, res: Response) {
+  try {
+    const userId = getUserId(req);
+    if (!userId) return res.status(401).json({ error: 'Unauthorized' });
+
+    const flow = await flowsService.deprecateFlowInMeta(userId, req.params.id);
+    res.json({ success: true, flow });
+  } catch (error: any) {
+    console.error('[Flows] Deprecate flow error:', error);
+    res.status(500).json({ error: error.message || 'Failed to deprecate flow' });
+  }
+}
+
+export async function deleteFlowFromMeta(req: Request, res: Response) {
+  try {
+    const userId = getUserId(req);
+    if (!userId) return res.status(401).json({ error: 'Unauthorized' });
+
+    await flowsService.deleteFlowInMeta(userId, req.params.id);
+    res.json({ success: true });
+  } catch (error: any) {
+    console.error('[Flows] Delete from Meta error:', error);
+    res.status(500).json({ error: error.message || 'Failed to delete flow from Meta' });
+  }
+}

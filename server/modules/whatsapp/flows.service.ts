@@ -317,3 +317,235 @@ export async function getFlowStats(userId: string): Promise<{
     linkedToAgents: linkedAgents
   };
 }
+
+export type FlowCategory = 
+  | 'SIGN_UP' 
+  | 'SIGN_IN' 
+  | 'APPOINTMENT_BOOKING' 
+  | 'LEAD_GENERATION' 
+  | 'CONTACT_US' 
+  | 'CUSTOMER_SUPPORT' 
+  | 'SURVEY' 
+  | 'OTHER';
+
+export async function createFlowInMeta(userId: string, data: {
+  name: string;
+  categories: FlowCategory[];
+  endpointUri?: string;
+}): Promise<{ flowId: string; flow: IWhatsAppFlow }> {
+  let accessToken: string | undefined;
+  let wabaId: string | undefined;
+
+  const integrationCreds = await integrationService.getDecryptedCredentials(userId, 'whatsapp');
+  if (integrationCreds?.accessToken && integrationCreds?.businessAccountId) {
+    accessToken = integrationCreds.accessToken;
+    wabaId = integrationCreds.businessAccountId;
+  } else {
+    const storedCreds = await credentialsService.getDecryptedCredentials(userId);
+    if (storedCreds?.whatsappToken && storedCreds?.businessAccountId) {
+      accessToken = storedCreds.whatsappToken;
+      wabaId = storedCreds.businessAccountId;
+    }
+  }
+
+  if (!accessToken) {
+    accessToken = process.env.WHATSAPP_TOKEN_NEW || process.env.WHATSAPP_TOKEN;
+    wabaId = wabaId || process.env.BUSINESS_ACCOUNT_ID;
+  }
+
+  if (!wabaId || !accessToken) {
+    throw new Error('WhatsApp credentials incomplete - missing Business Account ID or access token');
+  }
+
+  console.log(`[Flows] Creating flow "${data.name}" for user ${userId}`);
+
+  const requestBody: any = {
+    name: data.name,
+    categories: data.categories
+  };
+
+  if (data.endpointUri) {
+    requestBody.endpoint_uri = data.endpointUri;
+  }
+
+  const response = await fetch(`https://graph.facebook.com/v21.0/${wabaId}/flows`, {
+    method: 'POST',
+    headers: {
+      'Authorization': `Bearer ${accessToken}`,
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify(requestBody)
+  });
+
+  const responseText = await response.text();
+  console.log(`[Flows] Create API Response status: ${response.status}`);
+
+  if (!response.ok) {
+    console.error(`[Flows] Create API Error: ${responseText}`);
+    let errorMessage = 'Failed to create flow in Meta';
+    try {
+      const error = JSON.parse(responseText);
+      errorMessage = error.error?.message || errorMessage;
+    } catch {}
+    throw new Error(errorMessage);
+  }
+
+  const result = JSON.parse(responseText);
+  const flowId = result.id;
+
+  console.log(`[Flows] Flow created with ID: ${flowId}`);
+
+  const flow = await WhatsAppFlow.create({
+    userId,
+    flowId,
+    name: data.name,
+    status: 'DRAFT',
+    categories: data.categories,
+    validationErrors: [],
+    entryPoints: [{
+      id: 'default',
+      name: 'Default Entry',
+      type: 'CTA'
+    }],
+    lastSyncedAt: new Date()
+  });
+
+  return { flowId, flow };
+}
+
+export async function publishFlowInMeta(userId: string, id: string): Promise<IWhatsAppFlow> {
+  const flow = await WhatsAppFlow.findOne({ _id: id, userId });
+  if (!flow) {
+    throw new Error('Flow not found');
+  }
+
+  let accessToken: string | undefined;
+
+  const integrationCreds = await integrationService.getDecryptedCredentials(userId, 'whatsapp');
+  if (integrationCreds?.accessToken) {
+    accessToken = integrationCreds.accessToken;
+  } else {
+    const storedCreds = await credentialsService.getDecryptedCredentials(userId);
+    if (storedCreds?.whatsappToken) {
+      accessToken = storedCreds.whatsappToken;
+    }
+  }
+
+  if (!accessToken) {
+    accessToken = process.env.WHATSAPP_TOKEN_NEW || process.env.WHATSAPP_TOKEN;
+  }
+
+  if (!accessToken) {
+    throw new Error('WhatsApp access token not found');
+  }
+
+  const response = await fetch(`https://graph.facebook.com/v21.0/${flow.flowId}/publish`, {
+    method: 'POST',
+    headers: {
+      'Authorization': `Bearer ${accessToken}`
+    }
+  });
+
+  if (!response.ok) {
+    const error = await response.json();
+    throw new Error(error.error?.message || 'Failed to publish flow');
+  }
+
+  flow.status = 'PUBLISHED';
+  await flow.save();
+
+  console.log(`[Flows] Flow ${flow.flowId} published successfully`);
+  return flow;
+}
+
+export async function deprecateFlowInMeta(userId: string, id: string): Promise<IWhatsAppFlow> {
+  const flow = await WhatsAppFlow.findOne({ _id: id, userId });
+  if (!flow) {
+    throw new Error('Flow not found');
+  }
+
+  let accessToken: string | undefined;
+
+  const integrationCreds = await integrationService.getDecryptedCredentials(userId, 'whatsapp');
+  if (integrationCreds?.accessToken) {
+    accessToken = integrationCreds.accessToken;
+  } else {
+    const storedCreds = await credentialsService.getDecryptedCredentials(userId);
+    if (storedCreds?.whatsappToken) {
+      accessToken = storedCreds.whatsappToken;
+    }
+  }
+
+  if (!accessToken) {
+    accessToken = process.env.WHATSAPP_TOKEN_NEW || process.env.WHATSAPP_TOKEN;
+  }
+
+  if (!accessToken) {
+    throw new Error('WhatsApp access token not found');
+  }
+
+  const response = await fetch(`https://graph.facebook.com/v21.0/${flow.flowId}/deprecate`, {
+    method: 'POST',
+    headers: {
+      'Authorization': `Bearer ${accessToken}`
+    }
+  });
+
+  if (!response.ok) {
+    const error = await response.json();
+    throw new Error(error.error?.message || 'Failed to deprecate flow');
+  }
+
+  flow.status = 'DEPRECATED';
+  await flow.save();
+
+  console.log(`[Flows] Flow ${flow.flowId} deprecated successfully`);
+  return flow;
+}
+
+export async function deleteFlowInMeta(userId: string, id: string): Promise<boolean> {
+  const flow = await WhatsAppFlow.findOne({ _id: id, userId });
+  if (!flow) {
+    throw new Error('Flow not found');
+  }
+
+  if (flow.status !== 'DRAFT') {
+    throw new Error('Only draft flows can be deleted from Meta');
+  }
+
+  let accessToken: string | undefined;
+
+  const integrationCreds = await integrationService.getDecryptedCredentials(userId, 'whatsapp');
+  if (integrationCreds?.accessToken) {
+    accessToken = integrationCreds.accessToken;
+  } else {
+    const storedCreds = await credentialsService.getDecryptedCredentials(userId);
+    if (storedCreds?.whatsappToken) {
+      accessToken = storedCreds.whatsappToken;
+    }
+  }
+
+  if (!accessToken) {
+    accessToken = process.env.WHATSAPP_TOKEN_NEW || process.env.WHATSAPP_TOKEN;
+  }
+
+  if (!accessToken) {
+    throw new Error('WhatsApp access token not found');
+  }
+
+  const response = await fetch(`https://graph.facebook.com/v21.0/${flow.flowId}`, {
+    method: 'DELETE',
+    headers: {
+      'Authorization': `Bearer ${accessToken}`
+    }
+  });
+
+  if (!response.ok) {
+    const error = await response.json();
+    throw new Error(error.error?.message || 'Failed to delete flow from Meta');
+  }
+
+  await WhatsAppFlow.deleteOne({ _id: id });
+  console.log(`[Flows] Flow ${flow.flowId} deleted from Meta`);
+  return true;
+}

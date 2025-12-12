@@ -24,8 +24,13 @@ import {
   AlertCircle,
   Clock,
   Workflow,
-  Eye
+  Eye,
+  Plus,
+  Trash2,
+  Upload,
+  Archive
 } from "lucide-react";
+import { Checkbox } from "@/components/ui/checkbox";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -71,12 +76,24 @@ interface Template {
   status: string;
 }
 
+const FLOW_CATEGORIES = [
+  { value: 'LEAD_GENERATION', label: 'Lead Generation' },
+  { value: 'SIGN_UP', label: 'Sign Up' },
+  { value: 'SIGN_IN', label: 'Sign In' },
+  { value: 'APPOINTMENT_BOOKING', label: 'Appointment Booking' },
+  { value: 'CONTACT_US', label: 'Contact Us' },
+  { value: 'CUSTOMER_SUPPORT', label: 'Customer Support' },
+  { value: 'SURVEY', label: 'Survey' },
+  { value: 'OTHER', label: 'Other' }
+];
+
 export default function FlowsPage() {
   const [searchQuery, setSearchQuery] = useState("");
   const [statusFilter, setStatusFilter] = useState<string>("all");
   const [selectedFlow, setSelectedFlow] = useState<WhatsAppFlow | null>(null);
   const [isSendDialogOpen, setIsSendDialogOpen] = useState(false);
   const [isAttachDialogOpen, setIsAttachDialogOpen] = useState(false);
+  const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
   const [attachType, setAttachType] = useState<'agent' | 'template'>('agent');
   const [sendForm, setSendForm] = useState({
     phoneNumber: "",
@@ -84,6 +101,11 @@ export default function FlowsPage() {
     bodyText: "",
     footerText: "",
     ctaText: "Start"
+  });
+  const [createForm, setCreateForm] = useState({
+    name: "",
+    categories: [] as string[],
+    endpointUri: ""
   });
 
   const queryClient = useQueryClient();
@@ -237,6 +259,89 @@ export default function FlowsPage() {
     }
   });
 
+  const createFlowMutation = useMutation({
+    mutationFn: async (data: { name: string; categories: string[]; endpointUri?: string }) => {
+      const res = await fetch("/api/whatsapp/flows/create", {
+        method: "POST",
+        headers: { ...getAuthHeaders(), "Content-Type": "application/json" },
+        body: JSON.stringify(data)
+      });
+      if (!res.ok) {
+        const result = await res.json();
+        throw new Error(result.error || "Failed to create flow");
+      }
+      return res.json();
+    },
+    onSuccess: (data) => {
+      queryClient.invalidateQueries({ queryKey: ["/api/whatsapp/flows"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/whatsapp/flows/stats"] });
+      toast.success(`Flow "${data.flow.name}" created successfully`);
+      setIsCreateDialogOpen(false);
+      setCreateForm({ name: "", categories: [], endpointUri: "" });
+    },
+    onError: (error: Error) => toast.error(error.message)
+  });
+
+  const publishFlowMutation = useMutation({
+    mutationFn: async (flowId: string) => {
+      const res = await fetch(`/api/whatsapp/flows/${flowId}/publish`, {
+        method: "POST",
+        headers: getAuthHeaders()
+      });
+      if (!res.ok) {
+        const result = await res.json();
+        throw new Error(result.error || "Failed to publish flow");
+      }
+      return res.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/whatsapp/flows"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/whatsapp/flows/stats"] });
+      toast.success("Flow published successfully");
+    },
+    onError: (error: Error) => toast.error(error.message)
+  });
+
+  const deprecateFlowMutation = useMutation({
+    mutationFn: async (flowId: string) => {
+      const res = await fetch(`/api/whatsapp/flows/${flowId}/deprecate`, {
+        method: "POST",
+        headers: getAuthHeaders()
+      });
+      if (!res.ok) {
+        const result = await res.json();
+        throw new Error(result.error || "Failed to deprecate flow");
+      }
+      return res.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/whatsapp/flows"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/whatsapp/flows/stats"] });
+      toast.success("Flow deprecated successfully");
+    },
+    onError: (error: Error) => toast.error(error.message)
+  });
+
+  const deleteFlowMutation = useMutation({
+    mutationFn: async (flowId: string) => {
+      const res = await fetch(`/api/whatsapp/flows/${flowId}/meta`, {
+        method: "DELETE",
+        headers: getAuthHeaders()
+      });
+      if (!res.ok) {
+        const result = await res.json();
+        throw new Error(result.error || "Failed to delete flow");
+      }
+      return res.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/whatsapp/flows"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/whatsapp/flows/stats"] });
+      toast.success("Flow deleted successfully");
+    },
+    onError: (error: Error) => toast.error(error.message)
+  });
+
   const getStatusBadge = (status: string) => {
     const statusConfig: Record<string, { variant: "default" | "secondary" | "destructive" | "outline"; icon: any }> = {
       PUBLISHED: { variant: "default", icon: Check },
@@ -275,14 +380,11 @@ export default function FlowsPage() {
               disabled={syncMutation.isPending}
             >
               <RefreshCw className={`h-4 w-4 mr-2 ${syncMutation.isPending ? 'animate-spin' : ''}`} />
-              Sync Flows
+              Sync from Meta
             </Button>
-            <Button 
-              variant="outline"
-              onClick={() => window.open('https://business.facebook.com/latest/whatsapp_manager/flows', '_blank')}
-            >
-              <ExternalLink className="h-4 w-4 mr-2" />
-              Create in Meta
+            <Button onClick={() => setIsCreateDialogOpen(true)}>
+              <Plus className="h-4 w-4 mr-2" />
+              Create Flow
             </Button>
           </div>
         </div>
@@ -436,6 +538,18 @@ export default function FlowsPage() {
                                 Send to User
                               </DropdownMenuItem>
                             )}
+                            {flow.status === 'DRAFT' && (
+                              <DropdownMenuItem onClick={() => publishFlowMutation.mutate(flow._id)}>
+                                <Upload className="h-4 w-4 mr-2" />
+                                Publish Flow
+                              </DropdownMenuItem>
+                            )}
+                            {flow.status === 'PUBLISHED' && (
+                              <DropdownMenuItem onClick={() => deprecateFlowMutation.mutate(flow._id)}>
+                                <Archive className="h-4 w-4 mr-2" />
+                                Deprecate Flow
+                              </DropdownMenuItem>
+                            )}
                             <DropdownMenuItem onClick={() => {
                               setSelectedFlow(flow);
                               setAttachType('agent');
@@ -456,6 +570,23 @@ export default function FlowsPage() {
                               <DropdownMenuItem onClick={() => window.open(flow.previewUrl, '_blank')}>
                                 <Eye className="h-4 w-4 mr-2" />
                                 Preview Flow
+                              </DropdownMenuItem>
+                            )}
+                            <DropdownMenuItem onClick={() => window.open('https://business.facebook.com/latest/whatsapp_manager/flows', '_blank')}>
+                              <ExternalLink className="h-4 w-4 mr-2" />
+                              Edit in Meta
+                            </DropdownMenuItem>
+                            {flow.status === 'DRAFT' && (
+                              <DropdownMenuItem 
+                                className="text-red-600"
+                                onClick={() => {
+                                  if (confirm('Are you sure you want to delete this flow? This will also delete it from Meta.')) {
+                                    deleteFlowMutation.mutate(flow._id);
+                                  }
+                                }}
+                              >
+                                <Trash2 className="h-4 w-4 mr-2" />
+                                Delete Flow
                               </DropdownMenuItem>
                             )}
                           </DropdownMenuContent>
@@ -602,6 +733,93 @@ export default function FlowsPage() {
             </Tabs>
             <DialogFooter>
               <Button variant="outline" onClick={() => setIsAttachDialogOpen(false)}>Close</Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        <Dialog open={isCreateDialogOpen} onOpenChange={setIsCreateDialogOpen}>
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle>Create WhatsApp Flow</DialogTitle>
+              <DialogDescription>
+                Create a new flow that will appear in your Meta Business Suite
+              </DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4 py-4">
+              <div className="space-y-2">
+                <Label>Flow Name *</Label>
+                <Input
+                  placeholder="e.g., Lead Capture Form"
+                  value={createForm.name}
+                  onChange={(e) => setCreateForm({ ...createForm, name: e.target.value })}
+                />
+              </div>
+              <div className="space-y-2">
+                <Label>Categories * (select at least one)</Label>
+                <div className="grid grid-cols-2 gap-2 mt-2">
+                  {FLOW_CATEGORIES.map((cat) => (
+                    <div key={cat.value} className="flex items-center space-x-2">
+                      <Checkbox
+                        id={cat.value}
+                        checked={createForm.categories.includes(cat.value)}
+                        onCheckedChange={(checked) => {
+                          if (checked) {
+                            setCreateForm({
+                              ...createForm,
+                              categories: [...createForm.categories, cat.value]
+                            });
+                          } else {
+                            setCreateForm({
+                              ...createForm,
+                              categories: createForm.categories.filter(c => c !== cat.value)
+                            });
+                          }
+                        }}
+                      />
+                      <label
+                        htmlFor={cat.value}
+                        className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 cursor-pointer"
+                      >
+                        {cat.label}
+                      </label>
+                    </div>
+                  ))}
+                </div>
+              </div>
+              <div className="space-y-2">
+                <Label>Endpoint URI (optional)</Label>
+                <Input
+                  placeholder="https://your-server.com/webhook/flows"
+                  value={createForm.endpointUri}
+                  onChange={(e) => setCreateForm({ ...createForm, endpointUri: e.target.value })}
+                />
+                <p className="text-xs text-gray-500">
+                  Required for dynamic flows (Flow JSON v3.0+). Leave empty for static flows.
+                </p>
+              </div>
+              <div className="bg-muted/50 p-3 rounded-lg text-sm">
+                <p className="font-medium mb-1">Note:</p>
+                <p className="text-gray-600">
+                  After creating, you'll need to add screens and components in Meta's Flow Builder, 
+                  then publish the flow to make it available for sending.
+                </p>
+              </div>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setIsCreateDialogOpen(false)}>Cancel</Button>
+              <Button 
+                onClick={() => {
+                  createFlowMutation.mutate({
+                    name: createForm.name,
+                    categories: createForm.categories,
+                    endpointUri: createForm.endpointUri || undefined
+                  });
+                }}
+                disabled={!createForm.name || createForm.categories.length === 0 || createFlowMutation.isPending}
+              >
+                <Plus className="h-4 w-4 mr-2" />
+                Create Flow
+              </Button>
             </DialogFooter>
           </DialogContent>
         </Dialog>
