@@ -126,7 +126,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
         // { label: "Segments", href: "/automation/segments" },
         { label: "Analytics", href: "/automation/analytics" },
         { label: "Interest Lists", href: "/automation/interest" },
-        { label: "Builder", href: "/automation" },
+        // { label: "Builder", href: "/automation" },
         // { label: "Auto Leads", href: "/automation/leads" },
         { label: "Follow-up", href: "/automation/follow-up" },
         // { label: "New Lead Alert", href: "/automation/new-leads" },

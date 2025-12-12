@@ -29,6 +29,7 @@ import SelectedContacts from "@/pages/campaigns/SelectedContacts";
 import Schedule from "@/pages/campaigns/Schedule";
 import Single from "@/pages/campaigns/Single";
 import Report from "@/pages/campaigns/Report";
+import CampaignPage from "@/pages/campaigns/CampaignPage";
 
 import AutoLeads from "@/pages/automation/AutoLeads";
 import Keywords from "@/pages/automation/Keywords";
@@ -98,6 +99,7 @@ function Router() {
       
       {/* Campaigns */}
       <Route path="/campaigns">{() => <ProtectedRoute component={Campaigns} />}</Route>
+      <Route path="/campaigns/manager">{() => <ProtectedRoute component={CampaignPage} />}</Route>
       <Route path="/campaigns/broadcast">{() => <ProtectedRoute component={Broadcast} />}</Route>
       <Route path="/campaigns/selected-contacts">{() => <ProtectedRoute component={SelectedContacts} />}</Route>
       <Route path="/campaigns/schedule">{() => <ProtectedRoute component={Schedule} />}</Route>
