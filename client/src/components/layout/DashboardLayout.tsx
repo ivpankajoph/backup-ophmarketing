@@ -22,7 +22,8 @@ import {
   Facebook,
   Clock,
   UserPlus,
-  UserCog
+  UserCog,
+  Workflow
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -181,6 +182,12 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
         { label: "Lead Forms", href: "/facebook/forms" },
         { label: "Leads", href: "/facebook/leads" },
       ]
+    },
+    {
+      icon: Workflow,
+      label: "WhatsApp Flows",
+      href: "/whatsapp/flows",
+      pageId: "whatsapp-flows",
     },
     {
       icon: BarChart3,
