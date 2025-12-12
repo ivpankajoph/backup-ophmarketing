@@ -63,11 +63,13 @@ The system incorporates a modular backend structure, allowing for independent de
 - **Prefilled Text Mapping Fix**: Aligned MongoDB schema field from `text` to `prefilledText` to match service layer.
 - **WhatsApp Type Safety**: Fixed type errors in controller/service for userId handling with proper null checks.
 - **Contact Analytics**: System tracks 112+ contacts with interest level classification (interested/neutral/not interested).
-- **WhatsApp Flows Integration**: Full integration with Meta WhatsApp Flows for interactive user experiences. Features include:
-    - **Flow Sync**: Automatic sync from Meta Graph API with pagination and incremental refresh
-    - **Flow Management**: View, filter by status/category, and manage flows from FlowsPage UI
+- **WhatsApp Flows Integration**: Full bidirectional integration with Meta WhatsApp Flows for interactive user experiences. Features include:
+    - **Flow Sync**: Automatic sync from Meta Graph API v21.0 with pagination and incremental refresh
+    - **Flow Creation**: Create new flows directly from the UI with category selection (SIGN_UP, LEAD_GENERATION, etc.) - flows are created in Meta Business Suite
+    - **Flow Management**: View, filter by status/category, publish, deprecate, and delete flows from FlowsPage UI
     - **Send Flow Messages**: Send interactive flow messages directly to contacts with custom action buttons
     - **AI Agent Integration**: Attach flows to AI agents for automated flow delivery during conversations
     - **Entry Point Support**: Configure custom entry points for flow navigation
-    - Backend: MongoDB model with sync checkpoints, REST API routes under /api/whatsapp/flows
-    - Frontend: FlowsPage at /whatsapp/flows with sync, send, and attach dialogs
+    - **Quick Meta Access**: Direct link to edit flows in Meta Business Suite's Flow Builder
+    - Backend: MongoDB model with sync checkpoints, REST API routes under /api/whatsapp/flows supporting create/publish/deprecate/delete operations
+    - Frontend: FlowsPage at /whatsapp/flows with sync, create, send, and attach dialogs
