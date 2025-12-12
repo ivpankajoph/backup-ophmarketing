@@ -122,7 +122,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
         { label: "Triggers", href: "/automation/triggers" },
         { label: "Flows", href: "/automation/flows" },
         { label: "Drip Campaigns", href: "/automation/campaigns" },
-        { label: "Segments", href: "/automation/segments" },
+        // { label: "Segments", href: "/automation/segments" },
         { label: "Analytics", href: "/automation/analytics" },
         { label: "Interest Lists", href: "/automation/interest" },
         { label: "Builder", href: "/automation" },
