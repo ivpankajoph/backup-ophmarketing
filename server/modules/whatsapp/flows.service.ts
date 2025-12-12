@@ -64,6 +64,8 @@ export async function syncFlowsFromMeta(userId: string): Promise<{
       throw new Error('WhatsApp credentials incomplete - missing Business Account ID or access token');
     }
 
+    console.log(`[Flows] Starting sync for user ${userId} with WABA ID: ${wabaId}`);
+
     await FlowSyncCheckpoint.findOneAndUpdate(
       { userId },
       { $set: { syncStatus: 'syncing', wabaId } },
@@ -74,22 +76,33 @@ export async function syncFlowsFromMeta(userId: string): Promise<{
     let afterCursor: string | undefined;
 
     while (hasMore) {
-      const url = new URL(`https://graph.facebook.com/v18.0/${wabaId}/flows`);
+      const url = new URL(`https://graph.facebook.com/v21.0/${wabaId}/flows`);
       url.searchParams.append('fields', 'id,name,status,categories,validation_errors,json_version,data_api_version,data_channel_uri,preview,updated_at');
       if (afterCursor) {
         url.searchParams.append('after', afterCursor);
       }
 
+      console.log(`[Flows] Fetching from: ${url.toString().replace(accessToken!, '[REDACTED]')}`);
+      
       const response = await fetch(url.toString(), {
         headers: { 'Authorization': `Bearer ${accessToken}` }
       });
 
+      const responseText = await response.text();
+      console.log(`[Flows] API Response status: ${response.status}`);
+      
       if (!response.ok) {
-        const error = await response.json();
-        throw new Error(error.error?.message || 'Failed to fetch flows from Meta');
+        console.error(`[Flows] API Error: ${responseText}`);
+        let errorMessage = 'Failed to fetch flows from Meta';
+        try {
+          const error = JSON.parse(responseText);
+          errorMessage = error.error?.message || errorMessage;
+        } catch {}
+        throw new Error(errorMessage);
       }
 
-      const data: MetaFlowsListResponse = await response.json();
+      const data: MetaFlowsListResponse = JSON.parse(responseText);
+      console.log(`[Flows] Received ${data.data?.length || 0} flows from API`);
 
       for (const flow of data.data) {
         try {
