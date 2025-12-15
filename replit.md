@@ -73,3 +73,23 @@ The system incorporates a modular backend structure, allowing for independent de
     - **Quick Meta Access**: Direct link to edit flows in Meta Business Suite's Flow Builder
     - Backend: MongoDB model with sync checkpoints, REST API routes under /api/whatsapp/flows supporting create/publish/deprecate/delete operations
     - Frontend: FlowsPage at /whatsapp/flows with sync, create, send, and attach dialogs
+- **Billing Report System**: Comprehensive billing and usage tracking for WhatsApp messaging costs. Features include:
+    - **Pricing**: 1 Rs per message (both user inbound messages and AI agent responses)
+    - **Summary Dashboard**: Total cost, total messages, user messages, AI messages, conversation count
+    - **Time Filters**: Today, Last 7 Days, This Month, Custom Date Range
+    - **Daily Breakdown**: Bar chart and table showing daily message volume and costs
+    - **AI Agent Costs**: Pie chart and table showing cost breakdown per AI agent with conversation counts
+    - **Per Conversation View**: Detailed table with each contact's messages, agent used, and individual costs
+    - Backend: REST API at /api/reports/billing/summary, /api/reports/billing/conversations, /api/reports/billing/all-users
+    - Frontend: BillingReport page at /reports/billing with charts (Recharts) and data tables
+    - All data calculated from MongoDB messages collection in real-time
+- **Campaign Manager**: Enhanced broadcast campaign system with contact selection and interest-based re-targeting. Features include:
+    - **Contact Multi-Select**: Search and select multiple contacts for campaign
+    - **Message Types**: Template messages, AI agent responses, or custom messages
+    - **Campaign Execution**: Create draft campaigns and execute when ready
+    - **Per-Contact Tracking**: Individual status tracking (pending/sent/delivered/read/failed)
+    - **Interest Classification**: Contacts automatically classified as interested/not interested/neutral when they reply
+    - **Re-Targeting**: Send follow-up campaigns to interested or not interested contact lists
+    - **Detailed Reports**: View sent/delivered/read/replied metrics per campaign
+    - Backend: Campaign model with webhook integration for status updates
+    - Frontend: CampaignPage at /campaigns/manager with create and reports tabs

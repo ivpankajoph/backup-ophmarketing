@@ -70,6 +70,7 @@ import Spending from "@/pages/reports/Spending";
 import Credits from "@/pages/reports/Credits";
 import UserEngagement from "@/pages/reports/UserEngagement";
 import BroadcastReports from "@/pages/reports/BroadcastReports";
+import BillingReport from "@/pages/reports/BillingReport";
 import BlockedContacts from "@/pages/reports/BlockedContacts";
 import ContactReports from "@/pages/reports/ContactReports";
 import UserManagement from "@/pages/UserManagement";
@@ -159,6 +160,7 @@ function Router() {
       <Route path="/reports/credits">{() => <ProtectedRoute component={Credits} />}</Route>
       <Route path="/reports/user-engagement">{() => <ProtectedRoute component={UserEngagement} />}</Route>
       <Route path="/reports/broadcast">{() => <ProtectedRoute component={BroadcastReports} />}</Route>
+      <Route path="/reports/billing">{() => <ProtectedRoute component={BillingReport} />}</Route>
       <Route path="/reports/blocked">{() => <ProtectedRoute component={BlockedContacts} />}</Route>
       <Route path="/reports/contacts">{() => <ProtectedRoute component={ContactReports} />}</Route>
       <Route path="/reports/lead-assignments">{() => <ProtectedRoute component={LeadAssignmentReports} />}</Route>
