@@ -206,7 +206,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
         { label: "Blocked Contacts", href: "/reports/blocked" },
       
         { label: "User Engagement", href: "/reports/user-engagement" },
- 
+        { label: "Billing Report", href: "/reports/billing" },
       ]
     },
     {
